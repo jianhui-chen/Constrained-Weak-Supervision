@@ -4,7 +4,7 @@ from ge_criterion_baseline import *
 from utilities import saveToFile, runBaselineTests, getModelAccuracy, getWeakSignalAccuracy
 from sklearn.linear_model import LogisticRegression
 from sklearn.metrics import accuracy_score
-from experiments import breast_cancer_reader, cardio_reader, obs_network_reader
+from experiments import default_reader
 
 
 def train_weak_signals(data, weak_signal_data, num_weak_signal):
@@ -291,18 +291,54 @@ def dependent_error_exp(data, weak_signal_data, num_weak_signal):
     return output
 
 
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+# ------------------------------------------------------------------------- #
+# I am thinkging everything below here should go into the main script class #
+# ------------------------------------------------------------------------- #
+
 def run_tests():
     """
     Runs experiment.
     :return: None
     """
 
+    #for breast cancer classification dataset, select the mean radius, radius se and worst radius as weak signals
     print("Running breast cancer experiment...")
-    breast_cancer_reader.run_experiment(run_experiment, saveToFile)
+    views                  = {0:0, 1:10, 2:20}
+    datapath               = 'datasets/breast-cancer/wdbc.data'
+    savepath               = 'results/json/breast_cancer.json'
+    load_and_process_data  = default_reader.breast_cancer_load_and_process_data
+    default_reader.run_experiment(run_experiment, saveToFile, views, datapath, load_and_process_data, savepath)
+
+    #for obs network dataset, select the Utilized Bandwidth Rate, Packet drop rate and Flood Status as weak signals
     print("Running obs network experiment...")
-    obs_network_reader.run_experiment(run_experiment, saveToFile)
+    views                  = {0:1, 1:2, 2:20}
+    datapath               = 'datasets/obs-network/obs_network.data'
+    savepath               = 'results/json/obs_network.json'
+    load_and_process_data  = default_reader.obs_load_and_process_data
+    default_reader.run_experiment(run_experiment, saveToFile, views, datapath, load_and_process_data, savepath)
+ 
+    #Use AC, MLTV and Median as weak signal views
     print("Running cardio experiment...")
-    cardio_reader.run_experiment(run_experiment, saveToFile)
+    views                  = {0:1, 1:10, 2:18}
+    datapath               = 'datasets/cardiotocography/cardio.csv'
+    savepath               = 'results/json/cardio.json'
+    load_and_process_data  = default_reader.cardio_load_and_process_data
+    default_reader.run_experiment(run_experiment, saveToFile, views, datapath, load_and_process_data, savepath)
 
     # # un-comment to run bounds experimrnt in the paper
     #breast_cancer_reader.run_bounds_experiment(bound_experiment)
