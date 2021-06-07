@@ -298,18 +298,11 @@ def run_tests():
     """
 
     print("Running breast cancer experiment...")
-
-    views = {0:0, 1:10, 2:20}
-    datapath = 'datasets/breast-cancer/wdbc.data'
-    savepath = 'results/json/breast_cancer.json'
-
-    #default_reader.run_experiment(run, save, views, datapath, load_and_process_data, savepath)
-
     breast_cancer_reader.run_experiment(run_experiment, saveToFile)
     print("Running obs network experiment...")
-    #obs_network_reader.run_experiment(run_experiment, saveToFile)
+    obs_network_reader.run_experiment(run_experiment, saveToFile)
     print("Running cardio experiment...")
-    #cardio_reader.run_experiment(run_experiment, saveToFile)
+    cardio_reader.run_experiment(run_experiment, saveToFile)
 
     # # un-comment to run bounds experimrnt in the paper
     #breast_cancer_reader.run_bounds_experiment(bound_experiment)
