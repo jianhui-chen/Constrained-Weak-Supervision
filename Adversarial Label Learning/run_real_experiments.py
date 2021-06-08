@@ -406,7 +406,7 @@ def run_dep_err_experiment():
     path                      = 'results/json/cardio_error.json'
     load_and_process_data     = default_reader.cardio_load_and_process_data
     data_and_weak_signal_data = default_reader.create_weak_signal_view('datasets/cardiotocography/cardio.csv', views, load_and_process_data)
-    #default_reader.run_dep_error_exp(dependent_error_exp, data_and_weak_signal_data, path)
+    default_reader.run_dep_error_exp(dependent_error_exp, data_and_weak_signal_data, path)
 
 if __name__ == '__main__':
     run_tests()
