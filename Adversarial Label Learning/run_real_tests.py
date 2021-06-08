@@ -4,8 +4,10 @@ from ge_criterion_baseline import *
 from utilities import saveToFile, runBaselineTests, getModelAccuracy, getWeakSignalAccuracy
 from sklearn.linear_model import LogisticRegression
 from sklearn.metrics import accuracy_score
-import default_reader
 from real_experiments import run_experiment, bound_experiment, dependent_error_exp
+import default_reader
+from temp_classes import  BreastCancer, Cardio, Obs
+
 
 
 def run_tests():
@@ -22,44 +24,41 @@ def run_tests():
     print("\n\n# # # # # # # # # # # # # # # # # # # # #")
     print("# Running breast cancer experiment...   #")
     print("# # # # # # # # # # # # # # # # # # # # #\n")
-    views                  = {0:0, 1:10, 2:20}
-    datapath               = 'datasets/breast-cancer/wdbc.data'
-    savepath               = 'results/json/breast_cancer.json'
-    load_and_process_data  = default_reader.breast_cancer_load_and_process_data
-    default_reader.run_experiment(run_experiment, saveToFile, views, datapath, load_and_process_data, savepath)
+    bc_data = BreastCancer()
+    default_reader.run_experiment(run_experiment, saveToFile, bc_data)
 
 
 
 
-    # # # # # # # # # # # #
-    # obs network         #
-    # # # # # # # # # # # #
+    # # # # # # # # # # # # #
+    # # obs network         #
+    # # # # # # # # # # # # #
 
-    # #for obs network dataset, select the Utilized Bandwidth Rate, Packet drop rate and Flood Status as weak signals
-    print("\n\n\n\n# # # # # # # # # # # # # # # # # # # # #")
-    print("# Running obs network experiment...     #")
-    print("# # # # # # # # # # # # # # # # # # # # #\n")
-    views                  = {0:1, 1:2, 2:20}
-    datapath               = 'datasets/obs-network/obs_network.data'
-    savepath               = 'results/json/obs_network.json'
-    load_and_process_data  = default_reader.obs_load_and_process_data
-    default_reader.run_experiment(run_experiment, saveToFile, views, datapath, load_and_process_data, savepath)
+    # # #for obs network dataset, select the Utilized Bandwidth Rate, Packet drop rate and Flood Status as weak signals
+    # print("\n\n\n\n# # # # # # # # # # # # # # # # # # # # #")
+    # print("# Running obs network experiment...     #")
+    # print("# # # # # # # # # # # # # # # # # # # # #\n")
+    # views                  = {0:1, 1:2, 2:20}
+    # datapath               = 'datasets/obs-network/obs_network.data'
+    # savepath               = 'results/json/obs_network.json'
+    # load_and_process_data  = default_reader.obs_load_and_process_data
+    # default_reader.run_experiment(run_experiment, saveToFile, views, datapath, load_and_process_data, savepath)
 
 
 
-    # # # # # # # # # # # #
-    # cardio              #
-    # # # # # # # # # # # #
+    # # # # # # # # # # # # #
+    # # cardio              #
+    # # # # # # # # # # # # #
  
-    # #Use AC, MLTV and Median as weak signal views
-    print("\n\n\n\n# # # # # # # # # # # # # # # # # # # # #")
-    print("# Running cardio experiment...          #")
-    print("# # # # # # # # # # # # # # # # # # # # #\n")
-    views                  = {0:1, 1:10, 2:18}
-    datapath               = 'datasets/cardiotocography/cardio.csv'
-    savepath               = 'results/json/cardio.json'
-    load_and_process_data  = default_reader.cardio_load_and_process_data
-    default_reader.run_experiment(run_experiment, saveToFile, views, datapath, load_and_process_data, savepath)
+    # # #Use AC, MLTV and Median as weak signal views
+    # print("\n\n\n\n# # # # # # # # # # # # # # # # # # # # #")
+    # print("# Running cardio experiment...          #")
+    # print("# # # # # # # # # # # # # # # # # # # # #\n")
+    # views                  = {0:1, 1:10, 2:18}
+    # datapath               = 'datasets/cardiotocography/cardio.csv'
+    # savepath               = 'results/json/cardio.json'
+    # load_and_process_data  = default_reader.cardio_load_and_process_data
+    # default_reader.run_experiment(run_experiment, saveToFile, views, datapath, load_and_process_data, savepath)
 
 
 def run_bounds_experiment():

@@ -60,8 +60,8 @@ class BreastCancer(Data):
     datapath               = 'datasets/breast-cancer/wdbc.data'
     savepath               = 'results/json/breast_cancer.json'
 
-    def get_data(self):
-        df = pd.read_csv(datapath, header=None)
+    def get_data(self, path):
+        df = pd.read_csv(self.datapath, header=None)
         #Remove the first column of the data (the ID)
         df.drop([0], axis=1, inplace=True)
         #replace labels 'B' with 0 and 'M' with 1
