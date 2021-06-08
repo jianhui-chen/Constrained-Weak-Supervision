@@ -1,8 +1,7 @@
 import pandas as pd
 import numpy as np
 from abc import ABC, abstractmethod, abstractproperty
-from sklearn.linear_model import LogisticRegression
-from sklearn.metrics import accuracy_score
+
 from sklearn.model_selection import train_test_split
 from sklearn import preprocessing
 
@@ -99,7 +98,7 @@ class Cardio(Data):
     savepath               = 'results/json/cardio.json'
 
     def get_data(self):
-        df = pd.read_csv(path)
+        df = pd.read_csv(datapath)
         #Use class 1 and 2 labels only in the data
         mask_1 = df['CLASS'] == 1
         mask_2 = df['CLASS'] == 2
@@ -183,6 +182,7 @@ class LoadData:     # I'm not sure if we want to keep this as a class... seems i
 
     def get_all_data(self, data_object):
         data = data_object.get_data()
+        
         # code to get weak signals –– create_weak_signals_view
         train_data, train_labels = data['training_data']
         val_data, val_labels = data['validation_data']
