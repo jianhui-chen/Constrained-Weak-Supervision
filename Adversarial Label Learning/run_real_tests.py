@@ -15,6 +15,8 @@ def run_tests():
     Runs experiment.
     :return: None
     """
+
+    total_weak_signals = 3
  
     # # # # # # # # # # # #
     # breast cancer       #
