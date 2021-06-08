@@ -68,96 +68,100 @@ def train_weak_signals(data, weak_signal_data, num_weak_signal):
     return model
 
 
-def run_experiment(data, weak_signal_data, num_weak_signal, constant_bound=False):
+def run_experiment(data, w_models, constant_bound=False):
     """
     Runs experiment with the given dataset
 
     :param data: dictionary of validation and test data
     :type data: dict
-    :param weak_signal_data: data representing the different views for the weak signals
-    :type: array
-    :param num_weak_signal: number of weak signals
-    :type num_weak_signal: int
+    :param w_models: 
+    :type: 
     """
 
-    w_model = train_weak_signals(data, weak_signal_data, num_weak_signal)
+    adversarial_models = []
+    weak_models = []
 
-    training_data = data['training_data'][0].T
-    training_labels = data['training_data'][1]
-    val_data, val_labels = data['validation_data']
-    val_data = val_data.T
-    test_data = data['test_data'][0].T
-    test_labels = data['test_data'][1]
+    for num_weak_signals, w_model in enumerate(w_models, 1): #begins from 1
 
-    num_features, num_data_points = training_data.shape
+        training_data = data['training_data'][0].T
+        training_labels = data['training_data'][1]
+        val_data, val_labels = data['validation_data']
+        val_data = val_data.T
+        test_data = data['test_data'][0].T
+        test_labels = data['test_data'][1]
 
-    weak_signal_ub = w_model['error_bounds']
-    # weak_signal_ub = np.ones(w_model['error_bounds'].shape) * 0.3
-    models = w_model['models']
-    weak_signal_probabilities = w_model['probabilities']
+        num_features, num_data_points = training_data.shape
 
-    weights = np.zeros(num_features)
+        weak_signal_ub = w_model['error_bounds']
+        # weak_signal_ub = np.ones(w_model['error_bounds'].shape) * 0.3
+        models = w_model['models']
+        weak_signal_probabilities = w_model['probabilities']
 
-    print("Running tests...")
-    if constant_bound:
-        optimized_weights, y = train_all(val_data, weights, weak_signal_probabilities, np.zeros(weak_signal_ub.size) + 0.3, max_iter=10000)
-    else:
-       optimized_weights, y = train_all(val_data, weights, weak_signal_probabilities, weak_signal_ub, max_iter=10000)
+        weights = np.zeros(num_features)
 
-    # calculate validation results
-    learned_probabilities = probability(val_data, optimized_weights)
-    validation_accuracy = getModelAccuracy(learned_probabilities, val_labels)
+        print("Running tests...")
+        if constant_bound:
+            optimized_weights, y = train_all(val_data, weights, weak_signal_probabilities, np.zeros(weak_signal_ub.size) + 0.3, max_iter=10000)
+        else:
+            optimized_weights, y = train_all(val_data, weights, weak_signal_probabilities, weak_signal_ub, max_iter=10000)
 
-    # calculate test results
-    learned_probabilities = probability(test_data, optimized_weights)
-    test_accuracy = getModelAccuracy(learned_probabilities, test_labels)
+        # calculate validation results
+        learned_probabilities = probability(val_data, optimized_weights)
+        validation_accuracy = getModelAccuracy(learned_probabilities, val_labels)
 
-    # calculate weak signal results
-    weak_val_accuracy = w_model['validation_accuracy']
-    weak_test_accuracy = w_model['test_accuracy']
+        # calculate test results
+        learned_probabilities = probability(test_data, optimized_weights)
+        test_accuracy = getModelAccuracy(learned_probabilities, test_labels)
 
-    adversarial_model = {}
-    adversarial_model['validation_accuracy'] = validation_accuracy
-    adversarial_model['test_accuracy'] = test_accuracy
+        # calculate weak signal results
+        weak_val_accuracy = w_model['validation_accuracy']
+        weak_test_accuracy = w_model['test_accuracy']
 
-    weak_model = {}
-    weak_model['num_weak_signal'] = num_weak_signal
-    weak_model['validation_accuracy'] = weak_val_accuracy
-    weak_model['test_accuracy'] = weak_test_accuracy
+        adversarial_model = {}
+        adversarial_model['validation_accuracy'] = validation_accuracy
+        adversarial_model['test_accuracy'] = test_accuracy
 
-    print("")
-    print("+++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++")
-    print("We trained %d learnable classifiers with %d weak signals" %(1, num_weak_signal))
-    print("The accuracy of learned model on the validatiion data is", validation_accuracy)
-    print("The accuracy of weak signal(s) on the validation data is", weak_val_accuracy)
-    print("The accuracy of the model on the test data is", test_accuracy)
-    print("The accuracy of weak signal(s) on the test data is", weak_test_accuracy)
-    print("")
-    print("+++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++")
+        weak_model = {}
+        weak_model['num_weak_signals'] = num_weak_signals
+        weak_model['validation_accuracy'] = weak_val_accuracy
+        weak_model['test_accuracy'] = weak_test_accuracy
 
-    # calculate baseline
-    print("Running tests on the baselines...")
-    baselines = runBaselineTests(val_data, weak_signal_probabilities) #remove the transpose to enable it run
-    b_validation_accuracy = getWeakSignalAccuracy(val_data, val_labels, baselines)
-    b_test_accuracy = getWeakSignalAccuracy(test_data, test_labels, baselines)
-    print("The accuracy of the baseline models on test data is", b_test_accuracy)
-    print("")
-    weak_model['baseline_val_accuracy'] = b_validation_accuracy
-    weak_model['baseline_test_accuracy'] = b_test_accuracy
-    print("+++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++")
+        print("")
+        print("+++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++")
+        print("We trained %d learnable classifiers with %d weak signals" %(1, num_weak_signals))
+        print("The accuracy of learned model on the validatiion data is", validation_accuracy)
+        print("The accuracy of weak signal(s) on the validation data is", weak_val_accuracy)
+        print("The accuracy of the model on the test data is", test_accuracy)
+        print("The accuracy of weak signal(s) on the test data is", weak_test_accuracy)
+        print("")
+        print("+++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++")
 
-    # calculate ge criteria
-    print("Running tests on ge criteria...")
-    model = ge_criterion_train(val_data.T, val_labels, weak_signal_probabilities, num_weak_signal)
-    ge_validation_accuracy = accuracy_score(val_labels, np.round(probability(val_data, model)))
-    ge_test_accuracy = accuracy_score(test_labels, np.round(probability(test_data, model)))
-    print("The accuracy of ge criteria on validation data is", ge_validation_accuracy)
-    print("The accuracy of ge criteria on test data is", ge_test_accuracy)
-    weak_model['gecriteria_val_accuracy'] = ge_validation_accuracy
-    weak_model['gecriteria_test_accuracy'] = ge_test_accuracy
-    print("+++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++")
+        # calculate baseline
+        print("Running tests on the baselines...")
+        baselines = runBaselineTests(val_data, weak_signal_probabilities) #remove the transpose to enable it run
+        b_validation_accuracy = getWeakSignalAccuracy(val_data, val_labels, baselines)
+        b_test_accuracy = getWeakSignalAccuracy(test_data, test_labels, baselines)
+        print("The accuracy of the baseline models on test data is", b_test_accuracy)
+        print("")
+        weak_model['baseline_val_accuracy'] = b_validation_accuracy
+        weak_model['baseline_test_accuracy'] = b_test_accuracy
+        print("+++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++")
 
-    return adversarial_model, weak_model
+        # calculate ge criteria
+        print("Running tests on ge criteria...")
+        model = ge_criterion_train(val_data.T, val_labels, weak_signal_probabilities, num_weak_signals)
+        ge_validation_accuracy = accuracy_score(val_labels, np.round(probability(val_data, model)))
+        ge_test_accuracy = accuracy_score(test_labels, np.round(probability(test_data, model)))
+        print("The accuracy of ge criteria on validation data is", ge_validation_accuracy)
+        print("The accuracy of ge criteria on test data is", ge_test_accuracy)
+        weak_model['gecriteria_val_accuracy'] = ge_validation_accuracy
+        weak_model['gecriteria_test_accuracy'] = ge_test_accuracy
+        print("+++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++")
+
+        adversarial_models.append(adversarial_model)
+        weak_models.append(weak_model)
+
+    return adversarial_models, weak_models
 
 
 def bound_experiment(data, weak_signal_data, num_weak_signal, bound):
