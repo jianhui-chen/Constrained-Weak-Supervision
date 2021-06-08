@@ -1,6 +1,11 @@
 from sklearn.linear_model import LogisticRegression
 from sklearn.metrics import accuracy_score
 
+"""
+File contains functionality of defunct LoadData class
+Potentially to be moved to Data class
+"""
+
 def get_all_data(data_object):
     data = data_object.get_data()
     
