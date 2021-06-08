@@ -45,7 +45,7 @@ def create_weak_signal_view(path, views, load_and_process_data):
 # Code for reading in data from all 3 experiments                           #
 # ------------------------------------------------------------------------- #
 
-def run_experiment(run, save, views, datapath, load_and_process_data, savepath):
+def run_experiment(run, save, dataset):
 
     """
     :param run: method that runs real experiment given data
@@ -69,11 +69,11 @@ def run_experiment(run, save, views, datapath, load_and_process_data, savepath):
 
     for i in range(num_experiments):
 
-    	data, weak_signal_data = create_weak_signal_view(datapath, views, load_and_process_data)
+    	data, weak_signal_data = create_weak_signal_view(dataset.datapath, dataset.views, dataset.get_data)
     	for num_weak_signal in range(1, total_weak_signals + 1):
     	    adversarial_model, weak_model = run(data, weak_signal_data, num_weak_signal)
     	    print("Saving results to file...")
-    	    # save(adversarial_model, weak_model, savepath)
+    	    # save(adversarial_model, weak_model, dataset.savepath)
 
 def run_dep_error_exp(run, data_and_weak_signal_data, path):
 
