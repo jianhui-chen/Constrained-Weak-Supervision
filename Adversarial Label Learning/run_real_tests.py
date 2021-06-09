@@ -7,6 +7,7 @@ from sklearn.metrics import accuracy_score
 from real_experiments import run_experiment, bound_experiment, dependent_error_exp
 import default_reader
 from classes_file import Data
+from temp_classes import Obs, Cardio
 
 
 
@@ -40,16 +41,16 @@ def run_tests():
     # # obs network         #
     # # # # # # # # # # # # #
 
-    # # #for obs network dataset, select the Utilized Bandwidth Rate, Packet drop rate and Flood Status as weak signals
-    # print("\n\n\n\n# # # # # # # # # # # # # # # # # # # # #")
-    # print("# Running obs network experiment...     #")
-    # print("# # # # # # # # # # # # # # # # # # # # #\n")
-    # # views                  = {0:1, 1:2, 2:20}
-    # # datapath               = 'datasets/obs-network/obs_network.data'
-    # # savepath               = 'results/json/obs_network.json'
-    # # load_and_process_data  = default_reader.obs_load_and_process_data
-    # obs_data = Obs()
-    # default_reader.run_experiment(run_experiment, saveToFile, obs_data)
+    # #for obs network dataset, select the Utilized Bandwidth Rate, Packet drop rate and Flood Status as weak signals
+    print("\n\n\n\n# # # # # # # # # # # # # # # # # # # # #")
+    print("# Running obs network experiment...     #")
+    print("# # # # # # # # # # # # # # # # # # # # #\n")
+    # views                  = {0:1, 1:2, 2:20}
+    # datapath               = 'datasets/obs-network/obs_network.data'
+    # savepath               = 'results/json/obs_network.json'
+    # load_and_process_data  = default_reader.obs_load_and_process_data
+    obs_data = Obs()
+    default_reader.run_experiment(run_experiment, saveToFile, obs_data)
 
     obs_data = Data( {0:1, 1:2, 2:20}, 'datasets/obs-network/obs_network.data', 'results/json/obs_network.json', default_reader.obs_load_and_process_data)
 
@@ -58,20 +59,20 @@ def run_tests():
     adversarial_models, weak_models = run_experiment(obs_data.data, w_models)
 
 
-    # # # # # # # # # # # # #
-    # # cardio              #
-    # # # # # # # # # # # # #
+    # # # # # # # # # # # #
+    # cardio              #
+    # # # # # # # # # # # #
  
-    # # #Use AC, MLTV and Median as weak signal views
-    # print("\n\n\n\n# # # # # # # # # # # # # # # # # # # # #")
-    # print("# Running cardio experiment...          #")
-    # print("# # # # # # # # # # # # # # # # # # # # #\n")
-    # # views                  = {0:1, 1:10, 2:18}
-    # # datapath               = 'datasets/cardiotocography/cardio.csv'
-    # # savepath               = 'results/json/cardio.json'
-    # # load_and_process_data  = default_reader.cardio_load_and_process_data
-    # cardio_data = Cardio()
-    # default_reader.run_experiment(run_experiment, saveToFile, cardio_data)
+    # #Use AC, MLTV and Median as weak signal views
+    print("\n\n\n\n# # # # # # # # # # # # # # # # # # # # #")
+    print("# Running cardio experiment...          #")
+    print("# # # # # # # # # # # # # # # # # # # # #\n")
+    # views                  = {0:1, 1:10, 2:18}
+    # datapath               = 'datasets/cardiotocography/cardio.csv'
+    # savepath               = 'results/json/cardio.json'
+    # load_and_process_data  = default_reader.cardio_load_and_process_data
+    cardio_data = Cardio()
+    default_reader.run_experiment(run_experiment, saveToFile, cardio_data)
 
     cardio_data = Data( {0:1, 1:2, 2:20}, 'datasets/cardiotocography/cardio.csv', 'results/json/cardio.json', default_reader.cardio_load_and_process_data)
 
