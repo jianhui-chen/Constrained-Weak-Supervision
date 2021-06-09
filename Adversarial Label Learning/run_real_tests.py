@@ -51,6 +51,11 @@ def run_tests():
     # obs_data = Obs()
     # default_reader.run_experiment(run_experiment, saveToFile, obs_data)
 
+    obs_data = Data( {0:1, 1:2, 2:20}, 'datasets/obs-network/obs_network.data', 'results/json/obs_network.json', default_reader.obs_load_and_process_data)
+
+    # Will eventually work with other files
+    w_models = obs_data.get_data(3)
+    adversarial_models, weak_models = run_experiment(obs_data.data, w_models)
 
 
     # # # # # # # # # # # # #
@@ -67,6 +72,12 @@ def run_tests():
     # # load_and_process_data  = default_reader.cardio_load_and_process_data
     # cardio_data = Cardio()
     # default_reader.run_experiment(run_experiment, saveToFile, cardio_data)
+
+    cardio_data = Data( {0:1, 1:2, 2:20}, 'datasets/cardiotocography/cardio.csv', 'results/json/cardio.json', default_reader.cardio_load_and_process_data)
+
+    # Will eventually work with other files
+    w_models = cardio_data.get_data(3)
+    adversarial_models, weak_models = run_experiment(cardio_data.data, w_models)
 
 
 def run_bounds_experiment():
