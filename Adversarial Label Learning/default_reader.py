@@ -148,30 +148,30 @@ def breast_cancer_load_and_process_data(path):
     data_matrix = df.values
     # look into using df.to_numpy instead !!!!!!!
 
-
-
-    #Split the data into 70% training and 30% test set
+    #seperate labels from data 
     data_labels = data_matrix[:, :1].ravel() 
     data_matrix = data_matrix[:, 1:]
-    train_data, test_data, train_labels, test_labels = train_test_split(data_matrix, data_labels, test_size=0.3, shuffle=True, stratify=data_labels)
 
-    #Normalize the features of the data
-    scaler = preprocessing.StandardScaler().fit(train_data)
-    train_data = scaler.transform(train_data)
-    test_data = scaler.transform(test_data)
+    # #Split the data into 70% training and 30% test set
+    # train_data, test_data, train_labels, test_labels = train_test_split(data_matrix, data_labels, test_size=0.3, shuffle=True, stratify=data_labels)
 
-    assert train_labels.size == train_data.shape[0]
-    assert test_labels.size == test_data.shape[0]
+    # #Normalize the features of the data
+    # scaler = preprocessing.StandardScaler().fit(train_data)
+    # train_data = scaler.transform(train_data)
+    # test_data = scaler.transform(test_data)
 
-    data = {}
+    # assert train_labels.size == train_data.shape[0]
+    # assert test_labels.size == test_data.shape[0]
 
-    val_data, weak_supervision_data, val_labels, weak_supervision_labels = train_test_split(train_data, train_labels, test_size=0.4285, shuffle=True, stratify=train_labels)
+    # data = {}
 
-    data['training_data'] = weak_supervision_data, weak_supervision_labels
-    data['validation_data'] = val_data, val_labels
-    data['test_data'] = test_data, test_labels
+    # val_data, weak_supervision_data, val_labels, weak_supervision_labels = train_test_split(train_data, train_labels, test_size=0.4285, shuffle=True, stratify=train_labels)
 
-    return data
+    # data['training_data'] = weak_supervision_data, weak_supervision_labels
+    # data['validation_data'] = val_data, val_labels
+    # data['test_data'] = test_data, test_labels
+
+    # return data
 
 
 def cardio_load_and_process_data(path):
@@ -252,21 +252,21 @@ def obs_load_and_process_data(path):
 
     return data
 
-def load_and_process_data(data_matrix):
+def split_up_data(data_matrix, data_labels):
 
     """
         Trains different views of weak signals
 
-        :param data_matrix: location of 
+        :param data_matrix: 
         :type data_matrix: numpy.ndarray
-        """
+        :param data_labels: array of data that holds the labels of each
+        :type data_labels: numpy.ndarray
+     """
 
 
-    # data_matrix = load_data(path)
+    # data_matrix, data_labels = load_data(path)
 
     #Split the data into 70% training and 30% test set
-    data_labels = data_matrix[:,-1:].ravel() 
-    data_matrix = data_matrix[:,:-1]
     train_data, test_data, train_labels, test_labels = train_test_split(data_matrix, data_labels.astype('float'), test_size=0.3, shuffle=True, stratify=data_labels)
 
     #Normalize the features of the data
@@ -279,6 +279,7 @@ def load_and_process_data(data_matrix):
 
     data = {}
 
+    #Split the training set into 42.85% validation and 57.15% testing
     val_data, weak_supervision_data, val_labels, weak_supervision_labels = train_test_split(train_data, train_labels.astype('float'), test_size=0.4285, shuffle=True, stratify=train_labels)
 
     data['training_data'] = weak_supervision_data, weak_supervision_labels
