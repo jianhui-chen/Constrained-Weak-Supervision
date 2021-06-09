@@ -29,7 +29,7 @@ def run_tests():
     bc_data = Data( {0:0, 1:10, 2:20}, 'datasets/breast-cancer/wdbc.data', 'results/json/breast_cancer.json', default_reader.breast_cancer_load_and_process_data)
 
     # Will eventually work with other files
-    w_models = bc_data.load_data(bc_data, 3)
+    w_models = bc_data.get_data(3)
     adversarial_models, weak_models = run_experiment(bc_data.data, w_models)
 
     # currently does not save files

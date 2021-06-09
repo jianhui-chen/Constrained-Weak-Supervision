@@ -125,7 +125,7 @@ class Data:
         self.num_sig = total_weak_signals
 
         for num_weak_signals in range(1, total_weak_signals + 1):
-            w_models.append(self.train_weak_signals())
+            w_models.append(self.__train_weak_signals())
 
 
         return w_models
