@@ -6,7 +6,6 @@ from sklearn.linear_model import LogisticRegression
 from sklearn.metrics import accuracy_score
 from real_experiments import run_experiment, bound_experiment, dependent_error_exp
 import default_reader
-from temp_classes import  BreastCancer, Cardio, Obs
 from classes_file import Data
 
 
@@ -28,9 +27,9 @@ def run_tests():
     bc_data = Data( {0:0, 1:10, 2:20}, 'datasets/breast-cancer/wdbc.data', 'results/json/breast_cancer.json', default_reader.breast_cancer_load_and_process_data)
 
     # Will eventually work with other files
+    w_models = bc_data.load_data(bc_data, 3)
+    adversarial_models, weak_models = run_experiment(bc_data.data, w_models)
 
-    data, w_models = Data.load_data(bc_data, total_weak_signals)
-    adversarial_models, weak_models = run_experiment(data, w_models)
     # currently does not save files
 
 

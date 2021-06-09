@@ -128,7 +128,7 @@ class Data:
             w_models.append(self.train_weak_signals())
 
 
-        return self.data, w_models
+        return w_models
 
     
 
