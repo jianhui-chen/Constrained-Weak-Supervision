@@ -7,7 +7,6 @@ from sklearn.metrics import accuracy_score
 from real_experiments import run_experiment, bound_experiment, dependent_error_exp
 import default_reader
 from temp_classes import  BreastCancer, Cardio, Obs
-from classes_file import  Data
 
 
 
@@ -25,7 +24,7 @@ def run_tests():
     print("\n\n# # # # # # # # # # # # # # # # # # # # #")
     print("# Running breast cancer experiment...   #")
     print("# # # # # # # # # # # # # # # # # # # # #\n")
-    bc_data = Data( {0:0, 1:10, 2:20}, 'datasets/breast-cancer/wdbc.data', 'results/json/breast_cancer.json', default_reader.breast_cancer_load_and_process_data )
+    bc_data = BreastCancer()
     default_reader.run_experiment(run_experiment, saveToFile, bc_data)
 
 
