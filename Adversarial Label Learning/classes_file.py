@@ -43,6 +43,7 @@ class Data:
         self.sp = savepath
         self.data = load_and_process(datapath)
         self.w_data = self.__get_weak_signals()
+        self.num_sig = 0
 
     def get_views(self):
         return self.v
@@ -52,9 +53,12 @@ class Data:
 
     def get_savepath(self):
         return self.sp
+    
+    def get_num_signals(self):
+        return self.num_sig
 
     
-    def __train_weak_signals(self, num_weak_signals):
+    def __train_weak_signals(self):
         """
         Trains different views of weak signals
 
@@ -79,13 +83,13 @@ class Data:
         weak_signal_test_data = self.w_data[2]
 
         weak_signals = []
-        stats = np.zeros(num_weak_signals)
+        stats = np.zeros(self.num_sig)
         w_sig_probabilities = []
         w_sig_test_accuracies = []
         weak_val_accuracy = []
 
 
-        for i in range(num_weak_signals):
+        for i in range(self.num_sig):
             # fit model
             model = LogisticRegression(solver = "lbfgs", max_iter= 1000)
             model.fit(weak_signal_train_data[i], train_labels)
@@ -118,9 +122,10 @@ class Data:
     def get_data(self, total_weak_signals):
        
         w_models = []
+        self.num_sig = total_weak_signals
 
         for num_weak_signals in range(1, total_weak_signals + 1):
-            w_models.append(self.train_weak_signals(num_weak_signals))
+            w_models.append(self.train_weak_signals())
 
 
         return self.data, w_models
