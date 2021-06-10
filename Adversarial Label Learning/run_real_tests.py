@@ -29,11 +29,9 @@ def run_tests():
     print("# # # # # # # # # # # # # # # # # # # # #\n")
     bc_data = Data( {0:0, 1:10, 2:20}, 'datasets/breast-cancer/wdbc.data', 'results/json/breast_cancer.json', default_reader.breast_cancer_load_and_process_data)
 
-    # Will eventually work with other files
     w_models = bc_data.get_data(3)
     adversarial_models, weak_models = run_experiment(bc_data.data, w_models)
 
-    # currently does not save files
     # currently does not save files
 
 
@@ -45,10 +43,6 @@ def run_tests():
     print("\n\n\n\n# # # # # # # # # # # # # # # # # # # # #")
     print("# Running obs network experiment...     #")
     print("# # # # # # # # # # # # # # # # # # # # #\n")
-    # views                  = {0:1, 1:2, 2:20}
-    # datapath               = 'datasets/obs-network/obs_network.data'
-    # savepath               = 'results/json/obs_network.json'
-    # load_and_process_data  = default_reader.obs_load_and_process_data
     obs_data = Obs()
     default_reader.run_experiment(run_experiment, saveToFile, obs_data)
 
@@ -67,10 +61,6 @@ def run_tests():
     print("\n\n\n\n# # # # # # # # # # # # # # # # # # # # #")
     print("# Running cardio experiment...          #")
     print("# # # # # # # # # # # # # # # # # # # # #\n")
-    # views                  = {0:1, 1:10, 2:18}
-    # datapath               = 'datasets/cardiotocography/cardio.csv'
-    # savepath               = 'results/json/cardio.json'
-    # load_and_process_data  = default_reader.cardio_load_and_process_data
     cardio_data = Cardio()
     default_reader.run_experiment(run_experiment, saveToFile, cardio_data)
 

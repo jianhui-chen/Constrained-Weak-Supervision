@@ -4,74 +4,6 @@ from sklearn.model_selection import train_test_split
 from sklearn import preprocessing
 import json
 
-
-def create_weak_signal_view(path, views, load_and_process_data):
-    """
-    :param path: relative path to the dataset
-    :type: string
-    :param views: dictionary containing the index of the weak signals where the keys are numbered from 0
-    :type: dict
-    :param load_and_process_data: method that loads the dataset and process it into a table form
-    :type: function
-    :return: tuple of data and weak signal data
-    :return type: tuple
-    """
-
-    data = load_and_process_data(path)
-
-    train_data, train_labels = data['training_data']
-    val_data, val_labels = data['validation_data']
-    test_data, test_labels = data['test_data']
-
-    weak_signal_train_data = []
-    weak_signal_val_data = []
-    weak_signal_test_data = []
-
-    for i in range(len(views)):
-        f = views[i]
-
-        weak_signal_train_data.append(train_data[:, f:f+1])
-        weak_signal_val_data.append(val_data[:, f:f+1])
-        weak_signal_test_data.append(test_data[:, f:f+1])
-
-    weak_signal_data = [weak_signal_train_data, weak_signal_val_data, weak_signal_test_data]
-
-    return data, weak_signal_data
-
-# ------------------------------------------------------------------------- #
-# Code for reading in data from all 3 experiments                           #
-# ------------------------------------------------------------------------- #
-
-def run_experiment(run, save, dataset):
-
-    """
-    :param run: method that runs real experiment given data
-    :type: function
-    :param save: method that saves experiment results to JSON file
-    :type: function
-    :param views: dictionary of indices for the weak signals
-    :type: dict
-    :param datapath: relative path to the dataset
-    :type: string
-    :param load_and_process_data: default method to load and process the given dataset
-    :type: function
-    :param savepath: relative path to save the results of the experiments
-    :type: string
-    :return: none
-    """
-
-    # set up your variables
-    total_weak_signals = 3
-    num_experiments = 1
-
-    for i in range(num_experiments):
-
-    	data, weak_signal_data = create_weak_signal_view(dataset.datapath, dataset.views, dataset.get_data)
-    	for num_weak_signal in range(1, total_weak_signals + 1):
-    	    adversarial_model, weak_model = run(data, weak_signal_data, num_weak_signal)
-    	    print("Saving results to file...")
-    	    # save(adversarial_model, weak_model, dataset.savepath)
-
 def run_dep_error_exp(run, data_and_weak_signal_data, path):
 
 	"""
@@ -179,30 +111,13 @@ def breast_cancer_load_and_process_data(path):
     data_matrix = df.values
     # look into using df.to_numpy instead !!!!!!!
 
-
-
-    #Split the data into 70% training and 30% test set
+    #Seperate Data and labels 
     data_labels = data_matrix[:, :1].ravel() 
     data_matrix = data_matrix[:, 1:]
-    train_data, test_data, train_labels, test_labels = train_test_split(data_matrix, data_labels, test_size=0.3, shuffle=True, stratify=data_labels)
 
-    #Normalize the features of the data
-    scaler = preprocessing.StandardScaler().fit(train_data)
-    train_data = scaler.transform(train_data)
-    test_data = scaler.transform(test_data)
+    print(data_labels)
 
-    assert train_labels.size == train_data.shape[0]
-    assert test_labels.size == test_data.shape[0]
-
-    data = {}
-
-    val_data, weak_supervision_data, val_labels, weak_supervision_labels = train_test_split(train_data, train_labels, test_size=0.4285, shuffle=True, stratify=train_labels)
-
-    data['training_data'] = weak_supervision_data, weak_supervision_labels
-    data['validation_data'] = val_data, val_labels
-    data['test_data'] = test_data, test_labels
-
-    return data
+    return data_matrix, data_labels
 
 
 def cardio_load_and_process_data(path):
@@ -221,25 +136,29 @@ def cardio_load_and_process_data(path):
    #Split the data into 70% training and 30% test set
     data_labels = data_matrix[:,-1:].ravel() 
     data_matrix = data_matrix[:,:-1]
-    train_data, test_data, train_labels, test_labels = train_test_split(data_matrix, data_labels.astype('float'), test_size=0.3, shuffle=True, stratify=data_labels)
 
-    #Normalize the features of the data
-    scaler = preprocessing.StandardScaler().fit(train_data)
-    train_data = scaler.transform(train_data)
-    test_data = scaler.transform(test_data)
+    return data_matrix, data_labels
 
-    assert train_labels.size == train_data.shape[0]
-    assert test_labels.size == test_data.shape[0]
 
-    data = {}
+    # train_data, test_data, train_labels, test_labels = train_test_split(data_matrix, data_labels.astype('float'), test_size=0.3, shuffle=True, stratify=data_labels)
 
-    val_data, weak_supervision_data, val_labels, weak_supervision_labels = train_test_split(train_data, train_labels.astype('float'), test_size=0.4285, shuffle=True, stratify=train_labels)
+    # #Normalize the features of the data
+    # scaler = preprocessing.StandardScaler().fit(train_data)
+    # train_data = scaler.transform(train_data)
+    # test_data = scaler.transform(test_data)
 
-    data['training_data'] = weak_supervision_data, weak_supervision_labels
-    data['validation_data'] = val_data, val_labels
-    data['test_data'] = test_data, test_labels
+    # assert train_labels.size == train_data.shape[0]
+    # assert test_labels.size == test_data.shape[0]
 
-    return data
+    # data = {}
+
+    # val_data, weak_supervision_data, val_labels, weak_supervision_labels = train_test_split(train_data, train_labels.astype('float'), test_size=0.4285, shuffle=True, stratify=train_labels)
+
+    # data['training_data'] = weak_supervision_data, weak_supervision_labels
+    # data['validation_data'] = val_data, val_labels
+    # data['test_data'] = test_data, test_labels
+
+    # return data
 
 def obs_load_and_process_data(path):
 
@@ -263,57 +182,63 @@ def obs_load_and_process_data(path):
     #Split the data into 70% training and 30% test set
     data_labels = data_matrix[:,-1:].ravel() 
     data_matrix = data_matrix[:,:-1]
-    train_data, test_data, train_labels, test_labels = train_test_split(data_matrix, data_labels.astype('float'), test_size=0.3, shuffle=True, stratify=data_labels)
 
-    #Normalize the features of the data
-    scaler = preprocessing.StandardScaler().fit(train_data)
-    train_data = scaler.transform(train_data)
-    test_data = scaler.transform(test_data)
-
-    assert train_labels.size == train_data.shape[0]
-    assert test_labels.size == test_data.shape[0]
-
-    data = {}
-
-    val_data, weak_supervision_data, val_labels, weak_supervision_labels = train_test_split(train_data, train_labels.astype('float'), test_size=0.4285, shuffle=True, stratify=train_labels)
-
-    data['training_data'] = weak_supervision_data, weak_supervision_labels
-    data['validation_data'] = val_data, val_labels
-    data['test_data'] = test_data, test_labels
-
-    return data
-
-def load_and_process_data(data_matrix):
-
-    """
-        Trains different views of weak signals
-
-        :param data_matrix: location of 
-        :type data_matrix: numpy.ndarray
-        """
+    return data_matrix, data_labels
 
 
-    # data_matrix = load_data(path)
+    # train_data, test_data, train_labels, test_labels = train_test_split(data_matrix, data_labels.astype('float'), test_size=0.3, shuffle=True, stratify=data_labels)
 
-    #Split the data into 70% training and 30% test set
-    data_labels = data_matrix[:,-1:].ravel() 
-    data_matrix = data_matrix[:,:-1]
-    train_data, test_data, train_labels, test_labels = train_test_split(data_matrix, data_labels.astype('float'), test_size=0.3, shuffle=True, stratify=data_labels)
+    # #Normalize the features of the data
+    # scaler = preprocessing.StandardScaler().fit(train_data)
+    # train_data = scaler.transform(train_data)
+    # test_data = scaler.transform(test_data)
 
-    #Normalize the features of the data
-    scaler = preprocessing.StandardScaler().fit(train_data)
-    train_data = scaler.transform(train_data)
-    test_data = scaler.transform(test_data)
+    # assert train_labels.size == train_data.shape[0]
+    # assert test_labels.size == test_data.shape[0]
 
-    assert train_labels.size == train_data.shape[0]
-    assert test_labels.size == test_data.shape[0]
+    # data = {}
 
-    data = {}
+    # val_data, weak_supervision_data, val_labels, weak_supervision_labels = train_test_split(train_data, train_labels.astype('float'), test_size=0.4285, shuffle=True, stratify=train_labels)
 
-    val_data, weak_supervision_data, val_labels, weak_supervision_labels = train_test_split(train_data, train_labels.astype('float'), test_size=0.4285, shuffle=True, stratify=train_labels)
+    # data['training_data'] = weak_supervision_data, weak_supervision_labels
+    # data['validation_data'] = val_data, val_labels
+    # data['test_data'] = test_data, test_labels
 
-    data['training_data'] = weak_supervision_data, weak_supervision_labels
-    data['validation_data'] = val_data, val_labels
-    data['test_data'] = test_data, test_labels
+    # return data
 
-    return data
+# def load_and_process_data(path, load_data):
+
+#     """
+#         Trains different views of weak signals
+
+#         :param path: location of 
+#         :type path: numpy.ndarray
+#         :param path: funtion that gets data from the path
+#         :type path: numpy.ndarray
+#     """
+
+
+#     data_matrix, data_labels = load_data(path)
+
+#     #Split the data into 70% training and 30% test set
+#     data_labels = data_matrix[:,-1:].ravel() 
+#     data_matrix = data_matrix[:,:-1]
+#     train_data, test_data, train_labels, test_labels = train_test_split(data_matrix, data_labels.astype('float'), test_size=0.3, shuffle=True, stratify=data_labels)
+
+#     #Normalize the features of the data
+#     scaler = preprocessing.StandardScaler().fit(train_data)
+#     train_data = scaler.transform(train_data)
+#     test_data = scaler.transform(test_data)
+
+#     assert train_labels.size == train_data.shape[0]
+#     assert test_labels.size == test_data.shape[0]
+
+#     data = {}
+
+#     val_data, weak_supervision_data, val_labels, weak_supervision_labels = train_test_split(train_data, train_labels.astype('float'), test_size=0.4285, shuffle=True, stratify=train_labels)
+
+#     data['training_data'] = weak_supervision_data, weak_supervision_labels
+#     data['validation_data'] = val_data, val_labels
+#     data['test_data'] = test_data, test_labels
+
+#     return data
