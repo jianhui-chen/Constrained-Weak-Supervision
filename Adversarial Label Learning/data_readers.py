@@ -5,7 +5,7 @@ from sklearn import preprocessing
 import json
 
 
-def run_bounds_experiment(run, data_and_weak_signal_data, path):
+def run_bounds_experiment(run, data, weak_signal_data, path):
 
     """
     :param run: method that runs real experiment given data
@@ -17,7 +17,7 @@ def run_bounds_experiment(run, data_and_weak_signal_data, path):
     :type: string
     """
 
-    data, weak_signal_data = data_and_weak_signal_data
+    # data, weak_signal_data = data_and_weak_signal_data
 
     # set up your variables
     num_weak_signal = 3
@@ -32,6 +32,8 @@ def run_bounds_experiment(run, data_and_weak_signal_data, path):
 
     for i in range(num_experiments):
         output = run(data, weak_signal_data, num_weak_signal, bounds[i])
+
+        
         errors.append(output['error_bound'])
         accuracies.append(output['test_accuracy'])
         ineq_constraints.append(output['ineq_constraint'])
