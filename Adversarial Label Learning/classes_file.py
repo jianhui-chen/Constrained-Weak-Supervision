@@ -13,8 +13,61 @@ Can be later used with the overhead file running all the code
 
 class Data:
 
+    def __load_and_process_data(self, datapath, load_data):
+
+        # """
+        #     Calls function that gets the data, and then splits it into training, validation, and testing sets
+
+        #     :param data_matrix: matrix of data
+        #     :type data_matrix: numpy.ndarray
+        #     :param data_matrix: labels for each matrix entry 
+        #     :type data_matrix: numpy.ndarray
+        # """
+
+        """
+            Calls function that gets the data, and then splits it into training, validation, and testing sets
+
+            :param datapath: location of data
+            :type datapath: string
+            :param load_data: funtion specific to data set that gets data from the path and cleans it
+            :type load_data: function
+        """
+
+        data_matrix, data_labels = load_data(datapath)
+
+        #Split the data into 70% training and 30% test set
+        train_data, test_data, train_labels, test_labels = train_test_split(data_matrix, data_labels.astype('float'), test_size=0.3, shuffle=True, stratify=data_labels)
+
+        #Normalize the features of the data
+        scaler = preprocessing.StandardScaler().fit(train_data)
+        train_data = scaler.transform(train_data)
+        test_data = scaler.transform(test_data)
+
+        assert train_labels.size == train_data.shape[0]
+        assert test_labels.size == test_data.shape[0]
+
+        data = {}
+
+        #Split the remaining data into 57.15% training and 42.85% test set
+        val_data, weak_supervision_data, val_labels, weak_supervision_labels = train_test_split(train_data, train_labels.astype('float'), test_size=0.4285, shuffle=True, stratify=train_labels)
+
+        data['training_data'] = weak_supervision_data, weak_supervision_labels
+        data['validation_data'] = val_data, val_labels
+        data['test_data'] = test_data, test_labels
+
+        return data
+
+        # data = load_data(datapath)
+
+        # return data
+
     def __get_weak_signals(self):
         """ private method """
+
+        # get data, and then split it into groups
+        # data_matrix, data_labels = self.data
+        # data = self.load_and_process_data(data_matrix, data_labels)
+
         data = self.data
     
         # code to get weak signals –– create_weak_signals_view
@@ -37,11 +90,12 @@ class Data:
 
         return weak_signal_data
     
-    def __init__(self, views, datapath, savepath, load_and_process):
+    def __init__(self, views, datapath, savepath, load_data):
         self.v = views
         self.dp = datapath
         self.sp = savepath
-        self.data = load_and_process(datapath)
+        self.data = self.__load_and_process_data(datapath, load_data)
+        # self.data = load_data(datapath)
         self.w_data = self.__get_weak_signals()
         #self.num_sig = 0
     """

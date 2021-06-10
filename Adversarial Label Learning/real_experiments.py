@@ -4,7 +4,6 @@ from ge_criterion_baseline import *
 from utilities import saveToFile, runBaselineTests, getModelAccuracy, getWeakSignalAccuracy
 from sklearn.linear_model import LogisticRegression
 from sklearn.metrics import accuracy_score
-import default_reader
 
 
 def train_weak_signals(data, weak_signal_data, num_weak_signal):
