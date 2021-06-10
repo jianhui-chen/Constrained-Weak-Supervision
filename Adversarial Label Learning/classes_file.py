@@ -15,15 +15,6 @@ class Data:
 
     def __load_and_process_data(self, datapath, load_data):
 
-        # """
-        #     Calls function that gets the data, and then splits it into training, validation, and testing sets
-
-        #     :param data_matrix: matrix of data
-        #     :type data_matrix: numpy.ndarray
-        #     :param data_matrix: labels for each matrix entry 
-        #     :type data_matrix: numpy.ndarray
-        # """
-
         """
             Calls function that gets the data, and then splits it into training, validation, and testing sets
 
