@@ -7,7 +7,7 @@ from sklearn.metrics import accuracy_score
 from real_experiments import run_experiment, bound_experiment, dependent_error_exp
 import data_readers
 from classes_file import Data
-from temp_classes import Obs, Cardio
+
 
 
 def run_tests():
@@ -75,7 +75,7 @@ def run_bounds_experiment():
    
     print("\n\nRunning bounds on breast cancer experiment...")
 
-    bc_data  = Data( {0:0, 1:10, 2:20}, 'datasets/breast-cancer/wdbc.data', 'results/json/bc_bounds.json', data_readers.breast_cancer_load_and_process_data)
+    bc_data  = Data("Breast Cancer", {0:0, 1:10, 2:20}, 'datasets/breast-cancer/wdbc.data', 'results/json/bc_bounds.json', data_readers.breast_cancer_load_and_process_data)
     w_models = bc_data.get_data(3)
 
     bound_experiment(bc_data.data, bc_data.w_data, bc_data.sp)
@@ -89,7 +89,7 @@ def run_bounds_experiment():
 
     print("\n\nRunning bounds on obs network experiment...")
 
-    obs_data = Data( {0:1, 1:2, 2:20}, 'datasets/obs-network/obs_network.data', 'results/json/obs_bounds.json', data_readers.obs_load_and_process_data)
+    obs_data = Data("OBS", {0:1, 1:2, 2:20}, 'datasets/obs-network/obs_network.data', 'results/json/obs_bounds.json', data_readers.obs_load_and_process_data)
     w_models = obs_data.get_data(3)
 
     bound_experiment(obs_data.data, obs_data.w_data, obs_data.sp)
@@ -107,7 +107,7 @@ def run_dep_err_experiment():
      
     #Use AC, MLTV and Median as weak signal views, and repeat the bad weak signal 
     views       = {0: 1, 1: 18, 2: 18, 3: 18, 4: 18, 5: 18, 6: 18, 7: 18, 8: 18, 9: 18}
-    cardio_data = Data( views, 'datasets/cardiotocography/cardio.csv', 'results/json/cardio_error.json', data_readers.cardio_load_and_process_data)
+    cardio_data = Data("Cardio", views, 'datasets/cardiotocography/cardio.csv', 'results/json/cardio_error.json', data_readers.cardio_load_and_process_data)
 
     dependent_error_exp(cardio_data.data, cardio_data.w_data, cardio_data.sp)
 
