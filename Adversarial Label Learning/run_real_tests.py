@@ -28,7 +28,6 @@ def run_tests():
     print("# Running breast cancer experiment...   #")
     print("# # # # # # # # # # # # # # # # # # # # #\n")
     bc_data = Data( {0:0, 1:10, 2:20}, 'datasets/breast-cancer/wdbc.data', 'results/json/breast_cancer.json', data_readers.breast_cancer_load_and_process_data)
-
     w_models = bc_data.get_data(3)
     adversarial_models, weak_models = run_experiment(bc_data.data, w_models)
 
