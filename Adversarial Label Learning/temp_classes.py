@@ -60,7 +60,7 @@ class BreastCancer(Data):
     datapath               = 'datasets/breast-cancer/wdbc.data'
     savepath               = 'results/json/breast_cancer.json'
 
-    def get_data(self, path): #  Need to change function call to get rid of path
+    def get_data(self): #  Need to change function call to get rid of path
         df = pd.read_csv(self.datapath, header=None)
         #Remove the first column of the data (the ID)
         df.drop([0], axis=1, inplace=True)
@@ -96,7 +96,7 @@ class Cardio(Data):
     datapath               = 'datasets/cardiotocography/cardio.csv'
     savepath               = 'results/json/cardio.json'
 
-    def get_data(self, path):
+    def get_data(self):
         df = pd.read_csv(self.datapath)
         #Use class 1 and 2 labels only in the data
         mask_1 = df['CLASS'] == 1
@@ -136,7 +136,7 @@ class Obs(Data):
     datapath               = 'datasets/obs-network/obs_network.data'
     savepath               = 'results/json/obs_network.json'
 
-    def get_data(self, path):
+    def get_data(self):
         df = pd.read_csv(self.datapath, header=None)
         #Use 'NB-Wait' and "'NB-No Block'" labels only in the data
         mask_no_block = df[21] == "'NB-No Block'"
