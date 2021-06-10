@@ -4,6 +4,7 @@ from ge_criterion_baseline import *
 from utilities import saveToFile, runBaselineTests, getModelAccuracy, getWeakSignalAccuracy
 from sklearn.linear_model import LogisticRegression
 from sklearn.metrics import accuracy_score
+import json
 
 
 def train_weak_signals(data, weak_signal_data, num_weak_signal):
@@ -220,71 +221,94 @@ def bound_experiment(data, weak_signal_data, num_weak_signal, bound):
     return output
 
 
-def dependent_error_exp(data, weak_signal_data, num_weak_signal):
+def dependent_error_exp(data, weak_signal_data, path):
+
     """
-    Runs experiment with the given dataset
-    :param data: dictionary of validation and test data
-    :type data: dict
-    :param weak_signal_data: data representing the different views for the weak signals
-    :type: array
-    :param num_weak_signal: number of weak signals
-    :type num_weak_signal: int
-    :return: test accuracies of ALL and respective baselines
-    :rtype: dict
+    :param run: method that runs real experiment given data
+    :type: function
+    :return: none
+    :param data_and_weak_signal_data: tuple of data and weak signal data
+    :type: tuple
+    :param path: relative path to save the bounds experiment results
+    :type: string
     """
 
-    w_model = train_weak_signals(data, weak_signal_data, num_weak_signal)
+    # set up your variables
+    num_experiments = 10
 
-    training_data = data['training_data'][0].T
-    training_labels = data['training_data'][1]
-    val_data, val_labels = data['validation_data']
-    val_data = val_data.T
-    test_data = data['test_data'][0].T
-    test_labels = data['test_data'][1]
+    accuracy = {}
+    accuracy ['ALL'] = []
+    accuracy['GE'] = []
+    accuracy['BASELINE'] = []
+    accuracy ['WS'] = []
 
-    num_features, num_data_points = training_data.shape
+    # all_accuracy = []
+    # baseline_accuracy = []
+    # ge_accuracy = []
+    # weak_signal_accuracy = []
 
-    weak_signal_ub = w_model['error_bounds']
-    weak_signal_probabilities = w_model['probabilities']
-    weak_test_accuracy = w_model['test_accuracy']
+    for num_weak_signal in range(num_experiments):
 
-    weights = np.zeros(num_features)
+        # fix name later
+        new_num_weak_signal = num_weak_signal + 1
 
-    print("Running tests...")
+        w_model = train_weak_signals(data, weak_signal_data, new_num_weak_signal)
 
-    optimized_weights, ineq_constraint = train_all(val_data, weights, weak_signal_probabilities, weak_signal_ub, max_iter=5000)
+        training_data = data['training_data'][0].T
+        training_labels = data['training_data'][1]
+        val_data, val_labels = data['validation_data']
+        val_data = val_data.T
+        test_data = data['test_data'][0].T
+        test_labels = data['test_data'][1]
 
-    # calculate test probabilities
-    test_probabilities = probability(test_data, optimized_weights)
-    # calculate test accuracy
-    test_accuracy = getModelAccuracy(test_probabilities, test_labels)
+        num_features, num_data_points = training_data.shape
 
-    print("")
-    print("+++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++")
-    print("Experiment %d"%num_weak_signal)
-    print("We trained %d learnable classifiers with %d weak signals" %(1, num_weak_signal))
-    print("The accuracy of the model on the test data is", test_accuracy)
-    print("The accuracy of weak signal(s) on the test data is", weak_test_accuracy)
-    print("")
+        weak_signal_ub = w_model['error_bounds']
+        weak_signal_probabilities = w_model['probabilities']
+        weak_test_accuracy = w_model['test_accuracy']
 
-    # calculate ge criteria
-    print("Running tests on ge criteria...")
-    model = ge_criterion_train(val_data.T, val_labels, weak_signal_probabilities, num_weak_signal)
-    ge_test_accuracy = accuracy_score(test_labels, np.round(probability(test_data, model)))
-    print("The accuracy of ge criteria on test data is", ge_test_accuracy)
-    print("+++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++")
+        weights = np.zeros(num_features)
 
-    # calculate baseline
-    print("Running tests on the baselines...")
-    baselines = runBaselineTests(val_data, weak_signal_probabilities)
-    b_test_accuracy = getWeakSignalAccuracy(test_data, test_labels, baselines)
-    print("The accuracy of the baseline models on test data is", b_test_accuracy)
-    print("")
+        print("Running tests...")
 
-    output = {}
-    output['ALL'] = test_accuracy
-    output['WS'] = w_model['test_accuracy'][-1]
-    output['GE'] = ge_test_accuracy
-    output['AVG'] = b_test_accuracy[-1]
+        optimized_weights, ineq_constraint = train_all(val_data, weights, weak_signal_probabilities, weak_signal_ub, max_iter=5000)
 
-    return output
+        # calculate test probabilities
+        test_probabilities = probability(test_data, optimized_weights)
+        # calculate test accuracy
+        test_accuracy = getModelAccuracy(test_probabilities, test_labels)
+
+        print("")
+        print("+++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++")
+        print("Experiment %d"%new_num_weak_signal)
+        print("We trained %d learnable classifiers with %d weak signals" %(1, new_num_weak_signal))
+        print("The accuracy of the model on the test data is", test_accuracy)
+        print("The accuracy of weak signal(s) on the test data is", weak_test_accuracy)
+        print("")
+
+        # calculate ge criteria
+        print("Running tests on ge criteria...")
+        model = ge_criterion_train(val_data.T, val_labels, weak_signal_probabilities, new_num_weak_signal)
+        ge_test_accuracy = accuracy_score(test_labels, np.round(probability(test_data, model)))
+        print("The accuracy of ge criteria on test data is", ge_test_accuracy)
+        print("+++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++")
+
+        # calculate baseline
+        print("Running tests on the baselines...")
+        baselines = runBaselineTests(val_data, weak_signal_probabilities)
+        b_test_accuracy = getWeakSignalAccuracy(test_data, test_labels, baselines)
+        print("The accuracy of the baseline models on test data is", b_test_accuracy)
+        print("")
+        
+        accuracy['ALL'].append(test_accuracy)
+        accuracy['GE'].append( w_model['test_accuracy'][-1])
+        accuracy['BASELINE'].append(ge_test_accuracy)
+        accuracy['WS'].append(b_test_accuracy[-1] )
+
+
+    print("Saving results to file...")
+    filename = path
+
+    with open(filename, 'w') as file:
+        json.dump(accuracy, file, indent=4, separators=(',', ':'))
+    file.close()

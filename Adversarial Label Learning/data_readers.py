@@ -4,49 +4,6 @@ from sklearn.model_selection import train_test_split
 from sklearn import preprocessing
 import json
 
-def run_dep_error_exp(run, data_and_weak_signal_data, path):
-
-	"""
-	:param run: method that runs real experiment given data
-	:type: function
-	:return: none
-	:param data_and_weak_signal_data: tuple of data and weak signal data
-	:type: tuple
-	:param path: relative path to save the bounds experiment results
-	:type: string
-	"""
-
-	# set up your variables
-	num_experiments = 10
-
-	all_accuracy = []
-	baseline_accuracy = []
-	ge_accuracy = []
-	weak_signal_accuracy = []
-
-	data, weak_signal_data = data_and_weak_signal_data
-
-	for num_weak_signal in range(num_experiments):
-	    output = run(data, weak_signal_data, num_weak_signal + 1)
-	    all_accuracy.append(output['ALL'])
-	    baseline_accuracy.append(output['AVG'])
-	    ge_accuracy.append(output['GE'])
-	    weak_signal_accuracy.append(output['WS'])
-
-	print("Saving results to file...")
-	filename = path
-
-	output = {}
-	output ['ALL'] = all_accuracy
-	output['GE'] = ge_accuracy
-	output['AVG'] = baseline_accuracy
-	output ['WS'] = weak_signal_accuracy
-
-	with open(filename, 'w') as file:
-	    json.dump(output, file, indent=4, separators=(',', ':'))
-	file.close()
-
-
 
 def run_bounds_experiment(run, data_and_weak_signal_data, path):
 
@@ -131,7 +88,7 @@ def cardio_load_and_process_data(path):
     df['CLASS'] = df['CLASS'].replace({1: 0, 2: 1})
     data_matrix = df.values
 
-   #Split the data into 70% training and 30% test set
+    #Seperate Data and labels 
     data_labels = data_matrix[:,-1:].ravel() 
     data_matrix = data_matrix[:,:-1]
 
@@ -156,7 +113,7 @@ def obs_load_and_process_data(path):
     df[21] = df[21].replace({"'NB-No Block'": 0, 'NB-Wait': 1})
     data_matrix = df.values
 
-    #Split the data into 70% training and 30% test set
+    #Seperate Data and labels 
     data_labels = data_matrix[:,-1:].ravel() 
     data_matrix = data_matrix[:,:-1]
 
