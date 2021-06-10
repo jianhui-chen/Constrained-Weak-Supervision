@@ -5,56 +5,6 @@ from sklearn import preprocessing
 import json
 
 
-def run_bounds_experiment(run, data, weak_signal_data, path):
-
-    """
-    :param run: method that runs real experiment given data
-    :type: function
-    :return: none
-    :param data_and_weak_signal_data: tuple of data and weak signal data
-    :type: tuple
-    :param path: relative path to save the bounds experiment results
-    :type: string
-    """
-
-    # data, weak_signal_data = data_and_weak_signal_data
-
-    # set up your variables
-    num_weak_signal = 3
-    num_experiments = 100
-    errors = []
-    accuracies = []
-    ineq_constraints = []
-    weak_signal_ub = []
-    weak_test_accuracy = []
-
-    bounds = np.linspace(0, 1, num_experiments)
-
-    for i in range(num_experiments):
-        output = run(data, weak_signal_data, num_weak_signal, bounds[i])
-
-        
-        errors.append(output['error_bound'])
-        accuracies.append(output['test_accuracy'])
-        ineq_constraints.append(output['ineq_constraint'])
-        weak_signal_ub.append(output['weak_signal_ub'])
-        weak_test_accuracy.append(output['weak_test_accuracy'])
-
-    print("Saving results to file...")
-    filename = path
-
-    output = {}
-    output ['Error bound'] = errors
-    output['Accuracy'] = accuracies
-    output['Ineq constraint'] = ineq_constraints
-    output ['Weak_signal_ub'] = weak_signal_ub
-    output['Weak_test_accuracy'] = weak_test_accuracy
-    with open(filename, 'w') as file:
-        json.dump(output, file, indent=4, separators=(',', ':'))
-    file.close()
-
-
-
 # ------------------------------------------------------------------------- #
 # Code for Loading and processing all data sets                             #
 # ------------------------------------------------------------------------- #
