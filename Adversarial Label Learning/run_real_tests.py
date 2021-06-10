@@ -33,7 +33,7 @@ def run_tests():
 
     # currently does not save files
 
-
+    """
     # # # # # # # # # # # # #
     # # obs network         #
     # # # # # # # # # # # # #
@@ -60,7 +60,7 @@ def run_tests():
     cardio_data = Data( {0:1, 1:2, 2:20}, 'datasets/cardiotocography/cardio.csv', 'results/json/cardio.json', data_readers.cardio_load_and_process_data)
     w_models = cardio_data.get_data(3)
     adversarial_models, weak_models = run_experiment(cardio_data.data, w_models)
-
+    """
 
 def run_bounds_experiment():
     """

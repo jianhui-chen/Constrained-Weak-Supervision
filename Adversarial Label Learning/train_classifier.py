@@ -1,4 +1,5 @@
 import numpy as np
+from log import Logger
 
 def objective_function(y, learnable_probabilities, weak_signal_probabilities, weak_signal_ub, rho, gamma):
 	"""
@@ -154,6 +155,9 @@ def train_all(data, weights, weak_signal_probabilities, weak_signal_ub, max_iter
 	learnable_probabilities = probability(data, weights)
 	n = learnable_probabilities.size
 
+	# initialize logging object
+	logger = Logger('logs')
+
 	# initialize algorithm variables
 	y = 0.5 * np.ones(n)
 	gamma = np.zeros(weak_signal_probabilities.shape[0])
@@ -206,6 +210,9 @@ def train_all(data, weights, weak_signal_probabilities, weak_signal_ub, max_iter
 			objective = np.sum(objective) / n
 			print("Iter %d. Weights Infeas: %f, Y_Infeas: %f, Ineq Infeas: %f, lagrangian: %f, obj: %f" % (t, np.sum(conv_weights), conv_y,
 												ineq_infeas, lagrangian_obj, objective))
+			logger.log_scalar("Objective", objective, t)
+			
+
 
 		learnable_probabilities = probability(data, weights)
 
