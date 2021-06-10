@@ -81,7 +81,8 @@ class Data:
 
         return weak_signal_data
     
-    def __init__(self, views, datapath, savepath, load_data):
+    def __init__(self, name, views, datapath, savepath, load_data):
+        self.n = name
         self.v = views
         self.dp = datapath
         self.sp = savepath

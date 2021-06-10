@@ -27,13 +27,13 @@ def run_tests():
     print("\n\n# # # # # # # # # # # # # # # # # # # # #")
     print("# Running breast cancer experiment...   #")
     print("# # # # # # # # # # # # # # # # # # # # #\n")
-    bc_data = Data( {0:0, 1:10, 2:20}, 'datasets/breast-cancer/wdbc.data', 'results/json/breast_cancer.json', data_readers.breast_cancer_load_and_process_data)
+    bc_data = Data("Breast Cancer", {0:0, 1:10, 2:20}, 'datasets/breast-cancer/wdbc.data', 'results/json/breast_cancer.json', data_readers.breast_cancer_load_and_process_data)
     w_models = bc_data.get_data(3)
-    adversarial_models, weak_models = run_experiment(bc_data.data, w_models)
+    adversarial_models, weak_models = run_experiment(bc_data, w_models)
 
     # currently does not save files
 
-    """
+    
     # # # # # # # # # # # # #
     # # obs network         #
     # # # # # # # # # # # # #
@@ -43,9 +43,9 @@ def run_tests():
     print("# Running obs network experiment...     #")
     print("# # # # # # # # # # # # # # # # # # # # #\n")
 
-    obs_data = Data( {0:1, 1:2, 2:20}, 'datasets/obs-network/obs_network.data', 'results/json/obs_network.json', data_readers.obs_load_and_process_data)
+    obs_data = Data("OBS", {0:1, 1:2, 2:20}, 'datasets/obs-network/obs_network.data', 'results/json/obs_network.json', data_readers.obs_load_and_process_data)
     w_models = obs_data.get_data(3)
-    adversarial_models, weak_models = run_experiment(obs_data.data, w_models)
+    adversarial_models, weak_models = run_experiment(obs_data, w_models)
 
 
     # # # # # # # # # # # #
@@ -57,10 +57,10 @@ def run_tests():
     print("# Running cardio experiment...          #")
     print("# # # # # # # # # # # # # # # # # # # # #\n")
 
-    cardio_data = Data( {0:1, 1:2, 2:20}, 'datasets/cardiotocography/cardio.csv', 'results/json/cardio.json', data_readers.cardio_load_and_process_data)
+    cardio_data = Data("Cardio", {0:1, 1:2, 2:20}, 'datasets/cardiotocography/cardio.csv', 'results/json/cardio.json', data_readers.cardio_load_and_process_data)
     w_models = cardio_data.get_data(3)
-    adversarial_models, weak_models = run_experiment(cardio_data.data, w_models)
-    """
+    adversarial_models, weak_models = run_experiment(cardio_data, w_models)
+    
 
 def run_bounds_experiment():
     """

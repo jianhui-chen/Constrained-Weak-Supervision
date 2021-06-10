@@ -140,7 +140,7 @@ def y_gradient(y, learnable_probabilities, weak_signal_probabilities, weak_signa
 	return learnable_term + gamma_term - ineq_augmented_term
 
 
-def train_all(data, weights, weak_signal_probabilities, weak_signal_ub, max_iter=5000):
+def train_all(data, weights, weak_signal_probabilities, weak_signal_ub, logger, max_iter=5000):
 
 	"""
 	Trains a logistic regression classifier
@@ -166,7 +166,7 @@ def train_all(data, weights, weak_signal_probabilities, weak_signal_ub, max_iter
 
 	# testing logger code
 	#writer = tf.summary.create_file_writer("logs")
-	logger = Logger("logs")
+	
 	with logger.writer.as_default():
 		t = 0
 		converged = False
