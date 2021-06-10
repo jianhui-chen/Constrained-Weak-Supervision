@@ -5,6 +5,7 @@ from utilities import saveToFile, runBaselineTests, getModelAccuracy, getWeakSig
 from sklearn.linear_model import LogisticRegression
 from sklearn.metrics import accuracy_score
 from log import Logger
+import json
 
 
 
@@ -109,79 +110,108 @@ def run_experiment(data_obj, w_models, constant_bound=False):
     return adversarial_models, weak_models
 
 
-def bound_experiment(data, weak_signal_data, num_weak_signal, bound):
+def bound_experiment(data, weak_signal_data, path):
+    # """
+    # Runs experiment with the given dataset
+    # :param data: dictionary of validation and test data
+    # :type data: dict
+    # :param weak_signal_data: data representing the different views for the weak signals
+    # :type: array
+    # :param num_weak_signal: number of weak signals
+    # :type num_weak_signal: int
+    # :param bound: error bound of the weak signal
+    # :type bound: int
+    # :return: outputs from the bound experiments
+    # :rtype: dict
+    # """
+
     """
-    Runs experiment with the given dataset
     :param data: dictionary of validation and test data
-    :type data: dict
+    :type: dict
     :param weak_signal_data: data representing the different views for the weak signals
     :type: array
-    :param num_weak_signal: number of weak signals
-    :type num_weak_signal: int
-    :param bound: error bound of the weak signal
-    :type bound: int
-    :return: outputs from the bound experiments
-    :rtype: dict
+    :param path: relative path to save the bounds experiment results
+    :type: string
     """
 
-    w_model = train_weak_signals(data, weak_signal_data, num_weak_signal)
+    # set up your variables
+    num_weak_signal = 3
+    num_experiments = 100
 
-    training_data = data['training_data'][0].T
-    training_labels = data['training_data'][1]
-    val_data, val_labels = data['validation_data']
-    val_data = val_data.T
-    test_data = data['test_data'][0].T
-    test_labels = data['test_data'][1]
+    results = {}
+    results['Error bound'] = []
+    results['Accuracy'] = []
+    results['Ineq constraint'] = []
+    results['Weak_signal_ub'] = []
+    results['Weak_test_accuracy'] = []
 
-    num_features, num_data_points = training_data.shape
+    bounds = np.linspace(0, 1, num_experiments)
 
-    weak_signal_ub = w_model['error_bounds']
-    weak_signal_probabilities = w_model['probabilities']
+    for i in range(num_experiments):
 
-    weights = np.zeros(num_features)
+        w_model = train_weak_signals(data, weak_signal_data, num_weak_signal)
 
-    print("Running tests...")
+        training_data = data['training_data'][0].T
+        training_labels = data['training_data'][1]
+        val_data, val_labels = data['validation_data']
+        val_data = val_data.T
+        test_data = data['test_data'][0].T
+        test_labels = data['test_data'][1]
 
-    optimized_weights, ineq_constraint = train_all(val_data, weights, weak_signal_probabilities, bound, logger, max_iter=10000)
+        num_features, num_data_points = training_data.shape
 
-    # calculate test probabilities
-    test_probabilities = probability(test_data, optimized_weights)
-    # calculate error bound on test data
-    test_probabilities = np.round(test_probabilities)
-    error_bound = (test_probabilities.dot(1 - test_labels) + (1 - test_probabilities).dot(test_labels)) / test_labels.size
-    test_accuracy = getModelAccuracy(test_probabilities, test_labels)
+        optimized_weights, ineq_constraint = train_all(val_data, weights, weak_signal_probabilities, bound, logger, max_iter=10000)
+        weak_signal_ub = w_model['error_bounds']
+        weak_signal_probabilities = w_model['probabilities']
 
-    print("")
-    print("+++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++")
-    print("The error_bound of learned model on the weak signal is", weak_signal_ub)
-    print("The test accuracy of the weak signal is", w_model['test_accuracy'])
-    print("The error_bound of learned model on the test data is", error_bound[0])
-    print("The accuracy of the model on the test data is", test_accuracy)
+        weights = np.zeros(num_features)
 
-    output = {}
-    output['weak_signal_ub'] = weak_signal_ub[0]
-    output['weak_test_accuracy'] = w_model['test_accuracy'][0]
-    output['error_bound'] = error_bound[0]
-    output['test_accuracy'] = test_accuracy
-    output['ineq_constraint'] = ineq_constraint[0]
+        print("Running tests...")
 
-    return output
+        optimized_weights, ineq_constraint = train_all(val_data, weights, weak_signal_probabilities, bounds[i], max_iter=10000)
+
+        # calculate test probabilities
+        test_probabilities = probability(test_data, optimized_weights)
+        # calculate error bound on test data
+        test_probabilities = np.round(test_probabilities)
+        error_bound = (test_probabilities.dot(1 - test_labels) + (1 - test_probabilities).dot(test_labels)) / test_labels.size
+        test_accuracy = getModelAccuracy(test_probabilities, test_labels)
+
+        print("")
+        print("+++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++")
+        print("The error_bound of learned model on the weak signal is", weak_signal_ub)
+        print("The test accuracy of the weak signal is", w_model['test_accuracy'])
+        print("The error_bound of learned model on the test data is", error_bound[0])
+        print("The accuracy of the model on the test data is", test_accuracy)
+
+        # Save results for this experiement
+        results['Error bound'].append(error_bound[0])
+        results['Accuracy'].append(test_accuracy)
+        results['Ineq constraint'].append(ineq_constraint[0])
+        results['Weak_signal_ub'].append(weak_signal_ub[0])
+        results['Weak_test_accuracy'].append(w_model['test_accuracy'][0])
+
+    print("Saving results to file...")
+
+    with open(path, 'w') as file:
+        json.dump(results, file, indent=4, separators=(',', ':'))
+    file.close()
 
 
-def dependent_error_exp(data, weak_signal_data, num_weak_signal):
+def dependent_error_exp(data, weak_signal_data, path):
+
     """
-    Runs experiment with the given dataset
-    :param data: dictionary of validation and test data
-    :type data: dict
-    :param weak_signal_data: data representing the different views for the weak signals
-    :type: array
-    :param num_weak_signal: number of weak signals
-    :type num_weak_signal: int
-    :return: test accuracies of ALL and respective baselines
-    :rtype: dict
+    :param run: method that runs real experiment given data
+    :type: function
+    :return: none
+    :param data_and_weak_signal_data: tuple of data and weak signal data
+    :type: tuple
+    :param path: relative path to save the bounds experiment results
+    :type: string
     """
 
-    w_model = train_weak_signals(data, weak_signal_data, num_weak_signal)
+    # set up your variables
+    num_experiments = 10
 
     training_data = data['training_data'][0].T
     training_labels = data['training_data'][1]
@@ -236,3 +266,79 @@ def dependent_error_exp(data, weak_signal_data, num_weak_signal):
     output['AVG'] = b_test_accuracy[-1]
 
     return output
+    accuracy = {}
+    accuracy ['ALL'] = []
+    accuracy['GE'] = []
+    accuracy['BASELINE'] = []
+    accuracy ['WS'] = []
+
+    # all_accuracy = []
+    # baseline_accuracy = []
+    # ge_accuracy = []
+    # weak_signal_accuracy = []
+
+    for num_weak_signal in range(num_experiments):
+
+        # fix name later
+        new_num_weak_signal = num_weak_signal + 1
+
+        w_model = train_weak_signals(data, weak_signal_data, new_num_weak_signal)
+
+        training_data = data['training_data'][0].T
+        training_labels = data['training_data'][1]
+        val_data, val_labels = data['validation_data']
+        val_data = val_data.T
+        test_data = data['test_data'][0].T
+        test_labels = data['test_data'][1]
+
+        num_features, num_data_points = training_data.shape
+
+        weak_signal_ub = w_model['error_bounds']
+        weak_signal_probabilities = w_model['probabilities']
+        weak_test_accuracy = w_model['test_accuracy']
+
+        weights = np.zeros(num_features)
+
+        print("Running tests...")
+
+        optimized_weights, ineq_constraint = train_all(val_data, weights, weak_signal_probabilities, weak_signal_ub, max_iter=5000)
+
+        # calculate test probabilities
+        test_probabilities = probability(test_data, optimized_weights)
+        # calculate test accuracy
+        test_accuracy = getModelAccuracy(test_probabilities, test_labels)
+
+        print("")
+        print("+++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++")
+        print("Experiment %d"%new_num_weak_signal)
+        print("We trained %d learnable classifiers with %d weak signals" %(1, new_num_weak_signal))
+        print("The accuracy of the model on the test data is", test_accuracy)
+        print("The accuracy of weak signal(s) on the test data is", weak_test_accuracy)
+        print("")
+
+        # calculate ge criteria
+        print("Running tests on ge criteria...")
+        model = ge_criterion_train(val_data.T, val_labels, weak_signal_probabilities, new_num_weak_signal)
+        ge_test_accuracy = accuracy_score(test_labels, np.round(probability(test_data, model)))
+        print("The accuracy of ge criteria on test data is", ge_test_accuracy)
+        print("+++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++")
+
+        # calculate baseline
+        print("Running tests on the baselines...")
+        baselines = runBaselineTests(val_data, weak_signal_probabilities)
+        b_test_accuracy = getWeakSignalAccuracy(test_data, test_labels, baselines)
+        print("The accuracy of the baseline models on test data is", b_test_accuracy)
+        print("")
+
+        accuracy['ALL'].append(test_accuracy)
+        accuracy['GE'].append( w_model['test_accuracy'][-1])
+        accuracy['BASELINE'].append(ge_test_accuracy)
+        accuracy['WS'].append(b_test_accuracy[-1] )
+
+
+    print("Saving results to file...")
+    filename = path
+
+    with open(filename, 'w') as file:
+        json.dump(accuracy, file, indent=4, separators=(',', ':'))
+    file.close()
