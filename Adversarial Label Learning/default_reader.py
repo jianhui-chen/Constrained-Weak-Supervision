@@ -139,27 +139,6 @@ def cardio_load_and_process_data(path):
 
     return data_matrix, data_labels
 
-
-    # train_data, test_data, train_labels, test_labels = train_test_split(data_matrix, data_labels.astype('float'), test_size=0.3, shuffle=True, stratify=data_labels)
-
-    # #Normalize the features of the data
-    # scaler = preprocessing.StandardScaler().fit(train_data)
-    # train_data = scaler.transform(train_data)
-    # test_data = scaler.transform(test_data)
-
-    # assert train_labels.size == train_data.shape[0]
-    # assert test_labels.size == test_data.shape[0]
-
-    # data = {}
-
-    # val_data, weak_supervision_data, val_labels, weak_supervision_labels = train_test_split(train_data, train_labels.astype('float'), test_size=0.4285, shuffle=True, stratify=train_labels)
-
-    # data['training_data'] = weak_supervision_data, weak_supervision_labels
-    # data['validation_data'] = val_data, val_labels
-    # data['test_data'] = test_data, test_labels
-
-    # return data
-
 def obs_load_and_process_data(path):
 
     """Loads text classification data from `path`"""
@@ -186,59 +165,3 @@ def obs_load_and_process_data(path):
     return data_matrix, data_labels
 
 
-    # train_data, test_data, train_labels, test_labels = train_test_split(data_matrix, data_labels.astype('float'), test_size=0.3, shuffle=True, stratify=data_labels)
-
-    # #Normalize the features of the data
-    # scaler = preprocessing.StandardScaler().fit(train_data)
-    # train_data = scaler.transform(train_data)
-    # test_data = scaler.transform(test_data)
-
-    # assert train_labels.size == train_data.shape[0]
-    # assert test_labels.size == test_data.shape[0]
-
-    # data = {}
-
-    # val_data, weak_supervision_data, val_labels, weak_supervision_labels = train_test_split(train_data, train_labels.astype('float'), test_size=0.4285, shuffle=True, stratify=train_labels)
-
-    # data['training_data'] = weak_supervision_data, weak_supervision_labels
-    # data['validation_data'] = val_data, val_labels
-    # data['test_data'] = test_data, test_labels
-
-    # return data
-
-# def load_and_process_data(path, load_data):
-
-#     """
-#         Trains different views of weak signals
-
-#         :param path: location of 
-#         :type path: numpy.ndarray
-#         :param path: funtion that gets data from the path
-#         :type path: numpy.ndarray
-#     """
-
-
-#     data_matrix, data_labels = load_data(path)
-
-#     #Split the data into 70% training and 30% test set
-#     data_labels = data_matrix[:,-1:].ravel() 
-#     data_matrix = data_matrix[:,:-1]
-#     train_data, test_data, train_labels, test_labels = train_test_split(data_matrix, data_labels.astype('float'), test_size=0.3, shuffle=True, stratify=data_labels)
-
-#     #Normalize the features of the data
-#     scaler = preprocessing.StandardScaler().fit(train_data)
-#     train_data = scaler.transform(train_data)
-#     test_data = scaler.transform(test_data)
-
-#     assert train_labels.size == train_data.shape[0]
-#     assert test_labels.size == test_data.shape[0]
-
-#     data = {}
-
-#     val_data, weak_supervision_data, val_labels, weak_supervision_labels = train_test_split(train_data, train_labels.astype('float'), test_size=0.4285, shuffle=True, stratify=train_labels)
-
-#     data['training_data'] = weak_supervision_data, weak_supervision_labels
-#     data['validation_data'] = val_data, val_labels
-#     data['test_data'] = test_data, test_labels
-
-#     return data
