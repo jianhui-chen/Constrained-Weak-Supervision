@@ -86,9 +86,7 @@ class Data:
         self.dp = datapath
         self.sp = savepath
         self.data = self.__load_and_process_data(datapath, load_data)
-        # self.data = load_data(datapath)
         self.w_data = self.__get_weak_signals()
-        #self.num_sig = 0
     """
     def get_views(self):
         return self.v
