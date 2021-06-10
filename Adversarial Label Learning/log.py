@@ -28,8 +28,7 @@ class Logger(object):
         step : int
             training iteration
         """
-        with self.writer.as_default():
-            tf.summary.scalar(tag, value, step=step)
+        tf.summary.scalar(tag, value, step=step)
 
         self.writer.flush()
 

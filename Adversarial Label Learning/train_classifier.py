@@ -1,5 +1,6 @@
 import numpy as np
 from log import Logger
+#import tensorflow as tf
 
 def objective_function(y, learnable_probabilities, weak_signal_probabilities, weak_signal_ub, rho, gamma):
 	"""
@@ -155,8 +156,6 @@ def train_all(data, weights, weak_signal_probabilities, weak_signal_ub, max_iter
 	learnable_probabilities = probability(data, weights)
 	n = learnable_probabilities.size
 
-	# initialize logging object
-	logger = Logger('logs')
 
 	# initialize algorithm variables
 	y = 0.5 * np.ones(n)
@@ -165,58 +164,63 @@ def train_all(data, weights, weak_signal_probabilities, weak_signal_ub, max_iter
 	rho = 2.5
 	lr = 0.0001
 
-	t = 0
-	converged = False
-	while not converged and t < max_iter:
-		rate = 1 / (1 + t)
+	# testing logger code
+	#writer = tf.summary.create_file_writer("logs")
+	logger = Logger("logs")
+	with logger.writer.as_default():
+		t = 0
+		converged = False
+		while not converged and t < max_iter:
+			rate = 1 / (1 + t)
 
-		# update y
-		old_y = y
-		y_grad = y_gradient(y, learnable_probabilities, weak_signal_probabilities, weak_signal_ub, rho, gamma)
-		y = y + rate * y_grad
-		# projection step: clip y to [0, 1]
-		y = y.clip(min=0, max=1)
+			# update y
+			old_y = y
+			y_grad = y_gradient(y, learnable_probabilities, weak_signal_probabilities, weak_signal_ub, rho, gamma)
+			y = y + rate * y_grad
+			# projection step: clip y to [0, 1]
+			y = y.clip(min=0, max=1)
 
-		# compute gradient of probabilities
-		dl_dp = (1 / n) * (1 - 2 * old_y)
+			# compute gradient of probabilities
+			dl_dp = (1 / n) * (1 - 2 * old_y)
 
-		# update gamma
-		old_gamma = gamma
-		gamma_grad = gamma_gradient(old_y, weak_signal_probabilities, weak_signal_ub)
-		gamma = gamma - rho * gamma_grad
-		gamma = gamma.clip(max=0)
+			# update gamma
+			old_gamma = gamma
+			gamma_grad = gamma_gradient(old_y, weak_signal_probabilities, weak_signal_ub)
+			gamma = gamma - rho * gamma_grad
+			gamma = gamma.clip(max=0)
 
-		weights_gradient = []
-		# compute gradient of probabilities wrt weights
-		dp_dw = weight_gradient(data, weights)
-		# update weights
-		old_weights = weights.copy()
-		weights_gradient.append(dp_dw.dot(dl_dp))
+			weights_gradient = []
+			# compute gradient of probabilities wrt weights
+			dp_dw = weight_gradient(data, weights)
+			# update weights
+			old_weights = weights.copy()
+			weights_gradient.append(dp_dw.dot(dl_dp))
 
-		# update weights of the learnable functions
-		weights = weights - lr * np.array(weights_gradient)
-		conv_weights = np.linalg.norm(weights - old_weights)
-		conv_y = np.linalg.norm(y - old_y)
+			# update weights of the learnable functions
+			weights = weights - lr * np.array(weights_gradient)
+			conv_weights = np.linalg.norm(weights - old_weights)
+			conv_y = np.linalg.norm(y - old_y)
 
-		# check that inequality constraints are satisfied
-		ineq_constraint = gamma_gradient(y, weak_signal_probabilities, weak_signal_ub)
-		ineq_infeas = np.linalg.norm(ineq_constraint.clip(min=0))
+			# check that inequality constraints are satisfied
+			ineq_constraint = gamma_gradient(y, weak_signal_probabilities, weak_signal_ub)
+			ineq_infeas = np.linalg.norm(ineq_constraint.clip(min=0))
 
-		converged = np.isclose(0, conv_y, atol=1e-6) and np.isclose(0, ineq_infeas, atol=1e-6) and np.isclose(0, conv_weights, atol=1e-5)
+			converged = np.isclose(0, conv_y, atol=1e-6) and np.isclose(0, ineq_infeas, atol=1e-6) and np.isclose(0, conv_weights, atol=1e-5)
 
-		if t % 1000 == 0:
-			lagrangian_obj = objective_function(y, learnable_probabilities, weak_signal_probabilities, weak_signal_ub, rho, gamma) # might be slow
-			objective = np.dot(learnable_probabilities, 1 - y) + np.dot(1 - learnable_probabilities, y)
-			objective = np.sum(objective) / n
-			print("Iter %d. Weights Infeas: %f, Y_Infeas: %f, Ineq Infeas: %f, lagrangian: %f, obj: %f" % (t, np.sum(conv_weights), conv_y,
-												ineq_infeas, lagrangian_obj, objective))
-			logger.log_scalar("Objective", objective, t)
-			
+			if t % 1000 == 0:
+				lagrangian_obj = objective_function(y, learnable_probabilities, weak_signal_probabilities, weak_signal_ub, rho, gamma) # might be slow
+				objective = np.dot(learnable_probabilities, 1 - y) + np.dot(1 - learnable_probabilities, y)
+				objective = np.sum(objective) / n
+				print("Iter %d. Weights Infeas: %f, Y_Infeas: %f, Ineq Infeas: %f, lagrangian: %f, obj: %f" % (t, np.sum(conv_weights), conv_y,
+													ineq_infeas, lagrangian_obj, objective))
+				
+				logger.log_scalar("Objective", objective, t)
 
 
-		learnable_probabilities = probability(data, weights)
 
-		t += 1
+			learnable_probabilities = probability(data, weights)
+
+			t += 1
 
 	print("Inequality constraints", ineq_constraint)
 	print("Weak signal upper bounds: ", weak_signal_ub)
