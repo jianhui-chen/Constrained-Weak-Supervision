@@ -43,8 +43,6 @@ def run_tests():
     print("\n\n\n\n# # # # # # # # # # # # # # # # # # # # #")
     print("# Running obs network experiment...     #")
     print("# # # # # # # # # # # # # # # # # # # # #\n")
-    #obs_data = Obs()
-    #default_reader.run_experiment(run_experiment, saveToFile, obs_data)
 
     obs_data = Data( {0:1, 1:2, 2:20}, 'datasets/obs-network/obs_network.data', 'results/json/obs_network.json', data_readers.obs_load_and_process_data)
     w_models = obs_data.get_data(3)
@@ -59,8 +57,6 @@ def run_tests():
     print("\n\n\n\n# # # # # # # # # # # # # # # # # # # # #")
     print("# Running cardio experiment...          #")
     print("# # # # # # # # # # # # # # # # # # # # #\n")
-    # cardio_data = Cardio()
-    # data_readers.run_experiment(run_experiment, saveToFile, cardio_data)
 
     cardio_data = Data( {0:1, 1:2, 2:20}, 'datasets/cardiotocography/cardio.csv', 'results/json/cardio.json', data_readers.cardio_load_and_process_data)
     w_models = cardio_data.get_data(3)
