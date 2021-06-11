@@ -26,7 +26,7 @@ def run_experiment(data_obj, w_models, constant_bound=False):
 
     for num_weak_signals, w_model in enumerate(w_models, 1): #begins from 1
         # initializes logger
-        logger = Logger("logs/" + data_obj.n + "/" + str(num_weak_signals))
+        logger = Logger("logs/standard/" + data_obj.n + "/" + str(num_weak_signals))
 
 
         training_data = data['training_data'][0].T
@@ -110,7 +110,7 @@ def run_experiment(data_obj, w_models, constant_bound=False):
     return adversarial_models, weak_models
 
 
-def bound_experiment(data, weak_signal_data, path):
+def bound_experiment(data_obj, w_model):
     # """
     # Runs experiment with the given dataset
     # :param data: dictionary of validation and test data
@@ -134,6 +134,10 @@ def bound_experiment(data, weak_signal_data, path):
     :type: string
     """
 
+    data = data_obj.data
+    weak_signal_data = data_obj.w_data
+    path = data_obj.sp
+
     # set up your variables
     num_weak_signal = 3
     num_experiments = 100
@@ -148,8 +152,7 @@ def bound_experiment(data, weak_signal_data, path):
     bounds = np.linspace(0, 1, num_experiments)
 
     for i in range(num_experiments):
-
-        w_model = train_weak_signals(data, weak_signal_data, num_weak_signal)
+        logger = Logger("logs/bound/" + data_obj.n + "/" + str(i))
 
         training_data = data['training_data'][0].T
         training_labels = data['training_data'][1]
@@ -160,7 +163,6 @@ def bound_experiment(data, weak_signal_data, path):
 
         num_features, num_data_points = training_data.shape
 
-        optimized_weights, ineq_constraint = train_all(val_data, weights, weak_signal_probabilities, bound, logger, max_iter=10000)
         weak_signal_ub = w_model['error_bounds']
         weak_signal_probabilities = w_model['probabilities']
 
@@ -168,7 +170,7 @@ def bound_experiment(data, weak_signal_data, path):
 
         print("Running tests...")
 
-        optimized_weights, ineq_constraint = train_all(val_data, weights, weak_signal_probabilities, bounds[i], max_iter=10000)
+        optimized_weights, ineq_constraint = train_all(val_data, weights, weak_signal_probabilities, bounds[i], logger, max_iter=10000)
 
         # calculate test probabilities
         test_probabilities = probability(test_data, optimized_weights)
