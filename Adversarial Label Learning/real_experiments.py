@@ -200,7 +200,7 @@ def bound_experiment(data_obj, w_model):
     file.close()
 
 
-def dependent_error_exp(data, weak_signal_data, path):
+def dependent_error_exp(data_obj, w_models):
 
     """
     :param run: method that runs real experiment given data
@@ -212,62 +212,13 @@ def dependent_error_exp(data, weak_signal_data, path):
     :type: string
     """
 
+    data = data_obj.data
+    weak_signal_data = data_obj.w_data
+    path = data_obj.sp
+
     # set up your variables
-    num_experiments = 10
+    #num_experiments = 10
 
-    training_data = data['training_data'][0].T
-    training_labels = data['training_data'][1]
-    val_data, val_labels = data['validation_data']
-    val_data = val_data.T
-    test_data = data['test_data'][0].T
-    test_labels = data['test_data'][1]
-
-    num_features, num_data_points = training_data.shape
-
-    weak_signal_ub = w_model['error_bounds']
-    weak_signal_probabilities = w_model['probabilities']
-    weak_test_accuracy = w_model['test_accuracy']
-
-    weights = np.zeros(num_features)
-
-    print("Running tests...")
-
-    optimized_weights, ineq_constraint = train_all(val_data, weights, weak_signal_probabilities, weak_signal_ub, logger, max_iter=5000)
-
-    # calculate test probabilities
-    test_probabilities = probability(test_data, optimized_weights)
-    # calculate test accuracy
-    test_accuracy = getModelAccuracy(test_probabilities, test_labels)
-
-    print("")
-    print("+++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++")
-    print("Experiment %d"%num_weak_signal)
-    print("We trained %d learnable classifiers with %d weak signals" %(1, num_weak_signal))
-    print("The accuracy of the model on the test data is", test_accuracy)
-    print("The accuracy of weak signal(s) on the test data is", weak_test_accuracy)
-    print("")
-
-    # calculate ge criteria
-    print("Running tests on ge criteria...")
-    model = ge_criterion_train(val_data.T, val_labels, weak_signal_probabilities, num_weak_signal)
-    ge_test_accuracy = accuracy_score(test_labels, np.round(probability(test_data, model)))
-    print("The accuracy of ge criteria on test data is", ge_test_accuracy)
-    print("+++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++")
-
-    # calculate baseline
-    print("Running tests on the baselines...")
-    baselines = runBaselineTests(val_data, weak_signal_probabilities)
-    b_test_accuracy = getWeakSignalAccuracy(test_data, test_labels, baselines)
-    print("The accuracy of the baseline models on test data is", b_test_accuracy)
-    print("")
-
-    output = {}
-    output['ALL'] = test_accuracy
-    output['WS'] = w_model['test_accuracy'][-1]
-    output['GE'] = ge_test_accuracy
-    output['AVG'] = b_test_accuracy[-1]
-
-    return output
     accuracy = {}
     accuracy ['ALL'] = []
     accuracy['GE'] = []
@@ -279,12 +230,14 @@ def dependent_error_exp(data, weak_signal_data, path):
     # ge_accuracy = []
     # weak_signal_accuracy = []
 
-    for num_weak_signal in range(num_experiments):
+    for num_weak_signals, w_model in enumerate(w_models, 1):
+
+        logger = Logger("logs/error/" + data_obj.n + "/" + str(num_weak_signals))
 
         # fix name later
-        new_num_weak_signal = num_weak_signal + 1
+        #new_num_weak_signal = num_weak_signal + 1
 
-        w_model = train_weak_signals(data, weak_signal_data, new_num_weak_signal)
+        #w_model = train_weak_signals(data, weak_signal_data, new_num_weak_signal)
 
         training_data = data['training_data'][0].T
         training_labels = data['training_data'][1]
@@ -303,7 +256,7 @@ def dependent_error_exp(data, weak_signal_data, path):
 
         print("Running tests...")
 
-        optimized_weights, ineq_constraint = train_all(val_data, weights, weak_signal_probabilities, weak_signal_ub, max_iter=5000)
+        optimized_weights, ineq_constraint = train_all(val_data, weights, weak_signal_probabilities, weak_signal_ub, logger, max_iter=5000)
 
         # calculate test probabilities
         test_probabilities = probability(test_data, optimized_weights)
@@ -312,15 +265,15 @@ def dependent_error_exp(data, weak_signal_data, path):
 
         print("")
         print("+++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++")
-        print("Experiment %d"%new_num_weak_signal)
-        print("We trained %d learnable classifiers with %d weak signals" %(1, new_num_weak_signal))
+        print("Experiment %d"%num_weak_signals)
+        print("We trained %d learnable classifiers with %d weak signals" %(1, num_weak_signals))
         print("The accuracy of the model on the test data is", test_accuracy)
         print("The accuracy of weak signal(s) on the test data is", weak_test_accuracy)
         print("")
 
         # calculate ge criteria
         print("Running tests on ge criteria...")
-        model = ge_criterion_train(val_data.T, val_labels, weak_signal_probabilities, new_num_weak_signal)
+        model = ge_criterion_train(val_data.T, val_labels, weak_signal_probabilities, num_weak_signals)
         ge_test_accuracy = accuracy_score(test_labels, np.round(probability(test_data, model)))
         print("The accuracy of ge criteria on test data is", ge_test_accuracy)
         print("+++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++")

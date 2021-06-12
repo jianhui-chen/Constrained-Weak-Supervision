@@ -109,14 +109,16 @@ def run_dep_err_experiment():
     views       = [1, 18, 18, 18, 18, 18, 18, 18, 18, 18]
     cardio_data = Data("Cardio", views, 'datasets/cardiotocography/cardio.csv', 'results/json/cardio_error.json', data_readers.cardio_load_and_process_data)
 
-    dependent_error_exp(cardio_data.data, cardio_data.w_data, cardio_data.sp)
+    w_models = cardio_data.get_data(1, 10)
+
+    dependent_error_exp(cardio_data, w_models)
 
 
 if __name__ == '__main__':
     #run_tests()
 
     # # un-comment to run bounds experimrnt in the paper
-    run_bounds_experiment()
+    #run_bounds_experiment()
 
     # # un-comment to run dependency error experiment in the paper
-    # run_dep_err_experiment()
+    run_dep_err_experiment()
