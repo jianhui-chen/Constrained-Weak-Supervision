@@ -4,70 +4,13 @@ from ge_criterion_baseline import *
 from utilities import saveToFile, runBaselineTests, getModelAccuracy, getWeakSignalAccuracy
 from sklearn.linear_model import LogisticRegression
 from sklearn.metrics import accuracy_score
+from log import Logger
 import json
 
 
-def train_weak_signals(data, weak_signal_data, num_weak_signal):
-    """
-    Trains different views of weak signals
-    :param data: dictionary of training and test data
-    :type data: dict
-    :param weak_signal_data: data representing the different views for the weak signals
-    :type: array
-    :param num_weak_signal: number of weak_signals
-    type: in
-    :return: dictionary containing of models, probabilities and error bounds of weak signals
-    :rtype: dict
-    """
-
-    train_data, train_labels = data['training_data']
-    val_data, val_labels = data['validation_data']
-    test_data, test_labels = data['test_data']
-
-    n, d = train_data.shape
-
-    weak_signal_train_data = weak_signal_data[0]
-    weak_signal_val_data = weak_signal_data[1]
-    weak_signal_test_data = weak_signal_data[2]
-
-    weak_signals = []
-    stats = np.zeros(num_weak_signal)
-    w_sig_probabilities = []
-    w_sig_test_accuracies = []
-    weak_val_accuracy = []
 
 
-    for i in range(num_weak_signal):
-        # fit model
-        model = LogisticRegression(solver = "lbfgs", max_iter= 1000)
-        model.fit(weak_signal_train_data[i], train_labels)
-        weak_signals.append(model)
-
-        # evaluate probability of P(X=1)
-        probability = model.predict_proba(weak_signal_val_data[i])[:, 1]
-        score = val_labels * (1 - probability) + (1 - val_labels) * probability
-        stats[i] = np.sum(score) / score.size
-        w_sig_probabilities.append(probability)
-
-        # evaluate accuracy for validation data
-        weak_val_accuracy.append(accuracy_score(val_labels, np.round(probability)))
-
-        # evaluate accuracy for test data
-        test_predictions = model.predict(weak_signal_test_data[i])
-        w_sig_test_accuracies.append(accuracy_score(test_labels, test_predictions))
-
-
-    model = {}
-    model['models'] = weak_signals
-    model['probabilities'] = np.array(w_sig_probabilities)
-    model['error_bounds'] = stats
-    model['validation_accuracy'] = weak_val_accuracy
-    model['test_accuracy'] = w_sig_test_accuracies
-
-    return model
-
-
-def run_experiment(data, w_models, constant_bound=False):
+def run_experiment(data_obj, w_models, constant_bound=False):
     """
     Runs experiment with the given dataset
     :param data: dictionary of validation and test data
@@ -79,7 +22,12 @@ def run_experiment(data, w_models, constant_bound=False):
     adversarial_models = []
     weak_models = []
 
+    data = data_obj.data
+
     for num_weak_signals, w_model in enumerate(w_models, 1): #begins from 1
+        # initializes logger
+        logger = Logger("logs/standard/" + data_obj.n + "/" + str(num_weak_signals))
+
 
         training_data = data['training_data'][0].T
         training_labels = data['training_data'][1]
@@ -99,9 +47,9 @@ def run_experiment(data, w_models, constant_bound=False):
 
         print("Running tests...")
         if constant_bound:
-            optimized_weights, y = train_all(val_data, weights, weak_signal_probabilities, np.zeros(weak_signal_ub.size) + 0.3, max_iter=10000)
+            optimized_weights, y = train_all(val_data, weights, weak_signal_probabilities, np.zeros(weak_signal_ub.size) + 0.3, logger, max_iter=10000)
         else:
-            optimized_weights, y = train_all(val_data, weights, weak_signal_probabilities, weak_signal_ub, max_iter=10000)
+            optimized_weights, y = train_all(val_data, weights, weak_signal_probabilities, weak_signal_ub, logger, max_iter=10000)
 
         # calculate validation results
         learned_probabilities = probability(val_data, optimized_weights)
@@ -162,7 +110,7 @@ def run_experiment(data, w_models, constant_bound=False):
     return adversarial_models, weak_models
 
 
-def bound_experiment(data, weak_signal_data, path):
+def bound_experiment(data_obj, w_model):
     # """
     # Runs experiment with the given dataset
     # :param data: dictionary of validation and test data
@@ -186,6 +134,10 @@ def bound_experiment(data, weak_signal_data, path):
     :type: string
     """
 
+    data = data_obj.data
+    weak_signal_data = data_obj.w_data
+    path = data_obj.sp
+
     # set up your variables
     num_weak_signal = 3
     num_experiments = 100
@@ -200,8 +152,7 @@ def bound_experiment(data, weak_signal_data, path):
     bounds = np.linspace(0, 1, num_experiments)
 
     for i in range(num_experiments):
-
-        w_model = train_weak_signals(data, weak_signal_data, num_weak_signal)
+        logger = Logger("logs/bound/" + data_obj.n + "/" + str(i))
 
         training_data = data['training_data'][0].T
         training_labels = data['training_data'][1]
@@ -219,7 +170,7 @@ def bound_experiment(data, weak_signal_data, path):
 
         print("Running tests...")
 
-        optimized_weights, ineq_constraint = train_all(val_data, weights, weak_signal_probabilities, bounds[i], max_iter=10000)
+        optimized_weights, ineq_constraint = train_all(val_data, weights, weak_signal_probabilities, bounds[i], logger, max_iter=10000)
 
         # calculate test probabilities
         test_probabilities = probability(test_data, optimized_weights)
@@ -249,7 +200,7 @@ def bound_experiment(data, weak_signal_data, path):
     file.close()
 
 
-def dependent_error_exp(data, weak_signal_data, path):
+def dependent_error_exp(data_obj, w_models):
 
     """
     :param run: method that runs real experiment given data
@@ -261,8 +212,12 @@ def dependent_error_exp(data, weak_signal_data, path):
     :type: string
     """
 
+    data = data_obj.data
+    weak_signal_data = data_obj.w_data
+    path = data_obj.sp
+
     # set up your variables
-    num_experiments = 10
+    #num_experiments = 10
 
     accuracy = {}
     accuracy ['ALL'] = []
@@ -275,12 +230,14 @@ def dependent_error_exp(data, weak_signal_data, path):
     # ge_accuracy = []
     # weak_signal_accuracy = []
 
-    for num_weak_signal in range(num_experiments):
+    for num_weak_signals, w_model in enumerate(w_models, 1):
+
+        logger = Logger("logs/error/" + data_obj.n + "/" + str(num_weak_signals))
 
         # fix name later
-        new_num_weak_signal = num_weak_signal + 1
+        #new_num_weak_signal = num_weak_signal + 1
 
-        w_model = train_weak_signals(data, weak_signal_data, new_num_weak_signal)
+        #w_model = train_weak_signals(data, weak_signal_data, new_num_weak_signal)
 
         training_data = data['training_data'][0].T
         training_labels = data['training_data'][1]
@@ -299,7 +256,7 @@ def dependent_error_exp(data, weak_signal_data, path):
 
         print("Running tests...")
 
-        optimized_weights, ineq_constraint = train_all(val_data, weights, weak_signal_probabilities, weak_signal_ub, max_iter=5000)
+        optimized_weights, ineq_constraint = train_all(val_data, weights, weak_signal_probabilities, weak_signal_ub, logger, max_iter=5000)
 
         # calculate test probabilities
         test_probabilities = probability(test_data, optimized_weights)
@@ -308,15 +265,15 @@ def dependent_error_exp(data, weak_signal_data, path):
 
         print("")
         print("+++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++")
-        print("Experiment %d"%new_num_weak_signal)
-        print("We trained %d learnable classifiers with %d weak signals" %(1, new_num_weak_signal))
+        print("Experiment %d"%num_weak_signals)
+        print("We trained %d learnable classifiers with %d weak signals" %(1, num_weak_signals))
         print("The accuracy of the model on the test data is", test_accuracy)
         print("The accuracy of weak signal(s) on the test data is", weak_test_accuracy)
         print("")
 
         # calculate ge criteria
         print("Running tests on ge criteria...")
-        model = ge_criterion_train(val_data.T, val_labels, weak_signal_probabilities, new_num_weak_signal)
+        model = ge_criterion_train(val_data.T, val_labels, weak_signal_probabilities, num_weak_signals)
         ge_test_accuracy = accuracy_score(test_labels, np.round(probability(test_data, model)))
         print("The accuracy of ge criteria on test data is", ge_test_accuracy)
         print("+++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++")
