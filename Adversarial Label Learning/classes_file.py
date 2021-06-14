@@ -149,9 +149,6 @@ class Data:
     def get_data(self, min_weak_signals, total_weak_signals):
        
         w_models = []
-        #self.num_sig = total_weak_signals
-        # the above line makes it so that when you access it within the function, it will always be the max
-        # in this case, the max is 3
 
         for num_weak_signals in range(min_weak_signals, total_weak_signals + 1):
             w_models.append(self.__train_weak_signals(num_weak_signals))
