@@ -118,7 +118,7 @@ if __name__ == '__main__':
     run_tests()
 
     # # un-comment to run bounds experimrnt in the paper
-    #run_bounds_experiment()
+    # run_bounds_experiment()
 
     # # un-comment to run dependency error experiment in the paper
-    #run_dep_err_experiment()
+    # run_dep_err_experiment()
