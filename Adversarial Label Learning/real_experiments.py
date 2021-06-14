@@ -1,8 +1,7 @@
 import numpy as np
 from train_classifier import *
 from ge_criterion_baseline import *
-from utilities import saveToFile, runBaselineTests, getModelAccuracy, getWeakSignalAccuracy
-from sklearn.linear_model import LogisticRegression
+from utilities import runBaselineTests, getModelAccuracy, getWeakSignalAccuracy
 from sklearn.metrics import accuracy_score
 from log import Logger
 import json

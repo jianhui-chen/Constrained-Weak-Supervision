@@ -1,7 +1,6 @@
 import numpy as np
 from train_classifier import logistic
 from scipy.optimize import minimize, check_grad
-from sklearn.metrics import accuracy_score
 
 def compute_reference_distribution(labels, weak_signal):
 	"""
