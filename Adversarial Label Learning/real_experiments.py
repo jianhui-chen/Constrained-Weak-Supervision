@@ -134,7 +134,6 @@ def bound_experiment(data_obj, w_model):
     """
 
     data = data_obj.data
-    weak_signal_data = data_obj.w_data
     path = data_obj.sp
 
     # set up your variables
@@ -212,7 +211,6 @@ def dependent_error_exp(data_obj, w_models):
     """
 
     data = data_obj.data
-    weak_signal_data = data_obj.w_data
     path = data_obj.sp
 
     # set up your variables
@@ -233,10 +231,7 @@ def dependent_error_exp(data_obj, w_models):
 
         logger = Logger("logs/error/" + data_obj.n + "/" + str(num_weak_signals))
 
-        # fix name later
-        #new_num_weak_signal = num_weak_signal + 1
 
-        #w_model = train_weak_signals(data, weak_signal_data, new_num_weak_signal)
 
         training_data = data['training_data'][0].T
         training_labels = data['training_data'][1]
