@@ -17,8 +17,13 @@ def breast_cancer_load_and_process_data(path):
     df.drop([0], axis=1, inplace=True)
     #replace labels 'B' with 0 and 'M' with 1
     df[1] = df[1].replace({'B': 0, 'M': 1})
-    data_matrix = df.values
-    # look into using df.to_numpy instead !!!!!!!
+    #Convert to array
+    data_matrix = df.to_numpy()
+
+    print("\n\n\n\n")
+    print(data_matrix )
+    print("\n\n\n\n")
+
 
     #Seperate Data and labels 
     data_labels = data_matrix[:, :1].ravel() 
@@ -38,7 +43,8 @@ def cardio_load_and_process_data(path):
 
     #replace labels '1' with 0 and '2' with 1
     df['CLASS'] = df['CLASS'].replace({1: 0, 2: 1})
-    data_matrix = df.values
+    #Convert to array
+    data_matrix = df.to_numpy()
 
     #Seperate Data and labels 
     data_labels = data_matrix[:,-1:].ravel() 
@@ -63,7 +69,9 @@ def obs_load_and_process_data(path):
 
     #replace labels "'NB-No Block'" with 0 and 'NB-Wait' with 1
     df[21] = df[21].replace({"'NB-No Block'": 0, 'NB-Wait': 1})
-    data_matrix = df.values
+
+    #Convert to array
+    data_matrix = df.to_numpy()
 
     #Seperate Data and labels 
     data_labels = data_matrix[:,-1:].ravel() 
