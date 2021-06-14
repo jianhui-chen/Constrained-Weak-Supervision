@@ -20,11 +20,6 @@ def breast_cancer_load_and_process_data(path):
     #Convert to array
     data_matrix = df.to_numpy()
 
-    print("\n\n\n\n")
-    print(data_matrix )
-    print("\n\n\n\n")
-
-
     #Seperate Data and labels 
     data_labels = data_matrix[:, :1].ravel() 
     data_matrix = data_matrix[:, 1:]
