@@ -7,8 +7,6 @@ def run_tests():
     Runs experiment.
     :return: None
     """
-
-    total_weak_signals = 3
  
     # # # # # # # # # # # #
     # breast cancer       #
@@ -21,9 +19,6 @@ def run_tests():
     bc_data = Data("Breast Cancer", [0, 10, 20], 'datasets/breast-cancer/wdbc.data', 'results/json/breast_cancer.json', breast_cancer_load_and_process_data)
     w_models = bc_data.get_data(1, 3)
     adversarial_models, weak_models = run_experiment(bc_data, w_models)
-
-    # currently does not save files
-
     
     # # # # # # # # # # # # #
     # # obs network         #
