@@ -48,10 +48,6 @@ class Data:
 
         return data
 
-        # data = load_data(datapath)
-
-        # return data
-
     def __get_weak_signals(self):
         """ private method """
 
