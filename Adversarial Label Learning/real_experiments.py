@@ -106,6 +106,15 @@ def run_experiment(data_obj, w_models, constant_bound=False):
         adversarial_models.append(adversarial_model)
         weak_models.append(weak_model)
 
+        # # write out accuracies 
+        # with logger.writer.as_default():
+        #     logger.log_accuracy(num_weak_signals, adversarial_model, weak_models)
+    
+    accuracy_logger = Logger("logs/standard/" + data_obj.n + "/accuracy")
+
+    with accuracy_logger.writer.as_default():
+        accuracy_logger.log_accuracy(3, adversarial_models, weak_models)
+
     return adversarial_models, weak_models
 
 
@@ -283,6 +292,7 @@ def dependent_error_exp(data_obj, w_models):
         accuracy['GE'].append( w_model['test_accuracy'][-1])
         accuracy['BASELINE'].append(ge_test_accuracy)
         accuracy['WS'].append(b_test_accuracy[-1] )
+    
 
 
     print("Saving results to file...")
