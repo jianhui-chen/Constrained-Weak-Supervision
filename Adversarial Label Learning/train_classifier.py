@@ -163,9 +163,6 @@ def train_all(data, weights, weak_signal_probabilities, weak_signal_ub, logger, 
 	one_vec = np.ones(n)
 	rho = 2.5
 	lr = 0.0001
-
-	# testing logger code
-	#writer = tf.summary.create_file_writer("logs")
 	
 	with logger.writer.as_default():
 		t = 0
@@ -216,10 +213,10 @@ def train_all(data, weights, weak_signal_probabilities, weak_signal_ub, logger, 
 				
 				logger.log_scalar("Objective", objective, t)
 				logger.log_scalar("lagrangian", lagrangian_obj, t)
-				logger.log_scalar("Y_Infeas", conv_y, t)
-				logger.log_scalar("Weights Infeas", np.sum(conv_weights), t)
+				logger.log_scalar("Change in y", conv_y, t)
+				logger.log_scalar("Change in Weights", conv_weights, t)
 
-                # So small, does not even register 
+                # So small, does not even register????
 				logger.log_scalar("Ineq Infeas", ineq_infeas, t)
 
 
