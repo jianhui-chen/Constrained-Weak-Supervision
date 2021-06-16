@@ -105,8 +105,6 @@ def run_experiment(data_obj, w_models, constant_bound=False):
         adversarial_models.append(adversarial_model)
         weak_models.append(weak_model)
 
-
-    #ATTEMPT #2
     log_accuracy(data_obj, 3, adversarial_models, weak_models)
 
     

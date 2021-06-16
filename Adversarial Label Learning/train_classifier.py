@@ -215,6 +215,12 @@ def train_all(data, weights, weak_signal_probabilities, weak_signal_ub, logger, 
 													ineq_infeas, lagrangian_obj, objective))
 				
 				logger.log_scalar("Objective", objective, t)
+				logger.log_scalar("lagrangian", lagrangian_obj, t)
+				logger.log_scalar("Y_Infeas", conv_y, t)
+				logger.log_scalar("Weights Infeas", np.sum(conv_weights), t)
+
+                # So small, does not even register 
+				logger.log_scalar("Ineq Infeas", ineq_infeas, t)
 
 
 
