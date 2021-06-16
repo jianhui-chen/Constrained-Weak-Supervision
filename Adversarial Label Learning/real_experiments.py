@@ -7,6 +7,31 @@ from log import Logger
 import json
 
 
+def log_accuracy_test(data_obj, num_weak_signals, adversarial_models, weak_models):
+
+
+    # Init loggers 
+    learned_logger = Logger("logs/standard/" + data_obj.n + "/learned_model")
+    weak_logger = Logger("logs/standard/" + data_obj.n + "/weak_signal(s)")
+    Basline_logger = Logger("logs/standard/" + data_obj.n + "/baseline_models")
+    ge_logger = Logger("logs/standard/" + data_obj.n + "/ge_criteria")
+     
+
+    for x in range(0, num_weak_signals):
+
+        with learned_logger.writer.as_default():
+            learned_logger.log_accuracy_2(adversarial_models[x]['validation_accuracy'], adversarial_models[x]['test_accuracy'], x)
+        
+
+        with weak_logger.writer.as_default():
+            weak_logger.log_accuracy_2(weak_models[x]['validation_accuracy'][x], weak_models[x]['test_accuracy'][x], x)
+        
+        with Basline_logger.writer.as_default():
+            Basline_logger.log_accuracy_2(weak_models[x]['baseline_val_accuracy'][0], weak_models[x]['baseline_test_accuracy'][0], x)
+
+        with ge_logger.writer.as_default():
+            ge_logger.log_accuracy_2(weak_models[x]['gecriteria_val_accuracy'], weak_models[x]['gecriteria_test_accuracy'], x)
+
 
 
 def run_experiment(data_obj, w_models, constant_bound=False):
@@ -106,14 +131,16 @@ def run_experiment(data_obj, w_models, constant_bound=False):
         adversarial_models.append(adversarial_model)
         weak_models.append(weak_model)
 
-        # # write out accuracies 
-        # with logger.writer.as_default():
-        #     logger.log_accuracy(num_weak_signals, adversarial_model, weak_models)
-    
-    accuracy_logger = Logger("logs/standard/" + data_obj.n + "/accuracy")
 
-    with accuracy_logger.writer.as_default():
-        accuracy_logger.log_accuracy(3, adversarial_models, weak_models)
+    # ATTEMPT #1
+    # accuracy_logger = Logger("logs/standard/" + data_obj.n + "/accuracy")
+    # with accuracy_logger.writer.as_default():
+    #     accuracy_logger.log_accuracy(3, adversarial_models, weak_models)
+
+    #ATTEMPT #2
+    log_accuracy_test(data_obj, 3, adversarial_models, weak_models)
+
+    
 
     return adversarial_models, weak_models
 
