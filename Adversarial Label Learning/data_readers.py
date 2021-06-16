@@ -24,6 +24,8 @@ def breast_cancer_load_and_process_data(path):
     data_labels = data_matrix[:, :1].ravel() 
     data_matrix = data_matrix[:, 1:]
 
+    
+
     return data_matrix, data_labels
 
 
