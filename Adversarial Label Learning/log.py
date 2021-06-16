@@ -39,32 +39,39 @@ class Logger(object):
         """
 
 
-    
-    def log_accuracy(self, num_weak_signals, adversarial_models, weak_models):
-
-        for x in range(0, num_weak_signals):
-
-            # Adversarial Label Learning
-            tf.summary.scalar("Accuracy of learned model on the validatiion data", adversarial_models[x]['validation_accuracy'], step=x)
-            tf.summary.scalar("Accuracy of learned model on the test data", adversarial_models[x]['test_accuracy'], step=x)
-            tf.summary.scalar("Accuracy of weak signal(s) on the validation data", weak_models[x]['validation_accuracy'][x], step=x)
-            tf.summary.scalar("Accuracy of accuracy of weak signal(s) on the test data", weak_models[x]['test_accuracy'][x], step=x)
-
-            # baseline 
-            tf.summary.scalar("Accuracy of the baseline models on the validation data", weak_models[x]['baseline_val_accuracy'][0], step=x)
-            tf.summary.scalar("Accuracy of the baseline models on the test data", weak_models[x]['baseline_test_accuracy'][0], step=x)
-
-            # GE criteria
-            tf.summary.scalar("Accuracy of ge criteria on the validtion data", weak_models[x]['gecriteria_val_accuracy'], step=x)
-            tf.summary.scalar("Accuracy of ge criteria on the test data", weak_models[x]['gecriteria_test_accuracy'], step=x)
-            self.writer.flush()
-
-       
-
-    def log_accuracy_2(self, to_map_val , to_map_test, step):
+def log_accuracy(data_obj, num_weak_signals, adversarial_models, weak_models):
 
 
-        # Adversarial Label Learning
-        tf.summary.scalar("Accuracy of on validation data", to_map_val, step=step)
-        tf.summary.scalar("Accuracy of on test data", to_map_test, step=step)
-        self.writer.flush()
+    # Init loggers 
+    learned_logger = Logger("logs/standard/" + data_obj.n + "/learned_model")
+    weak_logger = Logger("logs/standard/" + data_obj.n + "/weak_signal(s)")
+    Basline_logger = Logger("logs/standard/" + data_obj.n + "/baseline_models")
+    ge_logger = Logger("logs/standard/" + data_obj.n + "/ge_criteria")
+     
+
+    for x in range(0, num_weak_signals):
+
+        with learned_logger.writer.as_default():
+            learned_logger.log_scalar("Accuracy of on validation data", adversarial_models[x]['validation_accuracy'], x)
+            learned_logger.log_scalar("Accuracy of on test data", adversarial_models[x]['test_accuracy'], x)
+        
+
+        with weak_logger.writer.as_default():
+            weak_logger.log_scalar("Accuracy of on validation data", weak_models[x]['validation_accuracy'][x], x)
+            weak_logger.log_scalar("Accuracy of on test data", weak_models[x]['test_accuracy'][x], x)
+        
+        with Basline_logger.writer.as_default():
+            Basline_logger.log_scalar("Accuracy of on validation data", weak_models[x]['baseline_val_accuracy'][0], x)
+            Basline_logger.log_scalar("Accuracy of on test data", weak_models[x]['baseline_test_accuracy'][0], x)
+
+        with ge_logger.writer.as_default():
+            ge_logger.log_scalar("Accuracy of on validation data", weak_models[x]['gecriteria_val_accuracy'], x)
+            ge_logger.log_scalar("Accuracy of on test data",  weak_models[x]['gecriteria_test_accuracy'], x)       
+
+# def log_accuracy(self, to_map_val , to_map_test, step):
+
+
+#     # Adversarial Label Learning
+#     tf.summary.scalar("Accuracy of on validation data", to_map_val, step=step)
+#     tf.summary.scalar("Accuracy of on test data", to_map_test, step=step)
+#     self.writer.flush()
