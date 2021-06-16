@@ -1,6 +1,7 @@
 from real_experiments import run_experiment, bound_experiment, dependent_error_exp
 from data_readers import *
 from classes_file import Data
+from weak_signals import *
 
 def run_tests():
     """
@@ -17,7 +18,7 @@ def run_tests():
     print("# Running breast cancer experiment...   #")
     print("# # # # # # # # # # # # # # # # # # # # #\n")
     bc_data = Data("Breast Cancer", [0, 10, 20], 'datasets/breast-cancer/wdbc.data', 'results/json/breast_cancer.json', breast_cancer_load_and_process_data)
-    w_models = bc_data.get_data(1, 3)
+    w_models = get_w_models(bc_data, 1, 3)
     adversarial_models, weak_models = run_experiment(bc_data, w_models)
     
     # # # # # # # # # # # # #
@@ -30,7 +31,7 @@ def run_tests():
     print("# # # # # # # # # # # # # # # # # # # # #\n")
 
     obs_data = Data("OBS", [1, 2, 20], 'datasets/obs-network/obs_network.data', 'results/json/obs_network.json', obs_load_and_process_data)
-    w_models = obs_data.get_data(1, 3)
+    w_models = get_w_models(obs_data, 1, 3)
     adversarial_models, weak_models = run_experiment(obs_data, w_models)
 
 
@@ -44,7 +45,7 @@ def run_tests():
     print("# # # # # # # # # # # # # # # # # # # # #\n")
 
     cardio_data = Data("Cardio", [1, 10, 18], 'datasets/cardiotocography/cardio.csv', 'results/json/cardio.json', cardio_load_and_process_data)
-    w_models = cardio_data.get_data(1, 3)
+    w_models = get_w_models(cardio_data, 1, 3)
     adversarial_models, weak_models = run_experiment(cardio_data, w_models)
     
 
@@ -63,7 +64,7 @@ def run_bounds_experiment():
     print("\n\nRunning bounds on breast cancer experiment...")
 
     bc_data  = Data("Breast Cancer", [0, 10, 20], 'datasets/breast-cancer/wdbc.data', 'results/json/bc_bounds.json', breast_cancer_load_and_process_data)
-    w_models = bc_data.get_data(3, 3)
+    w_models = get_w_models(bc_data, 3, 3)
 
     bound_experiment(bc_data, w_models[0])
 
@@ -77,7 +78,7 @@ def run_bounds_experiment():
     print("\n\nRunning bounds on obs network experiment...")
 
     obs_data = Data("OBS", [1, 2, 20], 'datasets/obs-network/obs_network.data', 'results/json/obs_bounds.json', obs_load_and_process_data)
-    w_models = obs_data.get_data(3, 3)
+    w_models = get_w_models(obs_data, 3, 3)
 
     bound_experiment(obs_data, w_models[0])
 
@@ -96,7 +97,7 @@ def run_dep_err_experiment():
     views       = [1, 18, 18, 18, 18, 18, 18, 18, 18, 18]
     cardio_data = Data("Cardio", views, 'datasets/cardiotocography/cardio.csv', 'results/json/cardio_error.json', cardio_load_and_process_data)
 
-    w_models = cardio_data.get_data(1, 10)
+    w_models = get_w_models(cardio_data, 1, 10)
 
     dependent_error_exp(cardio_data, w_models)
 
