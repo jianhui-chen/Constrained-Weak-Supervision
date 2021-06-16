@@ -3,9 +3,8 @@ from train_classifier import *
 from ge_criterion_baseline import *
 from utilities import runBaselineTests, getModelAccuracy, getWeakSignalAccuracy
 from sklearn.metrics import accuracy_score
-from log import Logger
+from log import Logger, log_accuracy
 import json
-
 
 
 
@@ -105,6 +104,10 @@ def run_experiment(data_obj, w_models, constant_bound=False):
 
         adversarial_models.append(adversarial_model)
         weak_models.append(weak_model)
+
+    log_accuracy(data_obj, 3, adversarial_models, weak_models)
+
+    
 
     return adversarial_models, weak_models
 
@@ -283,6 +286,7 @@ def dependent_error_exp(data_obj, w_models):
         accuracy['GE'].append( w_model['test_accuracy'][-1])
         accuracy['BASELINE'].append(ge_test_accuracy)
         accuracy['WS'].append(b_test_accuracy[-1] )
+    
 
 
     print("Saving results to file...")
