@@ -105,11 +105,20 @@ def run_experiment(data_obj, w_models, constant_bound=False):
         adversarial_models.append(adversarial_model)
         weak_models.append(weak_model)
 
-    log_accuracy(data_obj, 3, adversarial_models, weak_models)
+        val_accuracy = [adversarial_model['validation_accuracy'], weak_model['validation_accuracy'][num_weak_signals - 1], weak_model['baseline_val_accuracy'][0], weak_model['gecriteria_val_accuracy']]
+        log_accuracy(logger, val_accuracy, 'Accuracy on Validation Data')
 
-    
+        test_accuracy = [adversarial_model['test_accuracy'], weak_model['test_accuracy'][num_weak_signals - 1], weak_model['baseline_test_accuracy'][0], weak_model['gecriteria_test_accuracy']]
+        log_accuracy(logger, test_accuracy, 'Accuracy on Testing Data')
+
+    # Old code
+    # log_accuracy(data_obj, 3, adversarial_models, weak_models)
 
     return adversarial_models, weak_models
+
+
+
+
 
 
 def bound_experiment(data_obj, w_model):

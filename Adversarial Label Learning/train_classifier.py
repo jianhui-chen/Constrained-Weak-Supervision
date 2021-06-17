@@ -208,8 +208,8 @@ def train_all(data, weights, weak_signal_probabilities, weak_signal_ub, logger, 
 				lagrangian_obj = objective_function(y, learnable_probabilities, weak_signal_probabilities, weak_signal_ub, rho, gamma) # might be slow
 				objective = np.dot(learnable_probabilities, 1 - y) + np.dot(1 - learnable_probabilities, y)
 				objective = np.sum(objective) / n
-				print("Iter %d. Weights Infeas: %f, Y_Infeas: %f, Ineq Infeas: %f, lagrangian: %f, obj: %f" % (t, np.sum(conv_weights), conv_y,
-													ineq_infeas, lagrangian_obj, objective))
+				# print("Iter %d. Weights Infeas: %f, Y_Infeas: %f, Ineq Infeas: %f, lagrangian: %f, obj: %f" % (t, np.sum(conv_weights), conv_y,
+				# 									ineq_infeas, lagrangian_obj, objective))
 				
 				logger.log_scalar("Objective", objective, t)
 				logger.log_scalar("lagrangian", lagrangian_obj, t)
@@ -224,8 +224,5 @@ def train_all(data, weights, weak_signal_probabilities, weak_signal_ub, logger, 
 			learnable_probabilities = probability(data, weights)
 
 			t += 1
-
-	print("Inequality constraints", ineq_constraint)
-	print("Weak signal upper bounds: ", weak_signal_ub)
 
 	return weights, ineq_constraint
