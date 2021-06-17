@@ -9,6 +9,10 @@ import tensorflow as tf
 #from tensorflow.compat.v1 import summary
 #from tensorflow.compat.v1 import Summary
 import numpy as np
+import matplotlib.pyplot as plt
+from PIL import Image
+
+
 
 
 class Logger(object):
@@ -39,39 +43,30 @@ class Logger(object):
         """
 
 
-def log_accuracy(data_obj, num_weak_signals, adversarial_models, weak_models):
+def log_accuracy(logger, values, title):
+
+    # Prepare the plot
+    fig = plt.figure()
+    ax = fig.add_subplot(111)
+    ax.set_title(title)
+    methods = ['ALL', 'Baseline', 'GE Criteria', 'Weak Signal']
+
+    # add labels on graph 
+    for i, v in enumerate(values):
+        ax.text(i - 0.25, v + 0.01, str(round(v, 5)), color='seagreen', fontweight='bold')
+    ax.bar(methods,values)
+
+    # set y demensions of plots
+    min_value = min(values)
+    plt.ylim([min_value - 0.1, 1])
+
+    plt.savefig("./logs/standard/plot.png", format='png')
+
+    with logger.writer.as_default():
+        image = tf.io.read_file("./logs/standard/plot.png")
+        image = tf.image.decode_png(image, channels=4)
+        summary_op = tf.summary.image(title, [image], step=0)
+        logger.writer.flush()
 
 
-    # Init loggers 
-    learned_logger = Logger("logs/standard/" + data_obj.n + "/learned_model")
-    weak_logger = Logger("logs/standard/" + data_obj.n + "/weak_signal(s)")
-    Basline_logger = Logger("logs/standard/" + data_obj.n + "/baseline_models")
-    ge_logger = Logger("logs/standard/" + data_obj.n + "/ge_criteria")
-     
 
-    for x in range(0, num_weak_signals):
-
-        with learned_logger.writer.as_default():
-            learned_logger.log_scalar("Accuracy of on validation data", adversarial_models[x]['validation_accuracy'], x)
-            learned_logger.log_scalar("Accuracy of on test data", adversarial_models[x]['test_accuracy'], x)
-        
-
-        with weak_logger.writer.as_default():
-            weak_logger.log_scalar("Accuracy of on validation data", weak_models[x]['validation_accuracy'][x], x)
-            weak_logger.log_scalar("Accuracy of on test data", weak_models[x]['test_accuracy'][x], x)
-        
-        with Basline_logger.writer.as_default():
-            Basline_logger.log_scalar("Accuracy of on validation data", weak_models[x]['baseline_val_accuracy'][0], x)
-            Basline_logger.log_scalar("Accuracy of on test data", weak_models[x]['baseline_test_accuracy'][0], x)
-
-        with ge_logger.writer.as_default():
-            ge_logger.log_scalar("Accuracy of on validation data", weak_models[x]['gecriteria_val_accuracy'], x)
-            ge_logger.log_scalar("Accuracy of on test data",  weak_models[x]['gecriteria_test_accuracy'], x)       
-
-# def log_accuracy(self, to_map_val , to_map_test, step):
-
-
-#     # Adversarial Label Learning
-#     tf.summary.scalar("Accuracy of on validation data", to_map_val, step=step)
-#     tf.summary.scalar("Accuracy of on test data", to_map_test, step=step)
-#     self.writer.flush()
