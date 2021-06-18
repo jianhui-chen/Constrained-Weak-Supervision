@@ -8,12 +8,12 @@ import json
 
 
 
-def run_experiment(data_obj, w_models, constant_bound=False):
+def run_experiment(data_obj, w_data_dicts, constant_bound=False):
     """
     Runs experiment with the given dataset
     :param data: dictionary of validation and test data
     :type data: dict
-    :param w_models: 
+    :param w_data_dicts: 
     :type: 
     """
 
@@ -22,7 +22,7 @@ def run_experiment(data_obj, w_models, constant_bound=False):
 
     data = data_obj.data
 
-    for num_weak_signals, w_model in enumerate(w_models, 1): #begins from 1
+    for num_weak_signals, w_data_dict in enumerate(w_data_dicts, 1): #begins from 1
         # initializes logger
         logger = Logger("logs/standard/" + data_obj.n + "/" + str(num_weak_signals))
 
@@ -36,10 +36,10 @@ def run_experiment(data_obj, w_models, constant_bound=False):
 
         num_features, num_data_points = training_data.shape
 
-        weak_signal_ub = w_model['error_bounds']
-        # weak_signal_ub = np.ones(w_model['error_bounds'].shape) * 0.3
-        models = w_model['models']
-        weak_signal_probabilities = w_model['probabilities']
+        weak_signal_ub = w_data_dict['error_bounds']
+        # weak_signal_ub = np.ones(w_data_dict['error_bounds'].shape) * 0.3
+        models = w_data_dict['models']
+        weak_signal_probabilities = w_data_dict['probabilities']
 
         weights = np.zeros(num_features)
 
@@ -58,8 +58,8 @@ def run_experiment(data_obj, w_models, constant_bound=False):
         test_accuracy = getModelAccuracy(learned_probabilities, test_labels)
 
         # calculate weak signal results
-        weak_val_accuracy = w_model['validation_accuracy']
-        weak_test_accuracy = w_model['test_accuracy']
+        weak_val_accuracy = w_data_dict['validation_accuracy']
+        weak_test_accuracy = w_data_dict['test_accuracy']
 
         adversarial_model = {}
         adversarial_model['validation_accuracy'] = validation_accuracy
@@ -121,7 +121,7 @@ def run_experiment(data_obj, w_models, constant_bound=False):
 
 
 
-def bound_experiment(data_obj, w_model):
+def bound_experiment(data_obj, w_data_dict):
     # """
     # Runs experiment with the given dataset
     # :param data: dictionary of validation and test data
@@ -173,8 +173,8 @@ def bound_experiment(data_obj, w_model):
 
         num_features, num_data_points = training_data.shape
 
-        weak_signal_ub = w_model['error_bounds']
-        weak_signal_probabilities = w_model['probabilities']
+        weak_signal_ub = w_data_dict['error_bounds']
+        weak_signal_probabilities = w_data_dict['probabilities']
 
         weights = np.zeros(num_features)
 
@@ -192,7 +192,7 @@ def bound_experiment(data_obj, w_model):
         print("")
         print("+++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++")
         print("The error_bound of learned model on the weak signal is", weak_signal_ub)
-        print("The test accuracy of the weak signal is", w_model['test_accuracy'])
+        print("The test accuracy of the weak signal is", w_data_dict['test_accuracy'])
         print("The error_bound of learned model on the test data is", error_bound[0])
         print("The accuracy of the model on the test data is", test_accuracy)
 
@@ -201,7 +201,7 @@ def bound_experiment(data_obj, w_model):
         results['Accuracy'].append(test_accuracy)
         results['Ineq constraint'].append(ineq_constraint[0])
         results['Weak_signal_ub'].append(weak_signal_ub[0])
-        results['Weak_test_accuracy'].append(w_model['test_accuracy'][0])
+        results['Weak_test_accuracy'].append(w_data_dict['test_accuracy'][0])
 
     print("Saving results to file...")
 
@@ -210,7 +210,7 @@ def bound_experiment(data_obj, w_model):
     file.close()
 
 
-def dependent_error_exp(data_obj, w_models):
+def dependent_error_exp(data_obj, w_data_dicts):
 
     """
     :param run: method that runs real experiment given data
@@ -239,7 +239,7 @@ def dependent_error_exp(data_obj, w_models):
     # ge_accuracy = []
     # weak_signal_accuracy = []
 
-    for num_weak_signals, w_model in enumerate(w_models, 1):
+    for num_weak_signals, w_data_dict in enumerate(w_data_dicts, 1):
 
         logger = Logger("logs/error/" + data_obj.n + "/" + str(num_weak_signals))
 
@@ -254,9 +254,9 @@ def dependent_error_exp(data_obj, w_models):
 
         num_features, num_data_points = training_data.shape
 
-        weak_signal_ub = w_model['error_bounds']
-        weak_signal_probabilities = w_model['probabilities']
-        weak_test_accuracy = w_model['test_accuracy']
+        weak_signal_ub = w_data_dict['error_bounds']
+        weak_signal_probabilities = w_data_dict['probabilities']
+        weak_test_accuracy = w_data_dict['test_accuracy']
 
         weights = np.zeros(num_features)
 
@@ -292,7 +292,7 @@ def dependent_error_exp(data_obj, w_models):
         print("")
 
         accuracy['ALL'].append(test_accuracy)
-        accuracy['GE'].append( w_model['test_accuracy'][-1])
+        accuracy['GE'].append( w_data_dict['test_accuracy'][-1])
         accuracy['BASELINE'].append(ge_test_accuracy)
         accuracy['WS'].append(b_test_accuracy[-1] )
     
