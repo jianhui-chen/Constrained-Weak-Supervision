@@ -54,7 +54,7 @@ def log_accuracy(logger, values, title):
     # add labels on graph 
     for i, v in enumerate(values):
         ax.text(i - 0.25, v + 0.01, str(round(v, 5)), color='seagreen', fontweight='bold')
-    ax.bar(methods,values)
+    ax.bar(methods,values, color=['black', 'red', 'green', 'blue'])
 
     # set y demensions of plots
     min_value = min(values)
