@@ -89,6 +89,8 @@ def train_weak_signals(data_obj, num_weak_signals):
     w_data_dict['models'] = weak_signals
     w_data_dict['probabilities'] = np.array(w_sig_probabilities)
     w_data_dict['error_bounds'] = stats
+
+    # This is later used for comparison, so we don't have to calculate again
     w_data_dict['validation_accuracy'] = weak_val_accuracy
     w_data_dict['test_accuracy'] = w_sig_test_accuracies
 

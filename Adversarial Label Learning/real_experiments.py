@@ -17,8 +17,8 @@ def run_experiment(data_obj, w_data_dicts, constant_bound=False):
     :type: 
     """
 
-    adversarial_data_dicts = []
-    weak_models = []
+    adversarial_acc_dicts = []
+    w_acc_dicts = []
 
     data = data_obj.data
 
@@ -63,14 +63,14 @@ def run_experiment(data_obj, w_data_dicts, constant_bound=False):
         weak_val_accuracy = w_data_dict['validation_accuracy']
         weak_test_accuracy = w_data_dict['test_accuracy']
 
-        adversarial_data_dict = {}
-        adversarial_data_dict['validation_accuracy'] = validation_accuracy
-        adversarial_data_dict['test_accuracy'] = test_accuracy
+        adversarial_acc_dict = {}
+        adversarial_acc_dict['validation_accuracy'] = validation_accuracy
+        adversarial_acc_dict['test_accuracy'] = test_accuracy
 
-        weak_model = {}
-        weak_model['num_weak_signals'] = num_weak_signals
-        weak_model['validation_accuracy'] = weak_val_accuracy
-        weak_model['test_accuracy'] = weak_test_accuracy
+        w_acc_dict = {}
+        w_acc_dict['num_weak_signals'] = num_weak_signals
+        w_acc_dict['validation_accuracy'] = weak_val_accuracy
+        w_acc_dict['test_accuracy'] = weak_test_accuracy
 
         print("")
         print("+++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++")
@@ -89,8 +89,8 @@ def run_experiment(data_obj, w_data_dicts, constant_bound=False):
         b_test_accuracy = getWeakSignalAccuracy(test_data, test_labels, baselines)
         print("The accuracy of the baseline models on test data is", b_test_accuracy)
         print("")
-        weak_model['baseline_val_accuracy'] = b_validation_accuracy
-        weak_model['baseline_test_accuracy'] = b_test_accuracy
+        w_acc_dict['baseline_val_accuracy'] = b_validation_accuracy
+        w_acc_dict['baseline_test_accuracy'] = b_test_accuracy
         print("+++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++")
 
         # calculate ge criteria
@@ -100,23 +100,23 @@ def run_experiment(data_obj, w_data_dicts, constant_bound=False):
         ge_test_accuracy = accuracy_score(test_labels, np.round(probability(test_data, model)))
         print("The accuracy of ge criteria on validation data is", ge_validation_accuracy)
         print("The accuracy of ge criteria on test data is", ge_test_accuracy)
-        weak_model['gecriteria_val_accuracy'] = ge_validation_accuracy
-        weak_model['gecriteria_test_accuracy'] = ge_test_accuracy
+        w_acc_dict['gecriteria_val_accuracy'] = ge_validation_accuracy
+        w_acc_dict['gecriteria_test_accuracy'] = ge_test_accuracy
         print("+++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++")
 
-        adversarial_data_dicts.append(adversarial_data_dict)
-        weak_models.append(weak_model)
+        adversarial_acc_dicts.append(adversarial_acc_dict)
+        w_acc_dicts.append(w_acc_dict)
 
-        val_accuracy = [adversarial_data_dict['validation_accuracy'], weak_model['validation_accuracy'][num_weak_signals - 1], weak_model['baseline_val_accuracy'][0], weak_model['gecriteria_val_accuracy']]
+        val_accuracy = [adversarial_acc_dict['validation_accuracy'], w_acc_dict['validation_accuracy'][num_weak_signals - 1], w_acc_dict['baseline_val_accuracy'][0], w_acc_dict['gecriteria_val_accuracy']]
         log_accuracy(logger, val_accuracy, 'Accuracy on Validation Data')
 
-        test_accuracy = [adversarial_data_dict['test_accuracy'], weak_model['test_accuracy'][num_weak_signals - 1], weak_model['baseline_test_accuracy'][0], weak_model['gecriteria_test_accuracy']]
+        test_accuracy = [adversarial_acc_dict['test_accuracy'], w_acc_dict['test_accuracy'][num_weak_signals - 1], w_acc_dict['baseline_test_accuracy'][0], w_acc_dict['gecriteria_test_accuracy']]
         log_accuracy(logger, test_accuracy, 'Accuracy on Testing Data')
 
     # Old code
-    # log_accuracy(data_obj, 3, adversarial_data_dicts, weak_models)
+    # log_accuracy(data_obj, 3, adversarial_acc_dicts, w_acc_dicts)
 
-    return adversarial_data_dicts, weak_models
+    return adversarial_acc_dicts, w_acc_dicts
 
 
 

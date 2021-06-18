@@ -19,7 +19,7 @@ def run_tests():
     print("# # # # # # # # # # # # # # # # # # # # #\n")
     bc_data = Data("Breast Cancer", [0, 10, 20], 'datasets/breast-cancer/wdbc.data', 'results/json/breast_cancer.json', breast_cancer_load_and_process_data)
     w_data_dicts = get_w_data_dicts(bc_data, 1, 3)
-    adversarial_data_dicts, weak_models = run_experiment(bc_data, w_data_dicts)
+    adversarial_acc_dicts, w_acc_dicts = run_experiment(bc_data, w_data_dicts)
     
     # # # # # # # # # # # # #
     # # obs network         #
@@ -32,7 +32,7 @@ def run_tests():
 
     obs_data = Data("OBS", [1, 2, 20], 'datasets/obs-network/obs_network.data', 'results/json/obs_network.json', obs_load_and_process_data)
     w_data_dicts = get_w_data_dicts(obs_data, 1, 3)
-    adversarial_data_dicts, weak_models = run_experiment(obs_data, w_data_dicts)
+    adversarial_acc_dicts, w_acc_dicts = run_experiment(obs_data, w_data_dicts)
 
 
     # # # # # # # # # # # #
@@ -46,7 +46,7 @@ def run_tests():
 
     cardio_data = Data("Cardio", [1, 10, 18], 'datasets/cardiotocography/cardio.csv', 'results/json/cardio.json', cardio_load_and_process_data)
     w_data_dicts = get_w_data_dicts(cardio_data, 1, 3)
-    adversarial_data_dicts, weak_models = run_experiment(cardio_data, w_data_dicts)
+    adversarial_acc_dicts, w_acc_dicts = run_experiment(cardio_data, w_data_dicts)
     
 
 def run_bounds_experiment():
