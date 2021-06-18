@@ -206,12 +206,12 @@ def train_all(data, weights, weak_signal_probabilities, weak_signal_ub, logger, 
 
 			if t % 1000 == 0:
 				lagrangian_obj = objective_function(y, learnable_probabilities, weak_signal_probabilities, weak_signal_ub, rho, gamma) # might be slow
-				objective = np.dot(learnable_probabilities, 1 - y) + np.dot(1 - learnable_probabilities, y)
-				objective = np.sum(objective) / n
+				primal_objective = np.dot(learnable_probabilities, 1 - y) + np.dot(1 - learnable_probabilities, y)
+				primal_objective = np.sum(primal_objective) / n
 				# print("Iter %d. Weights Infeas: %f, Y_Infeas: %f, Ineq Infeas: %f, lagrangian: %f, obj: %f" % (t, np.sum(conv_weights), conv_y,
-				# 									ineq_infeas, lagrangian_obj, objective))
+				# 									ineq_infeas, lagrangian_obj, primal_objective))
 				
-				logger.log_scalar("Objective", objective, t)
+				logger.log_scalar("Primal Objective", primal_objective, t)
 				logger.log_scalar("lagrangian", lagrangian_obj, t)
 				logger.log_scalar("Change in y", conv_y, t)
 				logger.log_scalar("Change in Weights", conv_weights, t)

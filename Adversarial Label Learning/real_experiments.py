@@ -8,21 +8,21 @@ import json
 
 
 
-def run_experiment(data_obj, w_models, constant_bound=False):
+def run_experiment(data_obj, w_data_dicts, constant_bound=False):
     """
     Runs experiment with the given dataset
     :param data: dictionary of validation and test data
     :type data: dict
-    :param w_models: 
+    :param w_data_dicts: 
     :type: 
     """
 
-    adversarial_models = []
-    weak_models = []
+    adversarial_acc_dicts = []
+    w_acc_dicts = []
 
     data = data_obj.data
 
-    for num_weak_signals, w_model in enumerate(w_models, 1): #begins from 1
+    for num_weak_signals, w_data_dict in enumerate(w_data_dicts, 1): #begins from 1
         # initializes logger
         logger = Logger("logs/standard/" + data_obj.n + "/" + str(num_weak_signals))
 
@@ -36,10 +36,12 @@ def run_experiment(data_obj, w_models, constant_bound=False):
 
         num_features, num_data_points = training_data.shape
 
-        weak_signal_ub = w_model['error_bounds']
-        # weak_signal_ub = np.ones(w_model['error_bounds'].shape) * 0.3
-        models = w_model['models']
-        weak_signal_probabilities = w_model['probabilities']
+        weak_signal_ub = w_data_dict['error_bounds']
+        # weak_signal_ub = np.ones(w_data_dict['error_bounds'].shape) * 0.3
+        
+        # Following line doesn't seem to be used anywhere?
+        #models = w_data_dict['models']
+        weak_signal_probabilities = w_data_dict['probabilities']
 
         weights = np.zeros(num_features)
 
@@ -58,17 +60,17 @@ def run_experiment(data_obj, w_models, constant_bound=False):
         test_accuracy = getModelAccuracy(learned_probabilities, test_labels)
 
         # calculate weak signal results
-        weak_val_accuracy = w_model['validation_accuracy']
-        weak_test_accuracy = w_model['test_accuracy']
+        weak_val_accuracy = w_data_dict['validation_accuracy']
+        weak_test_accuracy = w_data_dict['test_accuracy']
 
-        adversarial_model = {}
-        adversarial_model['validation_accuracy'] = validation_accuracy
-        adversarial_model['test_accuracy'] = test_accuracy
+        adversarial_acc_dict = {}
+        adversarial_acc_dict['validation_accuracy'] = validation_accuracy
+        adversarial_acc_dict['test_accuracy'] = test_accuracy
 
-        weak_model = {}
-        weak_model['num_weak_signals'] = num_weak_signals
-        weak_model['validation_accuracy'] = weak_val_accuracy
-        weak_model['test_accuracy'] = weak_test_accuracy
+        w_acc_dict = {}
+        w_acc_dict['num_weak_signals'] = num_weak_signals
+        w_acc_dict['validation_accuracy'] = weak_val_accuracy
+        w_acc_dict['test_accuracy'] = weak_test_accuracy
 
         print("")
         print("+++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++")
@@ -87,8 +89,8 @@ def run_experiment(data_obj, w_models, constant_bound=False):
         b_test_accuracy = getWeakSignalAccuracy(test_data, test_labels, baselines)
         print("The accuracy of the baseline models on test data is", b_test_accuracy)
         print("")
-        weak_model['baseline_val_accuracy'] = b_validation_accuracy
-        weak_model['baseline_test_accuracy'] = b_test_accuracy
+        w_acc_dict['baseline_val_accuracy'] = b_validation_accuracy
+        w_acc_dict['baseline_test_accuracy'] = b_test_accuracy
         print("+++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++")
 
         # calculate ge criteria
@@ -98,30 +100,30 @@ def run_experiment(data_obj, w_models, constant_bound=False):
         ge_test_accuracy = accuracy_score(test_labels, np.round(probability(test_data, model)))
         print("The accuracy of ge criteria on validation data is", ge_validation_accuracy)
         print("The accuracy of ge criteria on test data is", ge_test_accuracy)
-        weak_model['gecriteria_val_accuracy'] = ge_validation_accuracy
-        weak_model['gecriteria_test_accuracy'] = ge_test_accuracy
+        w_acc_dict['gecriteria_val_accuracy'] = ge_validation_accuracy
+        w_acc_dict['gecriteria_test_accuracy'] = ge_test_accuracy
         print("+++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++")
 
-        adversarial_models.append(adversarial_model)
-        weak_models.append(weak_model)
+        adversarial_acc_dicts.append(adversarial_acc_dict)
+        w_acc_dicts.append(w_acc_dict)
 
-        val_accuracy = [adversarial_model['validation_accuracy'], weak_model['validation_accuracy'][num_weak_signals - 1], weak_model['baseline_val_accuracy'][0], weak_model['gecriteria_val_accuracy']]
+        val_accuracy = [adversarial_acc_dict['validation_accuracy'], w_acc_dict['validation_accuracy'][num_weak_signals - 1], w_acc_dict['baseline_val_accuracy'][0], w_acc_dict['gecriteria_val_accuracy']]
         log_accuracy(logger, val_accuracy, 'Accuracy on Validation Data')
 
-        test_accuracy = [adversarial_model['test_accuracy'], weak_model['test_accuracy'][num_weak_signals - 1], weak_model['baseline_test_accuracy'][0], weak_model['gecriteria_test_accuracy']]
+        test_accuracy = [adversarial_acc_dict['test_accuracy'], w_acc_dict['test_accuracy'][num_weak_signals - 1], w_acc_dict['baseline_test_accuracy'][0], w_acc_dict['gecriteria_test_accuracy']]
         log_accuracy(logger, test_accuracy, 'Accuracy on Testing Data')
 
     # Old code
-    # log_accuracy(data_obj, 3, adversarial_models, weak_models)
+    # log_accuracy(data_obj, 3, adversarial_acc_dicts, w_acc_dicts)
 
-    return adversarial_models, weak_models
-
-
+    return adversarial_acc_dicts, w_acc_dicts
 
 
 
 
-def bound_experiment(data_obj, w_model):
+
+
+def bound_experiment(data_obj, w_data_dict):
     # """
     # Runs experiment with the given dataset
     # :param data: dictionary of validation and test data
@@ -173,8 +175,8 @@ def bound_experiment(data_obj, w_model):
 
         num_features, num_data_points = training_data.shape
 
-        weak_signal_ub = w_model['error_bounds']
-        weak_signal_probabilities = w_model['probabilities']
+        weak_signal_ub = w_data_dict['error_bounds']
+        weak_signal_probabilities = w_data_dict['probabilities']
 
         weights = np.zeros(num_features)
 
@@ -192,7 +194,7 @@ def bound_experiment(data_obj, w_model):
         print("")
         print("+++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++")
         print("The error_bound of learned model on the weak signal is", weak_signal_ub)
-        print("The test accuracy of the weak signal is", w_model['test_accuracy'])
+        print("The test accuracy of the weak signal is", w_data_dict['test_accuracy'])
         print("The error_bound of learned model on the test data is", error_bound[0])
         print("The accuracy of the model on the test data is", test_accuracy)
 
@@ -201,7 +203,7 @@ def bound_experiment(data_obj, w_model):
         results['Accuracy'].append(test_accuracy)
         results['Ineq constraint'].append(ineq_constraint[0])
         results['Weak_signal_ub'].append(weak_signal_ub[0])
-        results['Weak_test_accuracy'].append(w_model['test_accuracy'][0])
+        results['Weak_test_accuracy'].append(w_data_dict['test_accuracy'][0])
 
     print("Saving results to file...")
 
@@ -210,7 +212,7 @@ def bound_experiment(data_obj, w_model):
     file.close()
 
 
-def dependent_error_exp(data_obj, w_models):
+def dependent_error_exp(data_obj, w_data_dicts):
 
     """
     :param run: method that runs real experiment given data
@@ -239,7 +241,7 @@ def dependent_error_exp(data_obj, w_models):
     # ge_accuracy = []
     # weak_signal_accuracy = []
 
-    for num_weak_signals, w_model in enumerate(w_models, 1):
+    for num_weak_signals, w_data_dict in enumerate(w_data_dicts, 1):
 
         logger = Logger("logs/error/" + data_obj.n + "/" + str(num_weak_signals))
 
@@ -254,9 +256,9 @@ def dependent_error_exp(data_obj, w_models):
 
         num_features, num_data_points = training_data.shape
 
-        weak_signal_ub = w_model['error_bounds']
-        weak_signal_probabilities = w_model['probabilities']
-        weak_test_accuracy = w_model['test_accuracy']
+        weak_signal_ub = w_data_dict['error_bounds']
+        weak_signal_probabilities = w_data_dict['probabilities']
+        weak_test_accuracy = w_data_dict['test_accuracy']
 
         weights = np.zeros(num_features)
 
@@ -279,8 +281,8 @@ def dependent_error_exp(data_obj, w_models):
 
         # calculate ge criteria
         print("Running tests on ge criteria...")
-        model = ge_criterion_train(val_data.T, val_labels, weak_signal_probabilities, num_weak_signals)
-        ge_test_accuracy = accuracy_score(test_labels, np.round(probability(test_data, model)))
+        ge_results = ge_criterion_train(val_data.T, val_labels, weak_signal_probabilities, num_weak_signals)
+        ge_test_accuracy = accuracy_score(test_labels, np.round(probability(test_data, ge_results)))
         print("The accuracy of ge criteria on test data is", ge_test_accuracy)
         print("+++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++")
 
@@ -292,7 +294,7 @@ def dependent_error_exp(data_obj, w_models):
         print("")
 
         accuracy['ALL'].append(test_accuracy)
-        accuracy['GE'].append( w_model['test_accuracy'][-1])
+        accuracy['GE'].append( w_data_dict['test_accuracy'][-1])
         accuracy['BASELINE'].append(ge_test_accuracy)
         accuracy['WS'].append(b_test_accuracy[-1] )
     
