@@ -17,7 +17,7 @@ def run_experiment(data_obj, w_data_dicts, constant_bound=False):
     :type: 
     """
 
-    adversarial_models = []
+    adversarial_data_dicts = []
     weak_models = []
 
     data = data_obj.data
@@ -38,7 +38,9 @@ def run_experiment(data_obj, w_data_dicts, constant_bound=False):
 
         weak_signal_ub = w_data_dict['error_bounds']
         # weak_signal_ub = np.ones(w_data_dict['error_bounds'].shape) * 0.3
-        models = w_data_dict['models']
+        
+        # Following line doesn't seem to be used anywhere?
+        #models = w_data_dict['models']
         weak_signal_probabilities = w_data_dict['probabilities']
 
         weights = np.zeros(num_features)
@@ -61,9 +63,9 @@ def run_experiment(data_obj, w_data_dicts, constant_bound=False):
         weak_val_accuracy = w_data_dict['validation_accuracy']
         weak_test_accuracy = w_data_dict['test_accuracy']
 
-        adversarial_model = {}
-        adversarial_model['validation_accuracy'] = validation_accuracy
-        adversarial_model['test_accuracy'] = test_accuracy
+        adversarial_data_dict = {}
+        adversarial_data_dict['validation_accuracy'] = validation_accuracy
+        adversarial_data_dict['test_accuracy'] = test_accuracy
 
         weak_model = {}
         weak_model['num_weak_signals'] = num_weak_signals
@@ -102,19 +104,19 @@ def run_experiment(data_obj, w_data_dicts, constant_bound=False):
         weak_model['gecriteria_test_accuracy'] = ge_test_accuracy
         print("+++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++")
 
-        adversarial_models.append(adversarial_model)
+        adversarial_data_dicts.append(adversarial_data_dict)
         weak_models.append(weak_model)
 
-        val_accuracy = [adversarial_model['validation_accuracy'], weak_model['validation_accuracy'][num_weak_signals - 1], weak_model['baseline_val_accuracy'][0], weak_model['gecriteria_val_accuracy']]
+        val_accuracy = [adversarial_data_dict['validation_accuracy'], weak_model['validation_accuracy'][num_weak_signals - 1], weak_model['baseline_val_accuracy'][0], weak_model['gecriteria_val_accuracy']]
         log_accuracy(logger, val_accuracy, 'Accuracy on Validation Data')
 
-        test_accuracy = [adversarial_model['test_accuracy'], weak_model['test_accuracy'][num_weak_signals - 1], weak_model['baseline_test_accuracy'][0], weak_model['gecriteria_test_accuracy']]
+        test_accuracy = [adversarial_data_dict['test_accuracy'], weak_model['test_accuracy'][num_weak_signals - 1], weak_model['baseline_test_accuracy'][0], weak_model['gecriteria_test_accuracy']]
         log_accuracy(logger, test_accuracy, 'Accuracy on Testing Data')
 
     # Old code
-    # log_accuracy(data_obj, 3, adversarial_models, weak_models)
+    # log_accuracy(data_obj, 3, adversarial_data_dicts, weak_models)
 
-    return adversarial_models, weak_models
+    return adversarial_data_dicts, weak_models
 
 
 
