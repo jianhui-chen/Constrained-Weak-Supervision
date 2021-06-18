@@ -28,22 +28,22 @@ class Data:
         data_matrix, data_labels = load_data(datapath)
 
         #Split the data into 70% training and 30% test set
-        train_data, test_data, train_labels, test_labels = train_test_split(data_matrix, data_labels.astype('float'), test_size=0.3, shuffle=True, stratify=data_labels)
+        train_dev_data, test_data, train_dev_labels, test_labels = train_test_split(data_matrix, data_labels.astype('float'), test_size=0.3, shuffle=True, stratify=data_labels)
 
         #Normalize the features of the data
-        scaler = preprocessing.StandardScaler().fit(train_data)
-        train_data = scaler.transform(train_data)
+        scaler = preprocessing.StandardScaler().fit(train_dev_data)
+        train_dev_data = scaler.transform(train_dev_data)
         test_data = scaler.transform(test_data)
 
-        assert train_labels.size == train_data.shape[0]
+        assert train_dev_labels.size == train_dev_data.shape[0]
         assert test_labels.size == test_data.shape[0]
 
         data = {}
 
         #Split the remaining data into 57.15% training and 42.85% test set
-        val_data, weak_supervision_data, val_labels, weak_supervision_labels = train_test_split(train_data, train_labels.astype('float'), test_size=0.4285, shuffle=True, stratify=train_labels)
+        val_data, weak_supervision_data, val_labels, weak_supervision_labels = train_test_split(train_dev_data, train_dev_labels.astype('float'), test_size=0.4285, shuffle=True, stratify=train_dev_labels)
 
-        data['training_data'] = weak_supervision_data, weak_supervision_labels
+        data['dev_data'] = weak_supervision_data, weak_supervision_labels
         data['validation_data'] = val_data, val_labels
         data['test_data'] = test_data, test_labels
 

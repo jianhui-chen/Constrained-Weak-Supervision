@@ -27,14 +27,14 @@ def run_experiment(data_obj, w_data_dicts, constant_bound=False):
         logger = Logger("logs/standard/" + data_obj.n + "/" + str(num_weak_signals))
 
 
-        training_data = data['training_data'][0].T
-        training_labels = data['training_data'][1]
+        dev_data = data['dev_data'][0].T
+        training_labels = data['dev_data'][1]
         val_data, val_labels = data['validation_data']
         val_data = val_data.T
         test_data = data['test_data'][0].T
         test_labels = data['test_data'][1]
 
-        num_features, num_data_points = training_data.shape
+        num_features, num_data_points = dev_data.shape
 
         weak_signal_ub = w_data_dict['error_bounds']
         # weak_signal_ub = np.ones(w_data_dict['error_bounds'].shape) * 0.3
@@ -166,14 +166,14 @@ def bound_experiment(data_obj, w_data_dict):
     for i in range(num_experiments):
         logger = Logger("logs/bound/" + data_obj.n + "/" + str(i))
 
-        training_data = data['training_data'][0].T
-        training_labels = data['training_data'][1]
+        dev_data = data['dev_data'][0].T
+        training_labels = data['dev_data'][1]
         val_data, val_labels = data['validation_data']
         val_data = val_data.T
         test_data = data['test_data'][0].T
         test_labels = data['test_data'][1]
 
-        num_features, num_data_points = training_data.shape
+        num_features, num_data_points = dev_data.shape
 
         weak_signal_ub = w_data_dict['error_bounds']
         weak_signal_probabilities = w_data_dict['probabilities']
@@ -247,14 +247,14 @@ def dependent_error_exp(data_obj, w_data_dicts):
 
 
 
-        training_data = data['training_data'][0].T
-        training_labels = data['training_data'][1]
+        dev_data = data['dev_data'][0].T
+        training_labels = data['dev_data'][1]
         val_data, val_labels = data['validation_data']
         val_data = val_data.T
         test_data = data['test_data'][0].T
         test_labels = data['test_data'][1]
 
-        num_features, num_data_points = training_data.shape
+        num_features, num_data_points = dev_data.shape
 
         weak_signal_ub = w_data_dict['error_bounds']
         weak_signal_probabilities = w_data_dict['probabilities']

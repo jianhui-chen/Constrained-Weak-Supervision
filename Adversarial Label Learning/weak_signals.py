@@ -13,22 +13,22 @@ def get_weak_signals(data_obj):
     data = data_obj.data
 
     # code to get weak signals –– create_weak_signals_view
-    train_data, train_labels = data['training_data']
+    dev_data, dev_labels = data['dev_data']
     val_data, val_labels = data['validation_data']
     test_data, test_labels = data['test_data']
 
-    weak_signal_train_data = []
+    weak_signal_dev_data = []
     weak_signal_val_data = []
     weak_signal_test_data = []
 
     for i in range(len(data_obj.v)):
         f = data_obj.v[i]
 
-        weak_signal_train_data.append(train_data[:, f:f+1])
+        weak_signal_dev_data.append(dev_data[:, f:f+1])
         weak_signal_val_data.append(val_data[:, f:f+1])
         weak_signal_test_data.append(test_data[:, f:f+1])
 
-    weak_signal_data = [weak_signal_train_data, weak_signal_val_data, weak_signal_test_data]
+    weak_signal_data = [weak_signal_dev_data, weak_signal_val_data, weak_signal_test_data]
 
     return weak_signal_data
 
@@ -46,15 +46,15 @@ def train_weak_signals(data_obj, num_weak_signals):
     :rtype: dict
     """
 
-    train_data, train_labels = data_obj.data['training_data']
+    dev_data, dev_labels = data_obj.data['dev_data']
     val_data, val_labels = data_obj.data['validation_data']
     test_data, test_labels = data_obj.data['test_data']
 
-    n, d = train_data.shape
+    n, d = dev_data.shape
 
     w_data = get_weak_signals(data_obj)
 
-    weak_signal_train_data = w_data[0]
+    weak_signal_dev_data = w_data[0]
     weak_signal_val_data = w_data[1]
     weak_signal_test_data = w_data[2]
 
@@ -68,7 +68,7 @@ def train_weak_signals(data_obj, num_weak_signals):
     for i in range(num_weak_signals):
         # fit model
         lr_model = LogisticRegression(solver = "lbfgs", max_iter= 1000)
-        lr_model.fit(weak_signal_train_data[i], train_labels)
+        lr_model.fit(weak_signal_dev_data[i], dev_labels)
         weak_signals.append(lr_model)
 
         # evaluate probability of P(X=1)
