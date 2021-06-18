@@ -41,10 +41,10 @@ class Data:
         data = {}
 
         #Split the remaining data into 57.15% training and 42.85% test set
-        val_data, weak_supervision_data, val_labels, weak_supervision_labels = train_test_split(train_dev_data, train_dev_labels.astype('float'), test_size=0.4285, shuffle=True, stratify=train_dev_labels)
+        train_data, weak_supervision_data, train_labels, weak_supervision_labels = train_test_split(train_dev_data, train_dev_labels.astype('float'), test_size=0.4285, shuffle=True, stratify=train_dev_labels)
 
         data['dev_data'] = weak_supervision_data, weak_supervision_labels
-        data['validation_data'] = val_data, val_labels
+        data['train_data'] = train_data, train_labels
         data['test_data'] = test_data, test_labels
 
         return data
