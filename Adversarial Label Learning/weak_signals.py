@@ -67,12 +67,12 @@ def train_weak_signals(data_obj, num_weak_signals):
 
     for i in range(num_weak_signals):
         # fit model
-        model = LogisticRegression(solver = "lbfgs", max_iter= 1000)
-        model.fit(weak_signal_train_data[i], train_labels)
-        weak_signals.append(model)
+        lr_model = LogisticRegression(solver = "lbfgs", max_iter= 1000)
+        lr_model.fit(weak_signal_train_data[i], train_labels)
+        weak_signals.append(lr_model)
 
         # evaluate probability of P(X=1)
-        probability = model.predict_proba(weak_signal_val_data[i])[:, 1]
+        probability = lr_model.predict_proba(weak_signal_val_data[i])[:, 1]
         score = val_labels * (1 - probability) + (1 - val_labels) * probability
         stats[i] = np.sum(score) / score.size
         w_sig_probabilities.append(probability)
@@ -81,18 +81,18 @@ def train_weak_signals(data_obj, num_weak_signals):
         weak_val_accuracy.append(accuracy_score(val_labels, np.round(probability)))
 
         # evaluate accuracy for test data
-        test_predictions = model.predict(weak_signal_test_data[i])
+        test_predictions = lr_model.predict(weak_signal_test_data[i])
         w_sig_test_accuracies.append(accuracy_score(test_labels, test_predictions))
 
 
-    model = {}
-    model['models'] = weak_signals
-    model['probabilities'] = np.array(w_sig_probabilities)
-    model['error_bounds'] = stats
-    model['validation_accuracy'] = weak_val_accuracy
-    model['test_accuracy'] = w_sig_test_accuracies
+    w_data_dict = {}
+    w_data_dict['models'] = weak_signals
+    w_data_dict['probabilities'] = np.array(w_sig_probabilities)
+    w_data_dict['error_bounds'] = stats
+    w_data_dict['validation_accuracy'] = weak_val_accuracy
+    w_data_dict['test_accuracy'] = w_sig_test_accuracies
 
-    return model
+    return w_data_dict
 
 def get_w_data_dicts(data_obj, min_weak_signals, total_weak_signals):
        
