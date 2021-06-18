@@ -281,8 +281,8 @@ def dependent_error_exp(data_obj, w_data_dicts):
 
         # calculate ge criteria
         print("Running tests on ge criteria...")
-        model = ge_criterion_train(val_data.T, val_labels, weak_signal_probabilities, num_weak_signals)
-        ge_test_accuracy = accuracy_score(test_labels, np.round(probability(test_data, model)))
+        ge_results = ge_criterion_train(val_data.T, val_labels, weak_signal_probabilities, num_weak_signals)
+        ge_test_accuracy = accuracy_score(test_labels, np.round(probability(test_data, ge_results)))
         print("The accuracy of ge criteria on test data is", ge_test_accuracy)
         print("+++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++")
 
