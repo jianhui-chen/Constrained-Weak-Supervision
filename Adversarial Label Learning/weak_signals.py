@@ -94,12 +94,12 @@ def train_weak_signals(data_obj, num_weak_signals):
 
     return model
 
-def get_w_models(data_obj, min_weak_signals, total_weak_signals):
+def get_w_data_dicts(data_obj, min_weak_signals, total_weak_signals):
        
-    w_models = []
+    w_data_dicts = []
 
     for num_weak_signals in range(min_weak_signals, total_weak_signals + 1):
-        w_models.append(train_weak_signals(data_obj, num_weak_signals))
+        w_data_dicts.append(train_weak_signals(data_obj, num_weak_signals))
 
 
-    return w_models
+    return w_data_dicts
