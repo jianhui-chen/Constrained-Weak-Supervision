@@ -3,6 +3,7 @@
 # Need to consider if we want to create an abstract base class
 
 from log import Logger
+import sys
 
 class ALL():
     """
@@ -33,12 +34,20 @@ class ALL():
     """
 
     def __init__(self, weak_signals_proba, weak_signals_error_bounds, 
-                 max_iter=10000, logging=False):
+                 max_iter=10000, log_name=None):
     
         self.weak_signals_proba = weak_signals_proba
         self.weak_signals_error_bounds = weak_signals_error_bounds
         self.max_iter = max_iter
-        self.logging = logging      # might want to rename this , can initialize logger object here
+
+        if log_name is None:
+            self.logger = None
+        elif type(log_name) is str:
+            self.logger = Logger("logs/" + log_name + "/" + 
+                                 str(weak_signals_proba.shape[0]) + 
+                                 "_weak_signals/")
+        else:
+            sys.exit("Not of string type")
 
     
     def fit(self, X, y=None):
