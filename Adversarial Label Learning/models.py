@@ -4,6 +4,7 @@
 
 from log import Logger
 import sys
+import numpy as np
 
 class ALL():
     """
@@ -36,6 +37,7 @@ class ALL():
     def __init__(self, weak_signals_proba, weak_signals_error_bounds, 
                  max_iter=10000, log_name=None):
     
+        # based on args
         self.weak_signals_proba = weak_signals_proba
         self.weak_signals_error_bounds = weak_signals_error_bounds
         self.max_iter = max_iter
@@ -45,10 +47,12 @@ class ALL():
         elif type(log_name) is str:
             self.logger = Logger("logs/" + log_name + "/" + 
                                  str(weak_signals_proba.shape[0]) + 
-                                 "_weak_signals/")
+                                 "_weak_signals/")      # this can be modified to include date and time in file name
         else:
             sys.exit("Not of string type")
 
+        # not based on args bc based on feature number
+        self.weights = None
     
     def fit(self, X, y=None):
         """
@@ -56,17 +60,25 @@ class ALL():
 
         Parameters
         ----------
-        X : {}
+        X : ndarray of shape (n_features, n_examples)       NOTE: Usually this is transposed, might want to change for consistency with other models
+            Training matrix, where n_examples is the number of examples and 
+            n_features is the number of features for each example
 
+        y : Not to be used for this function, would be used with GE computations
 
         Returns
         -------
-        model
+        self
+            Fitted estimator
 
         """
-        print(X) #placeholder code
+        self.weights = np.zeros(X.shape[0]) # this should be length of n_features
+  
 
-        # Would need to do if statement with self.logging to implement logger
+
+       
+
+      
 
 
     def predict_proba(self, X):     # Note to self: this should replace "probablity" function in train_classifier
@@ -76,15 +88,26 @@ class ALL():
 
         Parameters
         ----------
-        X : 
+        X : ndarray of shape (n_features, n_examples)
+            Examples to be assigned a probability (binary)
 
 
         Returns
         -------
-        label predictions
+        P : ndarray of shape (n_examples,)
 
         """
-        print(X) # placeholder code
+        if self.weights is None:
+            sys.exit("No Data fit")
+        
+        try: 
+            y = self.weights.dot(X)
+        except:
+            y = X.dot(self.weights)
+
+        probas = 1 / (1 + np.exp(-y))    # first line of logistic, squishes y values
+        
+        return probas
         
 
 class Baseline():
