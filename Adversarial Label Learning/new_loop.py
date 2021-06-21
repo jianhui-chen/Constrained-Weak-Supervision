@@ -36,6 +36,28 @@ def new_run_experiment(data_obj, w_data_dicts, constant_bound=False):
     # #     6. ALL w/ computed bounds and 3 weak signals
     # #     7. Avergaing Baseline
 
+    # # Variables we need for each loop/ diff experiment
+    # #     1. Overall dictionary to add it to
+    # #         Example: adversarial_acc_dicts.append(adversarial_acc_dict)
+    # #
+    # #     2. Overall dictionary to add it to
+    # #     3. where to add it to for that dictionary
+    # #         Example: w_acc_dict['baseline_val_accuracy'] = b_validation_accuracy
+    # #
+    # #     4. Probability function
+    # #         Example: validation_accuracy = getModelAccuracy(learned_probabilities, val_labels)
+    # #
+    # #     5. Name of currnent experiment
+    # #     6. Num weak signals (if anyt)
+    # #         Example:  experiment_names = ["ALL w/ constant bounds", "ALL w/ computed bounds", "Avergaing Baseline"]
+
+
+
+
+
+
+
+
 
 
     data = data_obj.data
@@ -48,6 +70,7 @@ def new_run_experiment(data_obj, w_data_dicts, constant_bound=False):
     test_labels = data['test_data'][1]
 
     num_features, num_data_points = training_data.shape
+
 
 
     for num_loops, w_data_dict in enumerate(w_data_dicts, 1): #begins from 1
@@ -67,64 +90,43 @@ def new_run_experiment(data_obj, w_data_dicts, constant_bound=False):
 
         weights = np.zeros(num_features)
 
-        print("Running tests...")
 
-        
-        # if constant_bound:
-        #     optimized_weights, y = train_all(val_data, weights, weak_signal_probabilities, np.zeros(weak_signal_ub.size) + 0.3, logger, max_iter=10000)
-        # else:
-        #     optimized_weights, y = train_all(val_data, weights, weak_signal_probabilities, weak_signal_ub, logger, max_iter=10000)
+        print("\n\n+++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++")
+        print("Running..." + experiment_names[curr_expirment] + " with " + str(num_weak_signals) + " weak signals")
 
-        # # calculate validation results
+
+        # calculate results
         # learned_probabilities = probability(val_data, optimized_weights)
         # validation_accuracy = getModelAccuracy(learned_probabilities, val_labels)
+        validation_accuracy = 5
+        test_accuracy = 5
+        print("The accuracy on the validatiion data is", validation_accuracy)
+        print("The accuracy on the test data is", test_accuracy)
 
-        # # calculate test results
-        # learned_probabilities = probability(test_data, optimized_weights)
-        # test_accuracy = getModelAccuracy(learned_probabilities, test_labels)
-
-        # # calculate weak signal results
-        # weak_val_accuracy = w_data_dict['validation_accuracy']
-        # weak_test_accuracy = w_data_dict['test_accuracy']
-
-        # adversarial_acc_dict = {}
-        # adversarial_acc_dict['validation_accuracy'] = validation_accuracy
-        # adversarial_acc_dict['test_accuracy'] = test_accuracy
-
-        # w_acc_dict = {}
-        # w_acc_dict['num_weak_signals'] = num_weak_signals
-        # w_acc_dict['validation_accuracy'] = weak_val_accuracy
-        # w_acc_dict['test_accuracy'] = weak_test_accuracy
-
-        # print("")
-        # print("+++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++")
-        # print("We trained %d learnable classifiers with %d weak signals" %(1, num_weak_signals))
-        # print("The accuracy of learned model on the validatiion data is", validation_accuracy)
-        # print("The accuracy of weak signal(s) on the validation data is", weak_val_accuracy)
-        # print("The accuracy of the model on the test data is", test_accuracy)
-        # print("The accuracy of weak signal(s) on the test data is", weak_test_accuracy)
-        # print("")
-        # print("+++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++")
-
-        # # calculate baseline
-        # print("Running tests on the baselines...")
-        # baselines = runBaselineTests(val_data, weak_signal_probabilities) #remove the transpose to enable it run
-        # b_validation_accuracy = getWeakSignalAccuracy(val_data, val_labels, baselines)
-        # b_test_accuracy = getWeakSignalAccuracy(test_data, test_labels, baselines)
-        # print("The accuracy of the baseline models on test data is", b_test_accuracy)
-        # print("")
+        # Save Results
         # w_acc_dict['baseline_val_accuracy'] = b_validation_accuracy
         # w_acc_dict['baseline_test_accuracy'] = b_test_accuracy
-        # print("+++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++")
 
-        # adversarial_acc_dicts.append(adversarial_acc_dict)
-        # w_acc_dicts.append(w_acc_dict)
+
+        print("+++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++\n\n")
+
 
         # val_accuracy = [adversarial_acc_dict['validation_accuracy'], w_acc_dict['validation_accuracy'][num_weak_signals - 1], w_acc_dict['baseline_val_accuracy'][0], w_acc_dict['gecriteria_val_accuracy']]
         # log_accuracy(logger, val_accuracy, 'Accuracy on Validation Data')
 
         # test_accuracy = [adversarial_acc_dict['test_accuracy'], w_acc_dict['test_accuracy'][num_weak_signals - 1], w_acc_dict['baseline_test_accuracy'][0], w_acc_dict['gecriteria_test_accuracy']]
         # log_accuracy(logger, test_accuracy, 'Accuracy on Testing Data')
+
+
+  
+        
+        # # calculate weak signal results... IDK WHAT TO DO WITH THESE #####
+        # weak_val_accuracy = w_data_dict['validation_accuracy']
+        # weak_test_accuracy = w_data_dict['test_accuracy']
+
+        # ONLY NEED ONE OF THESE 
+        # adversarial_acc_dicts.append(adversarial_acc_dict)
+        # w_acc_dicts.append(w_acc_dict)
     
 
     # # calculate ge criteria
