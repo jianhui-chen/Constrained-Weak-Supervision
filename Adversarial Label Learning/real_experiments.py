@@ -42,8 +42,11 @@ def run_experiment(data_obj, w_data_dicts, constant_bound=False):
         # Following line doesn't seem to be used anywhere?
         #models = w_data_dict['models']
         weak_signal_probabilities = w_data_dict['probabilities']
+        #print("WEAK SIGNALS PROBAS SIZE")
+        #print(weak_signal_probabilities.shape[0])
+        #exit()
 
-        weights = np.zeros(num_features)
+        weights = np.zeros(num_features) #no need to pass in weights to train_all
 
         print("Running tests...")
         if constant_bound:
