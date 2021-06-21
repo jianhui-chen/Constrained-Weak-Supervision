@@ -68,22 +68,17 @@ def new_run_experiment(data_obj, w_data_dicts, constant_bound=False):
     for num_loops, w_data_dict in enumerate(w_data_dicts, 1): #begins from 1
 
 
-        # Set up variables and logger
         curr_expirment   = math.floor((num_loops - 1) / 3 )
         num_weak_signals = (num_loops - 1) % 3 + 1
-        logger = Logger("logs/standard/" + data_obj.n + "/" + experiment_names[curr_expirment] + " with " + str(num_weak_signals) + " weak signals")
-
-        weak_signal_ub = w_data_dict['error_bounds']
-        weak_signal_probabilities = w_data_dict['probabilities']
-
-        weights = np.zeros(num_features)
-
-
         print("\n\n+++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++")
         print("Running: " + experiment_names[curr_expirment] + " with " + str(num_weak_signals) + " weak signals...")
 
-        baslines = "none"
-
+        # Set up logger and variables
+        logger                    = Logger("logs/standard/" + data_obj.n + "/" + experiment_names[curr_expirment] + " with " + str(num_weak_signals) + " weak signals")
+        weak_signal_ub            = w_data_dict['error_bounds']
+        weak_signal_probabilities = w_data_dict['probabilities']
+        weights                   = np.zeros(num_features)
+        baslines                  = "none"
 
         # Train the data if needed
         if num_loops < 4:
