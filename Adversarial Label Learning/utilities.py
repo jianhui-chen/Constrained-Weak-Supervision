@@ -1,7 +1,47 @@
 import numpy as np
 from sklearn.linear_model import LogisticRegression
 from sklearn.metrics import accuracy_score
+from train_classifier import *
 import json, sys
+
+
+def getAccuracy(data, labels, model, optimized_weights, probability_score=None):
+    """
+    Print accuracy of the learned model
+
+    :param probabilities: vector of probabilities of the learned classifier
+    :type probabilities: array
+    :param labels: array of labels for the data
+    :type labels: array
+    :param probability_score: indicator of which accuracy score to return
+    :type probability_score: any
+    :return: accuracy of the trained model
+    :rtype: float
+    """
+
+    probabilities = []
+
+    # in future, make it work with classes
+    if model == "none":
+        learned_probabilities = probability(data, optimized_weights)
+        probabilities = learned_probabilities.ravel()
+    else:
+        probabilities = model.predict_proba(data.T)[:,1]
+
+
+    if probability_score is not None:
+        predictions = labels * (1 - probabilities) + (1 - labels) * probabilities
+        score = np.sum(predictions) / predictions.size
+        score = 1 - score
+    else:
+        predictions = np.zeros(probabilities.size)
+        predictions[probabilities > 0.5] =1
+        score = accuracy_score(labels, predictions)
+
+    return score
+
+
+
 
 def getModelAccuracy(probabilities, labels, probability_score=None):
     """
@@ -63,6 +103,15 @@ def getWeakSignalAccuracy(data, labels, models, probability_score=None):
     return stats
 
 
+
+
+
+
+
+
+
+
+
 def runBaselineTests(data, weak_signal_probabilities):
     """
     Run baseline tests using each of the weak signals and average of all weak signals
@@ -90,6 +139,18 @@ def runBaselineTests(data, weak_signal_probabilities):
     baselines.append(model)
 
     return baselines
+
+
+
+
+
+
+
+
+
+
+
+
 
 
 def saveToFile(adversarial_model, weak_signal_model, filename):

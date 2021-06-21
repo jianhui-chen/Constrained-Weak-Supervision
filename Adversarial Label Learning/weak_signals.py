@@ -48,9 +48,9 @@ def train_weak_signals(data_obj, num_weak_signals):
 
     train_data, train_labels = data_obj.data['training_data']
     val_data, val_labels = data_obj.data['validation_data']
-    test_data, test_labels = data_obj.data['test_data']
+    # test_data, test_labels = data_obj.data['test_data']
 
-    n, d = train_data.shape
+    # n, d = train_data.shape
 
     w_data = get_weak_signals(data_obj)
 
@@ -61,8 +61,8 @@ def train_weak_signals(data_obj, num_weak_signals):
     weak_signals = []
     stats = np.zeros(num_weak_signals)
     w_sig_probabilities = []
-    w_sig_test_accuracies = []
-    weak_val_accuracy = []
+    # w_sig_test_accuracies = []
+    # weak_val_accuracy = []
 
 
     for i in range(num_weak_signals):
@@ -77,12 +77,12 @@ def train_weak_signals(data_obj, num_weak_signals):
         stats[i] = np.sum(score) / score.size
         w_sig_probabilities.append(probability)
 
-        # evaluate accuracy for validation data
-        weak_val_accuracy.append(accuracy_score(val_labels, np.round(probability)))
+        # # evaluate accuracy for validation data
+        # weak_val_accuracy.append(accuracy_score(val_labels, np.round(probability)))
 
-        # evaluate accuracy for test data
-        test_predictions = lr_model.predict(weak_signal_test_data[i])
-        w_sig_test_accuracies.append(accuracy_score(test_labels, test_predictions))
+        # # evaluate accuracy for test data
+        # test_predictions = lr_model.predict(weak_signal_test_data[i])
+        # w_sig_test_accuracies.append(accuracy_score(test_labels, test_predictions))
 
 
     w_data_dict = {}
@@ -90,9 +90,9 @@ def train_weak_signals(data_obj, num_weak_signals):
     w_data_dict['probabilities'] = np.array(w_sig_probabilities)
     w_data_dict['error_bounds'] = stats
 
-    # This is later used for comparison, so we don't have to calculate again
-    w_data_dict['validation_accuracy'] = weak_val_accuracy
-    w_data_dict['test_accuracy'] = w_sig_test_accuracies
+    # # This is later used for comparison, so we don't have to calculate again
+    # w_data_dict['validation_accuracy'] = weak_val_accuracy
+    # w_data_dict['test_accuracy'] = w_sig_test_accuracies
 
     return w_data_dict
 

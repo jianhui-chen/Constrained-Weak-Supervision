@@ -1,11 +1,37 @@
 import numpy as np
 from train_classifier import *
 from ge_criterion_baseline import *
-from utilities import runBaselineTests, getModelAccuracy, getWeakSignalAccuracy
+from utilities import getAccuracy, runBaselineTests, getModelAccuracy, getWeakSignalAccuracy
 from sklearn.metrics import accuracy_score
 from log import Logger, log_accuracy
 import json
 import math
+
+
+
+# # Loops
+# #     1. ALL w/ constant bounds and 1 weak signal
+# #     2. ALL w/ constant bounds and 2 weak signals
+# #     3. ALL w/ constant bounds and 3 weak signals
+# #     4. ALL w/ computed bounds and 1 weak signal
+# #     5. ALL w/ computed bounds and 2 weak signals
+# #     6. ALL w/ computed bounds and 3 weak signals
+# #     7. Avergaing Baseline
+
+# # Variables we need for each loop/ diff experiment
+# #     1. Overall dictionary to add it to
+# #         Example: adversarial_acc_dicts.append(adversarial_acc_dict)
+# #
+# #     2. Overall dictionary to add it to
+# #     3. where to add it to for that dictionary
+# #         Example: w_acc_dict['baseline_val_accuracy'] = b_validation_accuracy
+# #
+# #     4. Probability function
+# #         Example: validation_accuracy = getModelAccuracy(learned_probabilities, val_labels)
+# #
+# #     5. Name of currnent experiment
+# #     6. Num weak signals (if anyt)
+# #         Example:  experiment_names = ["ALL w/ constant bounds", "ALL w/ computed bounds", "Avergaing Baseline"]
 
 
 
@@ -26,38 +52,6 @@ def new_run_experiment(data_obj, w_data_dicts, constant_bound=False):
     num_experoments = 7
 
     w_data_dicts = [w_data_dicts[0], w_data_dicts[1], w_data_dicts[2], w_data_dicts[0], w_data_dicts[1], w_data_dicts[2], w_data_dicts[2]]
-
-    # # Loops
-    # #     1. ALL w/ constant bounds and 1 weak signal
-    # #     2. ALL w/ constant bounds and 2 weak signals
-    # #     3. ALL w/ constant bounds and 3 weak signals
-    # #     4. ALL w/ computed bounds and 1 weak signal
-    # #     5. ALL w/ computed bounds and 2 weak signals
-    # #     6. ALL w/ computed bounds and 3 weak signals
-    # #     7. Avergaing Baseline
-
-    # # Variables we need for each loop/ diff experiment
-    # #     1. Overall dictionary to add it to
-    # #         Example: adversarial_acc_dicts.append(adversarial_acc_dict)
-    # #
-    # #     2. Overall dictionary to add it to
-    # #     3. where to add it to for that dictionary
-    # #         Example: w_acc_dict['baseline_val_accuracy'] = b_validation_accuracy
-    # #
-    # #     4. Probability function
-    # #         Example: validation_accuracy = getModelAccuracy(learned_probabilities, val_labels)
-    # #
-    # #     5. Name of currnent experiment
-    # #     6. Num weak signals (if anyt)
-    # #         Example:  experiment_names = ["ALL w/ constant bounds", "ALL w/ computed bounds", "Avergaing Baseline"]
-
-
-
-
-
-
-
-
 
 
     data = data_obj.data
@@ -92,14 +86,20 @@ def new_run_experiment(data_obj, w_data_dicts, constant_bound=False):
 
 
         print("\n\n+++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++")
-        print("Running..." + experiment_names[curr_expirment] + " with " + str(num_weak_signals) + " weak signals")
+        print("Running: " + experiment_names[curr_expirment] + " with " + str(num_weak_signals) + " weak signals...")
+
+
+        # Train the data if needed
+        if num_loops < 4:
+            optimized_weights, y = train_all(val_data, weights, weak_signal_probabilities, np.zeros(weak_signal_ub.size) + 0.3, logger, max_iter=10000)
+        elif num_loops > 4 and num_loops < 6:
+            optimized_weights, y = train_all(val_data, weights, weak_signal_probabilities, weak_signal_ub, logger, max_iter=10000)
 
 
         # calculate results
-        # learned_probabilities = probability(val_data, optimized_weights)
-        # validation_accuracy = getModelAccuracy(learned_probabilities, val_labels)
-        validation_accuracy = 5
-        test_accuracy = 5
+        validation_accuracy = getAccuracy(val_data, val_labels, "none", optimized_weights)
+        test_accuracy = getAccuracy(test_data, test_labels, "none", optimized_weights)
+        # test_accuracy = 5
         print("The accuracy on the validatiion data is", validation_accuracy)
         print("The accuracy on the test data is", test_accuracy)
 
@@ -129,15 +129,16 @@ def new_run_experiment(data_obj, w_data_dicts, constant_bound=False):
         # w_acc_dicts.append(w_acc_dict)
     
 
-    # # calculate ge criteria
-    # print("Running tests on ge criteria...")
-    # model = ge_criterion_train(val_data.T, val_labels, weak_signal_probabilities, num_weak_signals)
-    # ge_validation_accuracy = accuracy_score(val_labels, np.round(probability(val_data, model)))
-    # ge_test_accuracy = accuracy_score(test_labels, np.round(probability(test_data, model)))
-    # print("The accuracy of ge criteria on validation data is", ge_validation_accuracy)
-    # print("The accuracy of ge criteria on test data is", ge_test_accuracy)
+    # calculate ge criteria
+    print("+++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++")
+    print("Running tests on ge criteria...")
+    model = ge_criterion_train(val_data.T, val_labels, weak_signal_probabilities, num_weak_signals)
+    ge_validation_accuracy = accuracy_score(val_labels, np.round(probability(val_data, model)))
+    ge_test_accuracy = accuracy_score(test_labels, np.round(probability(test_data, model)))
+    print("The accuracy of ge criteria on validation data is", ge_validation_accuracy)
+    print("The accuracy of ge criteria on test data is", ge_test_accuracy)
     # w_acc_dict['gecriteria_val_accuracy'] = ge_validation_accuracy
     # w_acc_dict['gecriteria_test_accuracy'] = ge_test_accuracy
-    # print("+++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++")
+    print("+++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++")
 
     # return adversarial_acc_dicts, w_acc_dicts
