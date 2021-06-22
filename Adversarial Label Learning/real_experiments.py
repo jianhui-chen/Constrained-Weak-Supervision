@@ -4,6 +4,7 @@ from ge_criterion_baseline import *
 from utilities import runBaselineTests, getModelAccuracy, getWeakSignalAccuracy
 from sklearn.metrics import accuracy_score
 from log import Logger, log_accuracy
+from models import ALL
 import json
 
 
@@ -42,21 +43,31 @@ def run_experiment(data_obj, w_data_dicts, constant_bound=False):
         # Following line doesn't seem to be used anywhere?
         #models = w_data_dict['models']
         weak_signal_probabilities = w_data_dict['probabilities']
+        #print("WEAK SIGNALS PROBAS SIZE")
+        #print(weak_signal_probabilities.shape[0])
+        #exit()
 
-        weights = np.zeros(num_features)
+        weights = np.zeros(num_features) #no need to pass in weights to train_all
 
         print("Running tests...")
         if constant_bound:
-            optimized_weights, y = train_all(train_data, weights, weak_signal_probabilities, np.zeros(weak_signal_ub.size) + 0.3, logger, max_iter=10000)
+            #optimized_weights, y = train_all(train_data, weights, weak_signal_probabilities, np.zeros(weak_signal_ub.size) + 0.3, logger, max_iter=10000)
+            all_model = ALL(weak_signal_probabilities, np.zeros(weak_signal_ub.size) + 0.3, log_name="constantALL").fit(train_data)
         else:
-            optimized_weights, y = train_all(train_data, weights, weak_signal_probabilities, weak_signal_ub, logger, max_iter=10000)
+            #optimized_weights, y = train_all(train_data, weights, weak_signal_probabilities, weak_signal_ub, logger, max_iter=10000)
+            all_model = ALL(weak_signal_probabilities, weak_signal_ub, log_name="ALL").fit(train_data)
 
         # calculate validation results
-        learned_probabilities = probability(train_data, optimized_weights)
+        #learned_probabilities = probability(train_data, optimized_weights)
+        learned_probabilities = all_model.predict_proba(train_data)
+        #print(optimized_weights)
+        #print(all_model.weights)
+        
         train_accuracy = getModelAccuracy(learned_probabilities, train_labels)
 
         # calculate test results
-        learned_probabilities = probability(test_data, optimized_weights)
+        #learned_probabilities = probability(test_data, optimized_weights)
+        learned_probabilities = all_model.predict_proba(test_data)
         test_accuracy = getModelAccuracy(learned_probabilities, test_labels)
 
         # calculate weak signal results
