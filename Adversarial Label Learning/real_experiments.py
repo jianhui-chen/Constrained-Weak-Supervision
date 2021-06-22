@@ -52,10 +52,10 @@ def run_experiment(data_obj, w_data_dicts, constant_bound=False):
         print("Running tests...")
         if constant_bound:
             #optimized_weights, y = train_all(train_data, weights, weak_signal_probabilities, np.zeros(weak_signal_ub.size) + 0.3, logger, max_iter=10000)
-            all_model = ALL(weak_signal_probabilities, np.zeros(weak_signal_ub.size) + 0.3, log_name="constantALL").fit(train_data)
+            all_model = ALL(weak_signal_probabilities, np.zeros(weak_signal_ub.size) + 0.3, log_name="constant").fit(train_data)
         else:
             #optimized_weights, y = train_all(train_data, weights, weak_signal_probabilities, weak_signal_ub, logger, max_iter=10000)
-            all_model = ALL(weak_signal_probabilities, weak_signal_ub, log_name="ALL").fit(train_data)
+            all_model = ALL(weak_signal_probabilities, weak_signal_ub, log_name="nonconstant").fit(train_data)
 
         # calculate validation results
         #learned_probabilities = probability(train_data, optimized_weights)
@@ -96,6 +96,7 @@ def run_experiment(data_obj, w_data_dicts, constant_bound=False):
         # calculate baseline
         print("Running tests on the baselines...")
         baselines = runBaselineTests(train_data, weak_signal_probabilities) #remove the transpose to enable it run
+        #print(type(baselines))
         b_train_accuracy = getWeakSignalAccuracy(train_data, train_labels, baselines)
         b_test_accuracy = getWeakSignalAccuracy(test_data, test_labels, baselines)
         print("The accuracy of the baseline models on test data is", b_test_accuracy)

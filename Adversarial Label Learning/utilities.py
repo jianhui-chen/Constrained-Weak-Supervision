@@ -62,7 +62,7 @@ def runBaselineTests(data, weak_signal_probabilities):
     :rtype: list
     """
 
-    # baselines = []
+    #baselines = [] # was commented out
     average_weak_labels = np.mean(weak_signal_probabilities, axis=0)
     average_weak_labels[average_weak_labels > 0.5] = 1
     average_weak_labels[average_weak_labels <= 0.5] = 0
@@ -74,9 +74,10 @@ def runBaselineTests(data, weak_signal_probabilities):
         print("The mean of the baseline labels is %f" %np.mean(average_weak_labels))
         sys.exit(1)
 
-    # baselines.append(model)
+    #baselines.append(model) #was commented out 
 
     return model
+    #return baselines
 
 
 

@@ -7,6 +7,8 @@ from log import Logger, log_accuracy
 import json
 import math
 
+from models import ALL, Baseline
+
 
 
 # # Loops
@@ -51,7 +53,7 @@ def new_run_experiment(data_obj, w_data_dicts, constant_bound=False):
 
     num_experoments = 7
 
-    w_data_dicts = [w_data_dicts[0], w_data_dicts[1], w_data_dicts[2], w_data_dicts[0], w_data_dicts[1], w_data_dicts[2], w_data_dicts[2]]
+    #w_data_dicts = [w_data_dicts[0], w_data_dicts[1], w_data_dicts[2], w_data_dicts[0], w_data_dicts[1], w_data_dicts[2], w_data_dicts[2]]
 
 
     data = data_obj.data
@@ -64,22 +66,48 @@ def new_run_experiment(data_obj, w_data_dicts, constant_bound=False):
     test_labels = data['test_data'][1]
 
     num_features, num_data_points = dev_data.shape
+    
+
 
     for num_loops, w_data_dict in enumerate(w_data_dicts, 1): #begins from 1
 
-
+        """
         curr_expirment   = math.floor((num_loops - 1) / 3 )
         num_weak_signals = (num_loops - 1) % 3 + 1
         print("\n\n+++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++")
         print("Running: " + experiment_names[curr_expirment] + " with " + str(num_weak_signals) + " weak signals...")
-
+        
         # Set up logger and variables
         logger                    = Logger("logs/standard/" + data_obj.n + "/" + experiment_names[curr_expirment] + " with " + str(num_weak_signals) + " weak signals")
+        """
+        
         weak_signal_ub            = w_data_dict['error_bounds']
         weak_signal_probabilities = w_data_dict['probabilities']
         weights                   = np.zeros(num_features)
         baslines                  = "none"
 
+        all_model_const = ALL(weak_signal_probabilities, np.zeros(weak_signal_ub.size) + 0.3, log_name="constant")
+        all_model = all_model = ALL(weak_signal_probabilities, weak_signal_ub, log_name="nonconstant")
+        baseline_model = Baseline(weak_signal_probabilities, weak_signal_ub)
+
+        models = [all_model_const, all_model, baseline_model]
+
+        for model_np, model in enumerate(models):
+            print("Running: " + experiment_names[model_np] + " with " + str(num_loops) + " weak signals...")
+            model = model.fit(train_data)
+            #print(type(model))
+            train_probas = model.predict_proba(train_data)
+            test_probas = model.predict_proba(test_data)
+            #print(type(train_probas))
+            #print(train_probas)
+            train_acc = model.get_accuracy(train_labels, train_probas)
+            test_acc = model.get_accuracy(test_labels, test_probas)
+            #print(type(train_acc))
+            print("The accuracy on the train data is", train_acc)
+            print("The accuracy on the test data is", test_acc)
+            #exit()
+
+        """
         # Train the data if needed
         if num_loops < 4:
             optimized_weights, y = train_all(train_data, weights, weak_signal_probabilities, np.zeros(weak_signal_ub.size) + 0.3, logger, max_iter=10000)
@@ -87,7 +115,7 @@ def new_run_experiment(data_obj, w_data_dicts, constant_bound=False):
             optimized_weights, y = train_all(train_data, weights, weak_signal_probabilities, weak_signal_ub, logger, max_iter=10000)
         else:
             baslines = runBaselineTests(train_data, weak_signal_probabilities) #remove the transpose to enable it run
-
+        
 
 
         # calculate results
@@ -95,7 +123,7 @@ def new_run_experiment(data_obj, w_data_dicts, constant_bound=False):
         test_accuracy       = getAccuracy(test_data, test_labels, baslines, optimized_weights)
         print("The accuracy on the train data is", train_accuracy)
         print("The accuracy on the test data is", test_accuracy)
-
+        """
         # Save Results
         # w_acc_dict['baseline_train_accuracy'] = b_train_accuracy
         # w_acc_dict['baseline_test_accuracy'] = b_test_accuracy
@@ -125,6 +153,7 @@ def new_run_experiment(data_obj, w_data_dicts, constant_bound=False):
     # calculate ge criteria
     print("+++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++")
     print("Running tests on ge criteria...")
+    num_weak_signals = 3
     model = ge_criterion_train(train_data.T, train_labels, weak_signal_probabilities, num_weak_signals)
     ge_train_accuracy = accuracy_score(train_labels, np.round(probability(train_data, model)))
     ge_test_accuracy = accuracy_score(test_labels, np.round(probability(test_data, model)))
