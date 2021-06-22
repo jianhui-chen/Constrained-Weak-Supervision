@@ -24,10 +24,10 @@ import math
 # #
 # #     2. Overall dictionary to add it to
 # #     3. where to add it to for that dictionary
-# #         Example: w_acc_dict['baseline_val_accuracy'] = b_validation_accuracy
+# #         Example: w_acc_dict['baseline_train_accuracy'] = b_train_accuracy
 # #
 # #     4. Probability function
-# #         Example: validation_accuracy = getModelAccuracy(learned_probabilities, val_labels)
+# #         Example: train_accuracy = getModelAccuracy(learned_probabilities, train_labels)
 # #
 # #     5. Name of currnent experiment
 # #     6. Num weak signals (if anyt)
@@ -56,14 +56,14 @@ def new_run_experiment(data_obj, w_data_dicts, constant_bound=False):
 
     data = data_obj.data
 
-    training_data = data['training_data'][0].T
-    training_labels = data['training_data'][1]
-    val_data, val_labels = data['validation_data']
-    val_data = val_data.T
+    dev_data = data['dev_data'][0].T
+    dev_labels = data['dev_data'][1]
+    train_data, train_labels = data['train_data']
+    train_data = train_data.T
     test_data = data['test_data'][0].T
     test_labels = data['test_data'][1]
 
-    num_features, num_data_points = training_data.shape
+    num_features, num_data_points = dev_data.shape
 
     for num_loops, w_data_dict in enumerate(w_data_dicts, 1): #begins from 1
 
@@ -82,30 +82,30 @@ def new_run_experiment(data_obj, w_data_dicts, constant_bound=False):
 
         # Train the data if needed
         if num_loops < 4:
-            optimized_weights, y = train_all(val_data, weights, weak_signal_probabilities, np.zeros(weak_signal_ub.size) + 0.3, logger, max_iter=10000)
+            optimized_weights, y = train_all(train_data, weights, weak_signal_probabilities, np.zeros(weak_signal_ub.size) + 0.3, logger, max_iter=10000)
         elif num_loops >= 4 and num_loops < 7:
-            optimized_weights, y = train_all(val_data, weights, weak_signal_probabilities, weak_signal_ub, logger, max_iter=10000)
+            optimized_weights, y = train_all(train_data, weights, weak_signal_probabilities, weak_signal_ub, logger, max_iter=10000)
         else:
-            baslines = runBaselineTests(val_data, weak_signal_probabilities) #remove the transpose to enable it run
+            baslines = runBaselineTests(train_data, weak_signal_probabilities) #remove the transpose to enable it run
 
 
 
         # calculate results
-        validation_accuracy = getAccuracy(val_data, val_labels, baslines, optimized_weights)
+        train_accuracy = getAccuracy(train_data, train_labels, baslines, optimized_weights)
         test_accuracy       = getAccuracy(test_data, test_labels, baslines, optimized_weights)
-        print("The accuracy on the validatiion data is", validation_accuracy)
+        print("The accuracy on the train data is", train_accuracy)
         print("The accuracy on the test data is", test_accuracy)
 
         # Save Results
-        # w_acc_dict['baseline_val_accuracy'] = b_validation_accuracy
+        # w_acc_dict['baseline_train_accuracy'] = b_train_accuracy
         # w_acc_dict['baseline_test_accuracy'] = b_test_accuracy
 
 
         print("+++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++\n\n")
 
 
-        # val_accuracy = [adversarial_acc_dict['validation_accuracy'], w_acc_dict['validation_accuracy'][num_weak_signals - 1], w_acc_dict['baseline_val_accuracy'][0], w_acc_dict['gecriteria_val_accuracy']]
-        # log_accuracy(logger, val_accuracy, 'Accuracy on Validation Data')
+        # train_accuracy = [adversarial_acc_dict['train_accuracy'], w_acc_dict['train_accuracy'][num_weak_signals - 1], w_acc_dict['baseline_train_accuracy'][0], w_acc_dict['gecriteria_train_accuracy']]
+        # log_accuracy(logger, train_accuracy, 'Accuracy on Validation Data')
 
         # test_accuracy = [adversarial_acc_dict['test_accuracy'], w_acc_dict['test_accuracy'][num_weak_signals - 1], w_acc_dict['baseline_test_accuracy'][0], w_acc_dict['gecriteria_test_accuracy']]
         # log_accuracy(logger, test_accuracy, 'Accuracy on Testing Data')
@@ -114,7 +114,7 @@ def new_run_experiment(data_obj, w_data_dicts, constant_bound=False):
   
         
         # # calculate weak signal results... IDK WHAT TO DO WITH THESE #####
-        # weak_val_accuracy = w_data_dict['validation_accuracy']
+        # weak_train_accuracy = w_data_dict['train_accuracy']
         # weak_test_accuracy = w_data_dict['test_accuracy']
 
         # ONLY NEED ONE OF THESE 
@@ -125,12 +125,12 @@ def new_run_experiment(data_obj, w_data_dicts, constant_bound=False):
     # calculate ge criteria
     print("+++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++")
     print("Running tests on ge criteria...")
-    model = ge_criterion_train(val_data.T, val_labels, weak_signal_probabilities, num_weak_signals)
-    ge_validation_accuracy = accuracy_score(val_labels, np.round(probability(val_data, model)))
+    model = ge_criterion_train(train_data.T, train_labels, weak_signal_probabilities, num_weak_signals)
+    ge_train_accuracy = accuracy_score(train_labels, np.round(probability(train_data, model)))
     ge_test_accuracy = accuracy_score(test_labels, np.round(probability(test_data, model)))
-    print("The accuracy of ge criteria on validation data is", ge_validation_accuracy)
+    print("The accuracy of ge criteria on validation data is", ge_train_accuracy)
     print("The accuracy of ge criteria on test data is", ge_test_accuracy)
-    # w_acc_dict['gecriteria_val_accuracy'] = ge_validation_accuracy
+    # w_acc_dict['gecriteria_train_accuracy'] = ge_train_accuracy
     # w_acc_dict['gecriteria_test_accuracy'] = ge_test_accuracy
     print("+++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++")
 
@@ -156,14 +156,14 @@ def new_run_experiment(data_obj, w_data_dicts, constant_bound=False):
 #         logger = Logger("logs/standard/" + data_obj.n + "/" + str(num_weak_signals))
 
 
-#         training_data = data['training_data'][0].T
-#         training_labels = data['training_data'][1]
-#         val_data, val_labels = data['validation_data']
-#         val_data = val_data.T
+#         dev_data = data['dev_data'][0].T
+#         dev_labels = data['dev_data'][1]
+#         train_data, train_labels = data['train_data']
+#         train_data = train_data.T
 #         test_data = data['test_data'][0].T
 #         test_labels = data['test_data'][1]
 
-#         num_features, num_data_points = training_data.shape
+#         num_features, num_data_points = dev_data.shape
 
 #         weak_signal_ub = w_data_dict['error_bounds']
 #         # weak_signal_ub = np.ones(w_data_dict['error_bounds'].shape) * 0.3
@@ -176,36 +176,36 @@ def new_run_experiment(data_obj, w_data_dicts, constant_bound=False):
 
 #         print("Running tests...")
 #         if constant_bound:
-#             optimized_weights, y = train_all(val_data, weights, weak_signal_probabilities, np.zeros(weak_signal_ub.size) + 0.3, logger, max_iter=10000)
+#             optimized_weights, y = train_all(train_data, weights, weak_signal_probabilities, np.zeros(weak_signal_ub.size) + 0.3, logger, max_iter=10000)
 #         else:
-#             optimized_weights, y = train_all(val_data, weights, weak_signal_probabilities, weak_signal_ub, logger, max_iter=10000)
+#             optimized_weights, y = train_all(train_data, weights, weak_signal_probabilities, weak_signal_ub, logger, max_iter=10000)
 
 #         # calculate validation results
-#         learned_probabilities = probability(val_data, optimized_weights)
-#         validation_accuracy = getModelAccuracy(learned_probabilities, val_labels)
+#         learned_probabilities = probability(train_data, optimized_weights)
+#         train_accuracy = getModelAccuracy(learned_probabilities, train_labels)
 
 #         # calculate test results
 #         learned_probabilities = probability(test_data, optimized_weights)
 #         test_accuracy = getModelAccuracy(learned_probabilities, test_labels)
 
 #         # calculate weak signal results
-#         # weak_val_accuracy = w_data_dict['validation_accuracy']
+#         # weak_train_accuracy = w_data_dict['train_accuracy']
 #         # weak_test_accuracy = w_data_dict['test_accuracy']
 
 #         adversarial_acc_dict = {}
-#         adversarial_acc_dict['validation_accuracy'] = validation_accuracy
+#         adversarial_acc_dict['train_accuracy'] = train_accuracy
 #         adversarial_acc_dict['test_accuracy'] = test_accuracy
 
 #         w_acc_dict = {}
 #         w_acc_dict['num_weak_signals'] = num_weak_signals
-#         # w_acc_dict['validation_accuracy'] = weak_val_accuracy
+#         # w_acc_dict['train_accuracy'] = weak_train_accuracy
 #         # w_acc_dict['test_accuracy'] = weak_test_accuracy
 
 #         print("")
 #         print("+++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++")
 #         print("We trained %d learnable classifiers with %d weak signals" %(1, num_weak_signals))
-#         print("The accuracy of learned model on the validatiion data is", validation_accuracy)
-#         # print("The accuracy of weak signal(s) on the validation data is", weak_val_accuracy)
+#         print("The accuracy of learned model on the validatiion data is", train_accuracy)
+#         # print("The accuracy of weak signal(s) on the validation data is", weak_train_accuracy)
 #         print("The accuracy of the model on the test data is", test_accuracy)
 #         # print("The accuracy of weak signal(s) on the test data is", weak_test_accuracy)
 #         print("")
@@ -213,31 +213,31 @@ def new_run_experiment(data_obj, w_data_dicts, constant_bound=False):
 
 #         # calculate baseline
 #         print("Running tests on the baselines...")
-#         baselines = runBaselineTests(val_data, weak_signal_probabilities) #remove the transpose to enable it run
-#         b_validation_accuracy = getWeakSignalAccuracy(val_data, val_labels, baselines)
+#         baselines = runBaselineTests(train_data, weak_signal_probabilities) #remove the transpose to enable it run
+#         b_train_accuracy = getWeakSignalAccuracy(train_data, train_labels, baselines)
 #         b_test_accuracy = getWeakSignalAccuracy(test_data, test_labels, baselines)
 #         print("The accuracy of the baseline models on test data is", b_test_accuracy)
 #         print("")
-#         w_acc_dict['baseline_val_accuracy'] = b_validation_accuracy
+#         w_acc_dict['baseline_train_accuracy'] = b_train_accuracy
 #         w_acc_dict['baseline_test_accuracy'] = b_test_accuracy
 #         print("+++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++")
 
 #         # calculate ge criteria
 #         print("Running tests on ge criteria...")
-#         model = ge_criterion_train(val_data.T, val_labels, weak_signal_probabilities, num_weak_signals)
-#         ge_validation_accuracy = accuracy_score(val_labels, np.round(probability(val_data, model)))
+#         model = ge_criterion_train(train_data.T, train_labels, weak_signal_probabilities, num_weak_signals)
+#         ge_train_accuracy = accuracy_score(train_labels, np.round(probability(train_data, model)))
 #         ge_test_accuracy = accuracy_score(test_labels, np.round(probability(test_data, model)))
-#         print("The accuracy of ge criteria on validation data is", ge_validation_accuracy)
+#         print("The accuracy of ge criteria on validation data is", ge_train_accuracy)
 #         print("The accuracy of ge criteria on test data is", ge_test_accuracy)
-#         w_acc_dict['gecriteria_val_accuracy'] = ge_validation_accuracy
+#         w_acc_dict['gecriteria_train_accuracy'] = ge_train_accuracy
 #         w_acc_dict['gecriteria_test_accuracy'] = ge_test_accuracy
 #         print("+++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++")
 
 #         adversarial_acc_dicts.append(adversarial_acc_dict)
 #         w_acc_dicts.append(w_acc_dict)
 
-#         # val_accuracy = [adversarial_acc_dict['validation_accuracy'], w_acc_dict['validation_accuracy'][num_weak_signals - 1], w_acc_dict['baseline_val_accuracy'][0], w_acc_dict['gecriteria_val_accuracy']]
-#         # log_accuracy(logger, val_accuracy, 'Accuracy on Validation Data')
+#         # train_accuracy = [adversarial_acc_dict['train_accuracy'], w_acc_dict['train_accuracy'][num_weak_signals - 1], w_acc_dict['baseline_train_accuracy'][0], w_acc_dict['gecriteria_train_accuracy']]
+#         # log_accuracy(logger, train_accuracy, 'Accuracy on Validation Data')
 
 #         # test_accuracy = [adversarial_acc_dict['test_accuracy'], w_acc_dict['test_accuracy'][num_weak_signals - 1], w_acc_dict['baseline_test_accuracy'][0], w_acc_dict['gecriteria_test_accuracy']]
 #         # log_accuracy(logger, test_accuracy, 'Accuracy on Testing Data')
