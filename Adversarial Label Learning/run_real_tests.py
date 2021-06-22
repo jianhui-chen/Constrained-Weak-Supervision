@@ -2,13 +2,15 @@ from real_experiments import run_experiment, bound_experiment, dependent_error_e
 from data_readers import *
 from classes_file import Data
 from weak_signals import *
+from new_loop import *
+
 
 def run_tests():
     """
     Runs experiment.
     :return: None
     """
-    """
+    
     # # # # # # # # # # # #
     # breast cancer       #
     # # # # # # # # # # # #
@@ -19,34 +21,38 @@ def run_tests():
     print("# # # # # # # # # # # # # # # # # # # # #\n")
     bc_data = Data("Breast Cancer", [0, 10, 20], 'datasets/breast-cancer/wdbc.data', 'results/json/breast_cancer.json', breast_cancer_load_and_process_data)
     w_data_dicts = get_w_data_dicts(bc_data, 1, 3)
-    adversarial_acc_dicts, w_acc_dicts = run_experiment(bc_data, w_data_dicts)
+    # adversarial_acc_dicts, w_acc_dicts = run_experiment(bc_data, w_data_dicts)
+    new_run_experiment(bc_data, w_data_dicts)
+
+
     
     # # # # # # # # # # # # #
     # # obs network         #
     # # # # # # # # # # # # #
 
-    # #for obs network dataset, select the Utilized Bandwidth Rate, Packet drop rate and Flood Status as weak signals
-    print("\n\n\n\n# # # # # # # # # # # # # # # # # # # # #")
-    print("# Running obs network experiment...     #")
-    print("# # # # # # # # # # # # # # # # # # # # #\n")
+    # # #for obs network dataset, select the Utilized Bandwidth Rate, Packet drop rate and Flood Status as weak signals
+    # print("\n\n\n\n# # # # # # # # # # # # # # # # # # # # #")
+    # print("# Running obs network experiment...     #")
+    # print("# # # # # # # # # # # # # # # # # # # # #\n")
 
-    obs_data = Data("OBS", [1, 2, 20], 'datasets/obs-network/obs_network.data', 'results/json/obs_network.json', obs_load_and_process_data)
-    w_data_dicts = get_w_data_dicts(obs_data, 1, 3)
-    adversarial_acc_dicts, w_acc_dicts = run_experiment(obs_data, w_data_dicts)
-    """
 
-    # # # # # # # # # # # #
-    # cardio              #
-    # # # # # # # # # # # #
+    # obs_data = Data("OBS", [1, 2, 20], 'datasets/obs-network/obs_network.data', 'results/json/obs_network.json', obs_load_and_process_data)
+    # w_data_dicts = get_w_data_dicts(obs_data, 1, 3)
+    # adversarial_acc_dicts, w_acc_dicts = run_experiment(obs_data, w_data_dicts)
+
+
+    # # # # # # # # # # # # #
+    # # cardio              #
+    # # # # # # # # # # # # #
  
-    # #Use AC, MLTV and Median as weak signal views
-    print("\n\n\n\n# # # # # # # # # # # # # # # # # # # # #")
-    print("# Running cardio experiment...          #")
-    print("# # # # # # # # # # # # # # # # # # # # #\n")
+    # # #Use AC, MLTV and Median as weak signal views
+    # print("\n\n\n\n# # # # # # # # # # # # # # # # # # # # #")
+    # print("# Running cardio experiment...          #")
+    # print("# # # # # # # # # # # # # # # # # # # # #\n")
 
-    cardio_data = Data("Cardio", [1, 10, 18], 'datasets/cardiotocography/cardio.csv', 'results/json/cardio.json', cardio_load_and_process_data)
-    w_data_dicts = get_w_data_dicts(cardio_data, 1, 3)
-    adversarial_acc_dicts, w_acc_dicts = run_experiment(cardio_data, w_data_dicts)
+    # cardio_data = Data("Cardio", [1, 10, 18], 'datasets/cardiotocography/cardio.csv', 'results/json/cardio.json', cardio_load_and_process_data)
+    # w_data_dicts = get_w_data_dicts(cardio_data, 1, 3)
+    # adversarial_acc_dicts, w_acc_dicts = run_experiment(cardio_data, w_data_dicts)
     
 
 def run_bounds_experiment():
