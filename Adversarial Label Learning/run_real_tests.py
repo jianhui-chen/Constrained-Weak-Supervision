@@ -21,7 +21,7 @@ def run_tests():
     print("# # # # # # # # # # # # # # # # # # # # #\n")
     bc_data = Data("Breast Cancer", [0, 10, 20], 'datasets/breast-cancer/wdbc.data', 'results/json/breast_cancer.json', breast_cancer_load_and_process_data)
     w_data_dicts = get_w_data_dicts(bc_data, 1, 3)
-    # adversarial_acc_dicts, w_acc_dicts = run_experiment(bc_data, w_data_dicts)
+    #adversarial_acc_dicts, w_acc_dicts = run_experiment(bc_data, w_data_dicts)
     new_run_experiment(bc_data, w_data_dicts)
 
 

@@ -5,6 +5,8 @@
 from log import Logger
 import sys
 import numpy as np
+from sklearn.linear_model import LogisticRegression
+from sklearn.metrics import accuracy_score
 
 class ALL():
     """
@@ -44,7 +46,7 @@ class ALL():
         if log_name is None:
             self.logger = None
         elif type(log_name) is str:
-            self.logger = Logger("logs/" + log_name + "/" + 
+            self.logger = Logger("logs/ALL/" + log_name + "/" + 
                                  str(weak_signals_proba.shape[0]) + 
                                  "_weak_signals/")      # this can be modified to include date and time in file name
         else:
@@ -281,5 +283,47 @@ class Baseline():
     Need to add more on its functionality. 
     """
 
-    def __init__(self, logging=False):
-        self.logging = logging
+    def __init__(self, weak_signals_proba, weak_signals_error_bounds, 
+                 max_iter=None, log_name=None):
+    
+        # based on args
+        self.weak_signals_proba = weak_signals_proba
+        self.weak_signals_error_bounds = weak_signals_error_bounds
+        self.max_iter = max_iter
+
+        if log_name is None:
+            self.logger = None
+        elif type(log_name) is str:
+            self.logger = Logger("logs/Baseline/" + log_name + "/" + 
+                                 str(weak_signals_proba.shape[0]) + 
+                                 "_weak_signals/")      # this can be modified to include date and time in file name
+        else:
+            sys.exit("Not of string type")
+
+        # not based on args bc based on feature number
+        self.model = None
+       
+
+    def predict_proba(self, X):
+        if self.model is None:
+            sys.exit("No Data fit")
+
+        probabilities = self.model.predict_proba(X.T)[:,1]
+        predictions = np.zeros(probabilities.size)
+        predictions[probabilities > 0.5] =1
+        score = accuracy_score(labels, predictions)
+
+        return score
+
+    def fit(self, X, y=None):
+        average_weak_labels = np.mean(self.weak_signal_probas, axis=0)
+        average_weak_labels[average_weak_labels > 0.5] = 1
+        average_weak_labels[average_weak_labels <= 0.5] = 0
+
+        self.model = LogisticRegression(solver = "lbfgs", max_iter= 1000)
+        try:
+            self.model.fit(X.T, average_weak_labels)
+        except:
+            print("The mean of the baseline labels is %f" %np.mean(average_weak_labels))
+            sys.exit(1)
+        return self
