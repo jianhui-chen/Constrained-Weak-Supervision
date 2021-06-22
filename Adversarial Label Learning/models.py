@@ -28,9 +28,8 @@ class ALL():
     max_iter : int, default=10000
         Maximum number of iterations taken for solvers to converge.
 
-    logging : bool, default=False
-        Specifies if a Logger object should be initialized for logging to 
-        Tensorboard.
+    log_name : string, default=None
+        Specifies directory name for a logger object.
 
     """
 
@@ -74,7 +73,7 @@ class ALL():
         """
         self.weights = np.zeros(X.shape[0]) # this should be length of n_features
   
-
+        
 
        
 
@@ -108,7 +107,7 @@ class ALL():
         probas = 1 / (1 + np.exp(-y))    # first line of logistic, squishes y values
         
         return probas
-        
+
 
 class Baseline():
     """
