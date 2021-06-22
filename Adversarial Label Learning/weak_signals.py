@@ -80,9 +80,9 @@ def train_weak_signals(data_obj, num_weak_signals):
         # evaluate accuracy for validation data
         weak_train_accuracy.append(accuracy_score(train_labels, np.round(probability)))
 
-        # evaluate accuracy for test data
-        test_predictions = lr_model.predict(weak_signal_test_data[i])
-        w_sig_test_accuracies.append(accuracy_score(test_labels, test_predictions))
+        # # evaluate accuracy for test data
+        # test_predictions = lr_model.predict(weak_signal_test_data[i])
+        # w_sig_test_accuracies.append(accuracy_score(test_labels, test_predictions))
 
 
     w_data_dict = {}
