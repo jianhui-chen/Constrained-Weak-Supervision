@@ -228,3 +228,4 @@ def train_all(data, weights, weak_signal_probabilities, weak_signal_ub, logger, 
 			t += 1
 
 	return weights, ineq_constraint
+	# ineq_constraints are not used anywhere

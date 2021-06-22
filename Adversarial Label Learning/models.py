@@ -150,7 +150,7 @@ class ALL():
 
 
 
-    def predict_proba(self):     # Note to self: this should replace "probablity" function in train_classifier
+    def predict_proba(self, X):     # Note to self: this should replace "probablity" function in train_classifier
         """
         Computes probability estimates for given class
         Should be able to be extendable for multi-class implementation
@@ -170,9 +170,9 @@ class ALL():
             sys.exit("No Data fit")
         
         try: 
-            y = self.weights.dot(self.train_data)
+            y = self.weights.dot(X)
         except:
-            y = self.train_data.dot(self.weights)
+            y = X(self.weights)
 
         probas = 1 / (1 + np.exp(-y))    # first line of logistic, squishes y values
         
@@ -198,7 +198,7 @@ class ALL():
         """
         self.weights = np.zeros(X.shape[0]) # this should be length of n_features
         self.train_data = X
-        n_examples = X.size[1]
+        n_examples = X.shape[1]
 
         # initializing algo vars
         y = 0.5 * np.ones(n_examples)
@@ -207,13 +207,13 @@ class ALL():
         rho = 2.5
         lr = 0.0001
 
-        learnable_probas = predict_proba(X)
+        learnable_probas = self.predict_proba(X)
 
         with self.logger.writer.as_default():
             t = 0
             converged = False
-            while not converged and t < max_iter:
-    			rate = 1 / (1 + t)
+            while not converged and t < self.max_iter:
+                rate = 1 / (1 + t)
 
                 # update y
                 old_y = y
@@ -256,17 +256,17 @@ class ALL():
                     # print("Iter %d. Weights Infeas: %f, Y_Infeas: %f, Ineq Infeas: %f, lagrangian: %f, obj: %f" % (t, np.sum(conv_weights), conv_y,
                     # 									ineq_infeas, lagrangian_obj, primal_objective))
                     
-                    logger.log_scalar("Primal Objective", primal_objective, t)
-                    logger.log_scalar("lagrangian", lagrangian_obj, t)
-                    logger.log_scalar("Change in y", conv_y, t)
-                    logger.log_scalar("Change in Weights", conv_weights, t)
+                    self.logger.log_scalar("Primal Objective", primal_objective, t)
+                    self.logger.log_scalar("lagrangian", lagrangian_obj, t)
+                    self.logger.log_scalar("Change in y", conv_y, t)
+                    self.logger.log_scalar("Change in Weights", conv_weights, t)
 
                     # So small, does not even register????
-                    logger.log_scalar("Ineq Infeas", ineq_infeas, t)
+                    self.logger.log_scalar("Ineq Infeas", ineq_infeas, t)
 
 
 
-                learnable_probabilities = predict_proba()
+                learnable_probabilities = self.predict_proba(X)
 
                 t += 1
 
