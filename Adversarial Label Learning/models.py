@@ -151,6 +151,14 @@ class ALL():
         return learnable_term + gamma_term - ineq_augmented_term
 
 
+    def _predict(self, probas):
+    
+        predictions = np.zeros(probas.size)
+        predictions[probas > 0.5] =1
+        return predictions
+
+    def get_accuracy(self, true_labels, predicted_labels):
+        score = accuracy_score(true_labels, self._predict(predicted_labels))
 
     def predict_proba(self, X):     # Note to self: this should replace "probablity" function in train_classifier
         """
@@ -178,7 +186,7 @@ class ALL():
 
         probas = 1 / (1 + np.exp(-y))    # first line of logistic, squishes y values
         
-        return probas
+        return probas.ravel()
 
     def fit(self, X, y=None):
         """
@@ -302,18 +310,26 @@ class Baseline():
 
         # not based on args bc based on feature number
         self.model = None
-       
+
+
+    def _predict(self, probas):
+
+        predictions = np.zeros(probas.size)
+        predictions[probas > 0.5] =1
+        return predictions
+
+    def get_accuracy(self, true_labels, predicted_labels):
+        score = accuracy_score(true_labels, self._predict(predicted_labels))
 
     def predict_proba(self, X):
         if self.model is None:
             sys.exit("No Data fit")
 
         probabilities = self.model.predict_proba(X.T)[:,1]
-        predictions = np.zeros(probabilities.size)
-        predictions[probabilities > 0.5] =1
-        score = accuracy_score(labels, predictions)
 
-        return score
+        
+
+        return probabilities
 
     def fit(self, X, y=None):
         average_weak_labels = np.mean(self.weak_signal_probas, axis=0)
