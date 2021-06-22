@@ -53,7 +53,7 @@ def new_run_experiment(data_obj, w_data_dicts, constant_bound=False):
 
     num_experoments = 7
 
-    w_data_dicts = [w_data_dicts[0], w_data_dicts[1], w_data_dicts[2], w_data_dicts[0], w_data_dicts[1], w_data_dicts[2], w_data_dicts[2]]
+    #w_data_dicts = [w_data_dicts[0], w_data_dicts[1], w_data_dicts[2], w_data_dicts[0], w_data_dicts[1], w_data_dicts[2], w_data_dicts[2]]
 
 
     data = data_obj.data
@@ -95,15 +95,17 @@ def new_run_experiment(data_obj, w_data_dicts, constant_bound=False):
         for model_np, model in enumerate(models):
             print("Running: " + experiment_names[model_np] + " with " + str(num_loops) + " weak signals...")
             model = model.fit(train_data)
+            #print(type(model))
             train_probas = model.predict_proba(train_data)
             test_probas = model.predict_proba(test_data)
-
+            #print(type(train_probas))
+            #print(train_probas)
             train_acc = model.get_accuracy(train_labels, train_probas)
             test_acc = model.get_accuracy(test_labels, test_probas)
-
+            #print(type(train_acc))
             print("The accuracy on the train data is", train_acc)
             print("The accuracy on the test data is", test_acc)
-
+            #exit()
 
         """
         # Train the data if needed
@@ -151,6 +153,7 @@ def new_run_experiment(data_obj, w_data_dicts, constant_bound=False):
     # calculate ge criteria
     print("+++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++")
     print("Running tests on ge criteria...")
+    num_weak_signals = 3
     model = ge_criterion_train(train_data.T, train_labels, weak_signal_probabilities, num_weak_signals)
     ge_train_accuracy = accuracy_score(train_labels, np.round(probability(train_data, model)))
     ge_test_accuracy = accuracy_score(test_labels, np.round(probability(test_data, model)))

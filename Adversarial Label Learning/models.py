@@ -159,6 +159,7 @@ class ALL():
 
     def get_accuracy(self, true_labels, predicted_labels):
         score = accuracy_score(true_labels, self._predict(predicted_labels))
+        return score
 
     def predict_proba(self, X):     # Note to self: this should replace "probablity" function in train_classifier
         """
@@ -330,6 +331,7 @@ class Baseline():
     def get_accuracy(self, true_labels, predicted_labels):
         # NOTE: Predicted labelss are probas
         score = accuracy_score(true_labels, self._predict(predicted_labels))
+        return score
 
     def predict_proba(self, X):
         if self.model is None:
