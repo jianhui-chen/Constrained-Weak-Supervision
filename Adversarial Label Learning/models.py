@@ -7,8 +7,41 @@ import sys
 import numpy as np
 from sklearn.linear_model import LogisticRegression
 from sklearn.metrics import accuracy_score
+from abc import ABC
 
-class ALL():
+class BaseClassifier(ABC):
+    """
+    Abstract Base Class for learning classifiers
+    """
+
+    def predict(self, X):
+        """
+
+        """
+        proba_predictions = self.predict_proba(X)   # the subclass predict_proba will throw an error if not trained
+
+        predictions = np.zeros(proba_predictions.size)
+        predictions[probas > 0.5] =1
+        return predictions
+    
+    def get_accuracy(self, true_labels, predicted_labels):
+        """
+
+        """
+        score = accuracy_score(true_labels, self._predict(predicted_labels))
+        return score
+
+    #not abstract
+    #def predict_proba
+
+    @abstractmethod 
+    def fit(self, X, y=None):
+        """
+
+        """
+        pass
+
+class ALL(BaseClassifier):
     """
     Adversarial Label Learning Classifier
 
@@ -150,7 +183,7 @@ class ALL():
 
         return learnable_term + gamma_term - ineq_augmented_term
 
-
+    """
     def _predict(self, probas):
     
         predictions = np.zeros(probas.size)
@@ -160,6 +193,8 @@ class ALL():
     def get_accuracy(self, true_labels, predicted_labels):
         score = accuracy_score(true_labels, self._predict(predicted_labels))
         return score
+    """
+
 
     def predict_proba(self, X):     # Note to self: this should replace "probablity" function in train_classifier
         """
@@ -295,7 +330,7 @@ class ALL():
        
 
 
-class Baseline():
+class Baseline(BaseClassifier):
     """
     Baseline Classifier
     Need to add more on its functionality. 
@@ -321,6 +356,7 @@ class Baseline():
         # not based on args bc based on feature number
         self.model = None
 
+    """
     # _predict and get_accuracy are the same for both classes –– can be moved
     def _predict(self, probas):
 
@@ -332,6 +368,8 @@ class Baseline():
         # NOTE: Predicted labelss are probas
         score = accuracy_score(true_labels, self._predict(predicted_labels))
         return score
+
+    """
 
     def predict_proba(self, X):
         if self.model is None:
