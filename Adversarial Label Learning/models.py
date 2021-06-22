@@ -188,6 +188,69 @@ class ALL():
         
         return probas.ravel()
 
+    def _optimize(self, X, learnable_probas, y, rho, gamma, n_examples, lr):
+        t = 0
+        converged = False
+        while not converged and t < self.max_iter:
+            rate = 1 / (1 + t)
+
+            # update y
+            old_y = y
+            y_grad = self._y_gradient(y, learnable_probas, rho, gamma)
+            y = y + rate * y_grad
+            # projection step: clip y to [0, 1]
+            y = y.clip(min=0, max=1)
+
+            # compute gradient of probabilities
+            dl_dp = (1 / n_examples) * (1 - 2 * old_y)
+
+            # update gamma
+            old_gamma = gamma
+            gamma_grad = self._gamma_gradient(old_y)
+            gamma = gamma - rho * gamma_grad
+            gamma = gamma.clip(max=0)
+
+            weights_gradient = []
+            # compute gradient of probabilities wrt weights
+            dp_dw = self._weight_gradient()
+            # update weights
+            old_weights = self.weights.copy()
+            weights_gradient.append(dp_dw.dot(dl_dp))
+
+            # update weights of the learnable functions
+            self.weights = self.weights - lr * np.array(weights_gradient)
+            conv_weights = np.linalg.norm(self.weights - old_weights)
+            conv_y = np.linalg.norm(y - old_y)
+
+            # check that inequality constraints are satisfied
+            ineq_constraint = self._gamma_gradient(y)
+            ineq_infeas = np.linalg.norm(ineq_constraint.clip(min=0))
+
+            converged = np.isclose(0, conv_y, atol=1e-6) and np.isclose(0, ineq_infeas, atol=1e-6) and np.isclose(0, conv_weights, atol=1e-5)
+
+            if t % 1000 == 0:
+                lagrangian_obj = self._objective_function(y, learnable_probas, rho, gamma) # might be slow
+                primal_objective = np.dot(learnable_probas, 1 - y) + np.dot(1 - learnable_probas, y)
+                primal_objective = np.sum(primal_objective) / n_examples
+                # print("Iter %d. Weights Infeas: %f, Y_Infeas: %f, Ineq Infeas: %f, lagrangian: %f, obj: %f" % (t, np.sum(conv_weights), conv_y,
+                # 									ineq_infeas, lagrangian_obj, primal_objective))
+                
+                if self.logger is not None:
+                    self.logger.log_scalar("Primal Objective", primal_objective, t)
+                    self.logger.log_scalar("lagrangian", lagrangian_obj, t)
+                    self.logger.log_scalar("Change in y", conv_y, t)
+                    self.logger.log_scalar("Change in Weights", conv_weights, t)
+
+                    # So small, does not even register????
+                    self.logger.log_scalar("Ineq Infeas", ineq_infeas, t)
+
+
+
+            learnable_probas = self.predict_proba(X)
+
+            t += 1
+        return self
+
     def fit(self, X, y=None):
         """
         Fits the model according to given training data (X)
@@ -219,68 +282,14 @@ class ALL():
 
         learnable_probas = self.predict_proba(X)
 
-        with self.logger.writer.as_default():
-            t = 0
-            converged = False
-            while not converged and t < self.max_iter:
-                rate = 1 / (1 + t)
+        if self.logger is None:
+            return self._optimize(X, learnable_probas, y, rho, gamma, n_examples, lr)
+        else:
+            with self.logger.writer.as_default():
+                return self._optimize(X, learnable_probas, y, rho, gamma, n_examples, lr)
+            
 
-                # update y
-                old_y = y
-                y_grad = self._y_gradient(y, learnable_probas, rho, gamma)
-                y = y + rate * y_grad
-                # projection step: clip y to [0, 1]
-                y = y.clip(min=0, max=1)
-
-                # compute gradient of probabilities
-                dl_dp = (1 / n_examples) * (1 - 2 * old_y)
-
-                # update gamma
-                old_gamma = gamma
-                gamma_grad = self._gamma_gradient(old_y)
-                gamma = gamma - rho * gamma_grad
-                gamma = gamma.clip(max=0)
-
-                weights_gradient = []
-                # compute gradient of probabilities wrt weights
-                dp_dw = self._weight_gradient()
-                # update weights
-                old_weights = self.weights.copy()
-                weights_gradient.append(dp_dw.dot(dl_dp))
-
-                # update weights of the learnable functions
-                self.weights = self.weights - lr * np.array(weights_gradient)
-                conv_weights = np.linalg.norm(self.weights - old_weights)
-                conv_y = np.linalg.norm(y - old_y)
-
-                # check that inequality constraints are satisfied
-                ineq_constraint = self._gamma_gradient(y)
-                ineq_infeas = np.linalg.norm(ineq_constraint.clip(min=0))
-
-                converged = np.isclose(0, conv_y, atol=1e-6) and np.isclose(0, ineq_infeas, atol=1e-6) and np.isclose(0, conv_weights, atol=1e-5)
-
-                if t % 1000 == 0:
-                    lagrangian_obj = self._objective_function(y, learnable_probas, rho, gamma) # might be slow
-                    primal_objective = np.dot(learnable_probas, 1 - y) + np.dot(1 - learnable_probas, y)
-                    primal_objective = np.sum(primal_objective) / n_examples
-                    # print("Iter %d. Weights Infeas: %f, Y_Infeas: %f, Ineq Infeas: %f, lagrangian: %f, obj: %f" % (t, np.sum(conv_weights), conv_y,
-                    # 									ineq_infeas, lagrangian_obj, primal_objective))
-                    
-                    self.logger.log_scalar("Primal Objective", primal_objective, t)
-                    self.logger.log_scalar("lagrangian", lagrangian_obj, t)
-                    self.logger.log_scalar("Change in y", conv_y, t)
-                    self.logger.log_scalar("Change in Weights", conv_weights, t)
-
-                    # So small, does not even register????
-                    self.logger.log_scalar("Ineq Infeas", ineq_infeas, t)
-
-
-
-                learnable_probabilities = self.predict_proba(X)
-
-                t += 1
-
-        return self
+    
 
        
 
@@ -296,7 +305,7 @@ class Baseline():
     
         # based on args
         self.weak_signals_proba = weak_signals_proba
-        self.weak_signals_error_bounds = weak_signals_error_bounds
+        self.weak_signals_error_bounds = weak_signals_error_bounds #don't need these
         self.max_iter = max_iter
 
         if log_name is None:
@@ -311,7 +320,7 @@ class Baseline():
         # not based on args bc based on feature number
         self.model = None
 
-
+    # _predict and get_accuracy are the same for both classes –– can be moved
     def _predict(self, probas):
 
         predictions = np.zeros(probas.size)
@@ -319,6 +328,7 @@ class Baseline():
         return predictions
 
     def get_accuracy(self, true_labels, predicted_labels):
+        # NOTE: Predicted labelss are probas
         score = accuracy_score(true_labels, self._predict(predicted_labels))
 
     def predict_proba(self, X):
@@ -332,7 +342,7 @@ class Baseline():
         return probabilities
 
     def fit(self, X, y=None):
-        average_weak_labels = np.mean(self.weak_signal_probas, axis=0)
+        average_weak_labels = np.mean(self.weak_signals_proba, axis=0)
         average_weak_labels[average_weak_labels > 0.5] = 1
         average_weak_labels[average_weak_labels <= 0.5] = 0
 
