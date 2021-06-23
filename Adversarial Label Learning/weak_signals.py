@@ -70,7 +70,6 @@ def train_weak_signals(data_obj, num_weak_signals):
         lr_model = LogisticRegression(solver = "lbfgs", max_iter= 1000)
         lr_model.fit(weak_signal_dev_data[i], dev_labels)
         weak_signals.append(lr_model)
-
         # evaluate probability of P(X=1)
         probability = lr_model.predict_proba(weak_signal_train_data[i])[:, 1]
         score = train_labels * (1 - probability) + (1 - train_labels) * probability
@@ -83,44 +82,59 @@ def train_weak_signals(data_obj, num_weak_signals):
         # # evaluate accuracy for test data
         # test_predictions = lr_model.predict(weak_signal_test_data[i])
         # w_sig_test_accuracies.append(accuracy_score(test_labels, test_predictions))
+    
+
+    # print("weak_signals:", weak_signals)
+    # print("\n\nprobabilities:", np.array(w_sig_probabilities), "\n\n")
+    # print("\n\error_bounds:", stats, "\n\n")
 
 
     w_data_dict = {}
-    w_data_dict['models'] = weak_signals
+    # w_data_dict['models'] = weak_signals
     w_data_dict['probabilities'] = np.array(w_sig_probabilities)
     w_data_dict['error_bounds'] = stats
 
     # This is later used for comparison, so we don't have to calculate again
-    w_data_dict['train_accuracy'] = weak_train_accuracy
-    w_data_dict['test_accuracy'] = w_sig_test_accuracies
+    # w_data_dict['train_accuracy'] = weak_train_accuracy
+    # w_data_dict['test_accuracy'] = w_sig_test_accuracies
 
     return w_data_dict
 
-def get_w_data_dicts(data_obj, min_weak_signals, total_weak_signals):
+# def read_weak_signals_data(datapath):
+#     """ Read text datasets """
+
+#     # train_data = np.load(datapath + 'data_features.npy', allow_pickle=True)[()]
+#     weak_signals = np.load(datapath + 'weak_signals.npy', allow_pickle=True)[()]
+#     # train_labels = np.load(datapath + 'data_labels.npy', allow_pickle=True)[()]
+#     # test_data = np.load(datapath +'test_features.npy', allow_pickle=True)[()]
+#     # test_labels = np.load(datapath + 'test_labels.npy', allow_pickle=True)[()]
+
+#     if len(weak_signals.shape) == 2:
+#         weak_signals = np.expand_dims(weak_signals.T, axis=-1)
+
+#     w_data_dict = {}
+#     w_data_dict['models'] = weak_signals
+#     w_data_dict['probabilities'] = np.array(w_sig_probabilities)
+#     w_data_dict['error_bounds'] = stats
+
+
+#     return data['weak_signals'] = weak_signals
+
+
+def get_w_data_dicts(data_obj, min_weak_signals, total_weak_signals, weak_sig_datapath="none"):
        
     w_data_dicts = []
 
-    for num_weak_signals in range(min_weak_signals, total_weak_signals + 1):
-        w_data_dicts.append(train_weak_signals(data_obj, num_weak_signals))
+    #train weak signals when none are presented
+    if weak_sig_datapath == "none":
+        for num_weak_signals in range(min_weak_signals, total_weak_signals + 1):
+            w_data_dicts.append(train_weak_signals(data_obj, num_weak_signals))
+
+    else:
+        w_data_dict = {}
+        # w_data_dict['models'] = weak_signals
+        w_data_dict['probabilities'] = np.load(datapath + 'weak_signals.npy', allow_pickle=True)[()]
+        w_data_dict['error_bounds'] = np.load(datapath + 'weak_signals.npy', allow_pickle=True)[()]
 
 
     return w_data_dicts
-
-
-def read_text_data(datapath):
-    """ Read text datasets """
-
-    train_data = np.load(datapath + 'data_features.npy', allow_pickle=True)[()]
-    weak_signals = np.load(datapath + 'weak_signals.npy', allow_pickle=True)[()]
-    train_labels = np.load(datapath + 'data_labels.npy', allow_pickle=True)[()]
-    test_data = np.load(datapath +'test_features.npy', allow_pickle=True)[()]
-    test_labels = np.load(datapath + 'test_labels.npy', allow_pickle=True)[()]
-
-    if len(weak_signals.shape) == 2:
-        weak_signals = np.expand_dims(weak_signals.T, axis=-1)
-
-    data = {}
-    data['train'] = train_data, train_labels
-    data['test'] = test_data, test_labels
-    data['weak_signals'] = weak_signals
-    return data
