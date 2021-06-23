@@ -51,11 +51,6 @@ def new_run_experiment(data_obj, w_data_dicts, constant_bound=False):
 
     experiment_names = ["ALL w/ constant bounds", "ALL w/ computed bounds", "Avergaing Baseline"]
 
-    num_experoments = 7
-
-    #w_data_dicts = [w_data_dicts[0], w_data_dicts[1], w_data_dicts[2], w_data_dicts[0], w_data_dicts[1], w_data_dicts[2], w_data_dicts[2]]
-
-
     data = data_obj.data
 
     dev_data = data['dev_data'][0].T
@@ -83,29 +78,40 @@ def new_run_experiment(data_obj, w_data_dicts, constant_bound=False):
         
         weak_signal_ub            = w_data_dict['error_bounds']
         weak_signal_probabilities = w_data_dict['probabilities']
-        weights                   = np.zeros(num_features)
-        baslines                  = "none"
+        # weights                   = np.zeros(num_features)
+        train_accuracy            = []
+        test_accuracy             = []
+
 
         all_model_const = ALL(weak_signal_probabilities, np.zeros(weak_signal_ub.size) + 0.3, log_name="constant")
-        all_model = all_model = ALL(weak_signal_probabilities, weak_signal_ub, log_name="nonconstant")
-        baseline_model = Baseline(weak_signal_probabilities, weak_signal_ub)
+        all_model       = ALL(weak_signal_probabilities, weak_signal_ub, log_name="nonconstant")
+        baseline_model  = Baseline(weak_signal_probabilities, weak_signal_ub)
 
         models = [all_model_const, all_model, baseline_model]
 
         for model_np, model in enumerate(models):
             print("Running: " + experiment_names[model_np] + " with " + str(num_loops) + " weak signals...")
             model = model.fit(train_data)
-            #print(type(model))
+
             train_probas = model.predict_proba(train_data)
             test_probas = model.predict_proba(test_data)
-            #print(type(train_probas))
-            #print(train_probas)
+
             train_acc = model.get_accuracy(train_labels, train_probas)
             test_acc = model.get_accuracy(test_labels, test_probas)
-            #print(type(train_acc))
+
             print("The accuracy on the train data is", train_acc)
             print("The accuracy on the test data is", test_acc)
-            #exit()
+
+            train_accuracy.append(train_acc)
+            test_accuracy.append(test_acc)
+
+        
+        logger = Logger("logs/All/ Accuracies with " + str(num_loops) + " Weak signal")
+        log_accuracy(logger, train_accuracy, 'Accuracy on Validation Data')
+        log_accuracy(logger, test_accuracy, 'Accuracy on Testing Data')
+
+        
+
 
         """
         # Train the data if needed
@@ -124,19 +130,9 @@ def new_run_experiment(data_obj, w_data_dicts, constant_bound=False):
         print("The accuracy on the train data is", train_accuracy)
         print("The accuracy on the test data is", test_accuracy)
         """
-        # Save Results
-        # w_acc_dict['baseline_train_accuracy'] = b_train_accuracy
-        # w_acc_dict['baseline_test_accuracy'] = b_test_accuracy
 
 
         print("+++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++\n\n")
-
-
-        # train_accuracy = [adversarial_acc_dict['train_accuracy'], w_acc_dict['train_accuracy'][num_weak_signals - 1], w_acc_dict['baseline_train_accuracy'][0], w_acc_dict['gecriteria_train_accuracy']]
-        # log_accuracy(logger, train_accuracy, 'Accuracy on Validation Data')
-
-        # test_accuracy = [adversarial_acc_dict['test_accuracy'], w_acc_dict['test_accuracy'][num_weak_signals - 1], w_acc_dict['baseline_test_accuracy'][0], w_acc_dict['gecriteria_test_accuracy']]
-        # log_accuracy(logger, test_accuracy, 'Accuracy on Testing Data')
 
 
   
@@ -164,6 +160,9 @@ def new_run_experiment(data_obj, w_data_dicts, constant_bound=False):
     print("+++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++")
 
     # return adversarial_acc_dicts, w_acc_dicts
+
+
+
 
 
 # def new_run_experiment(data_obj, w_data_dicts, constant_bound=False):
