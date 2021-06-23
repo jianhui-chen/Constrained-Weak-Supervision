@@ -1,0 +1,35 @@
+{
+    "label_accuracy":0.5732643410321431,
+    "test_score":0.5553158101216163,
+    "experiment":"imbd"
+}{
+    "label_accuracy":0.7515625,
+    "test_score":0.81375,
+    "experiment":"synthetic"
+}{
+    "label_accuracy":0.6851884505179634,
+    "test_score":0.68,
+    "experiment":"yelp"
+}{
+    "label_accuracy":0.677088544272136,
+    "test_score":0.6820428336079077,
+    "experiment":"sst-2"
+}{
+    "label_accuracy":0.8329938900203666,
+    "test_score":0.532,
+    "experiment":"trec-6"
+}{
+    "label_accuracy":0.952,
+    "test_score":0.938,
+    "experiment":"fashion-mnist"
+}
+{
+    "label_accuracy":0.952,
+    "test_score":0.936,
+    "experiment":"fashion-mnist"
+}
+{
+    "label_accuracy":0.612,
+    "test_score":0.69025,
+    "experiment":"dependent_experiment"
+}
