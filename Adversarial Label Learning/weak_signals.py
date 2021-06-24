@@ -32,6 +32,7 @@ def get_weak_signals(data_obj):
 
     return weak_signal_data
 
+
 def train_weak_signals(data_obj, num_weak_signals):
     """
     Trains different views of weak signals
@@ -61,7 +62,7 @@ def train_weak_signals(data_obj, num_weak_signals):
     weak_signals = []
     stats = np.zeros(num_weak_signals)
     w_sig_probabilities = []
-    w_sig_test_accuracies = []
+    # w_sig_test_accuracies = []
     weak_train_accuracy = []
 
 
@@ -100,27 +101,6 @@ def train_weak_signals(data_obj, num_weak_signals):
 
     return w_data_dict
 
-# def read_weak_signals_data(datapath):
-#     """ Read text datasets """
-
-#     # train_data = np.load(datapath + 'data_features.npy', allow_pickle=True)[()]
-#     weak_signals = np.load(datapath + 'weak_signals.npy', allow_pickle=True)[()]
-#     # train_labels = np.load(datapath + 'data_labels.npy', allow_pickle=True)[()]
-#     # test_data = np.load(datapath +'test_features.npy', allow_pickle=True)[()]
-#     # test_labels = np.load(datapath + 'test_labels.npy', allow_pickle=True)[()]
-
-#     if len(weak_signals.shape) == 2:
-#         weak_signals = np.expand_dims(weak_signals.T, axis=-1)
-
-#     w_data_dict = {}
-#     w_data_dict['models'] = weak_signals
-#     w_data_dict['probabilities'] = np.array(w_sig_probabilities)
-#     w_data_dict['error_bounds'] = stats
-
-
-#     return data['weak_signals'] = weak_signals
-
-
 def get_w_data_dicts(data_obj, min_weak_signals, total_weak_signals, weak_sig_datapath="none"):
        
     w_data_dicts = []
@@ -130,11 +110,59 @@ def get_w_data_dicts(data_obj, min_weak_signals, total_weak_signals, weak_sig_da
         for num_weak_signals in range(min_weak_signals, total_weak_signals + 1):
             w_data_dicts.append(train_weak_signals(data_obj, num_weak_signals))
 
+    #train get weak signals from path
     else:
         w_data_dict = {}
-        # w_data_dict['models'] = weak_signals
         w_data_dict['probabilities'] = np.load(datapath + 'weak_signals.npy', allow_pickle=True)[()]
-        w_data_dict['error_bounds'] = np.load(datapath + 'weak_signals.npy', allow_pickle=True)[()]
+
+        try:
+            w_data_dict['error_bounds'] = np.load(datapath + 'error_rates.npy', allow_pickle=True)[()]
+        except: 
+            w_data_dict['error_bounds'] = 'Constant bounds'
 
 
     return w_data_dicts
+
+
+
+
+# # # # # # # # # # # # # # # # # # # # # # # # # 
+# Maybe use in future as a model                #
+# # # # # # # # # # # # # # # # # # # # # # # # # 
+#
+# def read_text_data(datapath):
+#     # read in the data
+#     data_features = np.load(datapath+'data_features.npy', allow_pickle=True)[()]
+#     weak_signals = np.load(datapath+'weak_signals.npy', allow_pickle=True)[()]
+#     try:
+#         labels = np.load(datapath+'data_labels.npy', allow_pickle=True)[()]
+#         has_labels = True
+#     except:
+#         labels = False
+#         has_labels = False
+
+#     try:
+#         test_features = np.load(datapath+'test_features.npy', allow_pickle=True)[()]
+#         test_labels = np.load(datapath+'test_labels.npy', allow_pickle=True)[()]
+#         has_test_data = True
+#     except:
+#         test_features = False
+#         test_labels = False
+#         has_test_data = False
+
+#     if len(weak_signals.shape) == 2:
+#         n,m = weak_signals.shape
+#         assert n>=m
+#         weak_signals = weak_signals.T.reshape(m,n,1)
+
+
+#     data = {}
+#     data['data_features'] = data_features
+#     data['weak_signals'] = weak_signals
+#     data['labels'] = labels
+#     data['test_features'] = test_features
+#     data['test_labels'] = test_labels
+#     data['has_test_data'] = has_test_data
+#     data['has_labels'] = has_test_data
+
+#     return data
