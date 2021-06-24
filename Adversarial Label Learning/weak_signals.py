@@ -113,12 +113,12 @@ def get_w_data_dicts(data_obj, min_weak_signals, total_weak_signals, weak_sig_da
     #train get weak signals from path
     else:
         w_data_dict = {}
-        w_data_dict['probabilities'] = np.load(datapath + 'weak_signals.npy', allow_pickle=True)[()]
+        w_data_dict['probabilities'] = np.load(weak_sig_datapath + 'weak_signals.npy', allow_pickle=True)[()]
 
         try:
-            w_data_dict['error_bounds'] = np.load(datapath + 'error_rates.npy', allow_pickle=True)[()]
+            w_data_dict['error_bounds'] = np.load(weak_sig_datapath + 'error_rates.npy', allow_pickle=True)[()]
         except: 
-            w_data_dict['error_bounds'] = 'Constant bounds'
+            w_data_dict['error_bounds'] = np.zeros(w_data_dict['probabilities'].size) + 0.3
 
 
     return w_data_dicts
