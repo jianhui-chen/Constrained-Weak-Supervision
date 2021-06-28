@@ -1,0 +1,1441 @@
+{
+    "Adversarial model":{
+        "validation_accuracy":0.8181818181818182,
+        "test_accuracy":0.7889273356401384
+    },
+    "Weak model":{
+        "num_weak_signal":1,
+        "validation_accuracy":[
+            0.922077922077922
+        ],
+        "test_accuracy":[
+            0.9446366782006921
+        ],
+        "baseline_val_accuracy":[
+            0.922077922077922
+        ],
+        "baseline_test_accuracy":[
+            0.9411764705882353
+        ],
+        "gecriteria_val_accuracy":0.8441558441558441,
+        "gecriteria_test_accuracy":0.7958477508650519
+    }
+}{
+    "Adversarial model":{
+        "validation_accuracy":0.8181818181818182,
+        "test_accuracy":0.7889273356401384
+    },
+    "Weak model":{
+        "num_weak_signal":2,
+        "validation_accuracy":[
+            0.922077922077922,
+            0.6
+        ],
+        "test_accuracy":[
+            0.9446366782006921,
+            0.6020761245674741
+        ],
+        "baseline_val_accuracy":[
+            0.9272727272727272
+        ],
+        "baseline_test_accuracy":[
+            0.9446366782006921
+        ],
+        "gecriteria_val_accuracy":0.6701298701298701,
+        "gecriteria_test_accuracy":0.657439446366782
+    }
+}{
+    "Adversarial model":{
+        "validation_accuracy":0.8233766233766234,
+        "test_accuracy":0.7889273356401384
+    },
+    "Weak model":{
+        "num_weak_signal":3,
+        "validation_accuracy":[
+            0.922077922077922,
+            0.6,
+            0.6
+        ],
+        "test_accuracy":[
+            0.9446366782006921,
+            0.6020761245674741,
+            0.5986159169550173
+        ],
+        "baseline_val_accuracy":[
+            0.9376623376623376
+        ],
+        "baseline_test_accuracy":[
+            0.9480968858131488
+        ],
+        "gecriteria_val_accuracy":0.6545454545454545,
+        "gecriteria_test_accuracy":0.629757785467128
+    }
+}{
+    "Adversarial model":{
+        "validation_accuracy":0.825974025974026,
+        "test_accuracy":0.7889273356401384
+    },
+    "Weak model":{
+        "num_weak_signal":1,
+        "validation_accuracy":[
+            0.922077922077922
+        ],
+        "test_accuracy":[
+            0.9446366782006921
+        ],
+        "baseline_val_accuracy":[
+            0.922077922077922
+        ],
+        "baseline_test_accuracy":[
+            0.9411764705882353
+        ],
+        "gecriteria_val_accuracy":0.8441558441558441,
+        "gecriteria_test_accuracy":0.7958477508650519
+    }
+}{
+    "Adversarial model":{
+        "validation_accuracy":0.8103896103896104,
+        "test_accuracy":0.7820069204152249
+    },
+    "Weak model":{
+        "num_weak_signal":2,
+        "validation_accuracy":[
+            0.922077922077922,
+            0.6
+        ],
+        "test_accuracy":[
+            0.9446366782006921,
+            0.6020761245674741
+        ],
+        "baseline_val_accuracy":[
+            0.9272727272727272
+        ],
+        "baseline_test_accuracy":[
+            0.9446366782006921
+        ],
+        "gecriteria_val_accuracy":0.7064935064935065,
+        "gecriteria_test_accuracy":0.6747404844290658
+    }
+}{
+    "Adversarial model":{
+        "validation_accuracy":0.6909090909090909,
+        "test_accuracy":0.6608996539792388
+    },
+    "Weak model":{
+        "num_weak_signal":3,
+        "validation_accuracy":[
+            0.922077922077922,
+            0.6,
+            0.6
+        ],
+        "test_accuracy":[
+            0.9446366782006921,
+            0.6020761245674741,
+            0.5986159169550173
+        ],
+        "baseline_val_accuracy":[
+            0.9376623376623376
+        ],
+        "baseline_test_accuracy":[
+            0.9480968858131488
+        ],
+        "gecriteria_val_accuracy":0.6545454545454545,
+        "gecriteria_test_accuracy":0.6228373702422145
+    }
+}{
+    "Adversarial model":{
+        "validation_accuracy":0.8155844155844156,
+        "test_accuracy":0.8027681660899654
+    },
+    "Weak model":{
+        "num_weak_signal":1,
+        "validation_accuracy":[
+            0.9402597402597402
+        ],
+        "test_accuracy":[
+            0.9446366782006921
+        ],
+        "baseline_val_accuracy":[
+            0.9454545454545454
+        ],
+        "baseline_test_accuracy":[
+            0.9307958477508651
+        ],
+        "gecriteria_val_accuracy":0.8519480519480519,
+        "gecriteria_test_accuracy":0.8373702422145328
+    }
+}{
+    "Adversarial model":{
+        "validation_accuracy":0.812987012987013,
+        "test_accuracy":0.7993079584775087
+    },
+    "Weak model":{
+        "num_weak_signal":2,
+        "validation_accuracy":[
+            0.9402597402597402,
+            0.6
+        ],
+        "test_accuracy":[
+            0.9446366782006921,
+            0.6020761245674741
+        ],
+        "baseline_val_accuracy":[
+            0.9402597402597402
+        ],
+        "baseline_test_accuracy":[
+            0.9377162629757786
+        ],
+        "gecriteria_val_accuracy":0.6337662337662338,
+        "gecriteria_test_accuracy":0.6055363321799307
+    }
+}{
+    "Adversarial model":{
+        "validation_accuracy":0.8181818181818182,
+        "test_accuracy":0.7993079584775087
+    },
+    "Weak model":{
+        "num_weak_signal":3,
+        "validation_accuracy":[
+            0.9402597402597402,
+            0.6,
+            0.625974025974026
+        ],
+        "test_accuracy":[
+            0.9446366782006921,
+            0.6020761245674741,
+            0.5951557093425606
+        ],
+        "baseline_val_accuracy":[
+            0.9298701298701298
+        ],
+        "baseline_test_accuracy":[
+            0.9377162629757786
+        ],
+        "gecriteria_val_accuracy":0.6805194805194805,
+        "gecriteria_test_accuracy":0.657439446366782
+    }
+}{
+    "Adversarial model":{
+        "validation_accuracy":0.8181818181818182,
+        "test_accuracy":0.8062283737024222
+    },
+    "Weak model":{
+        "num_weak_signal":1,
+        "validation_accuracy":[
+            0.9402597402597402
+        ],
+        "test_accuracy":[
+            0.9446366782006921
+        ],
+        "baseline_val_accuracy":[
+            0.9454545454545454
+        ],
+        "baseline_test_accuracy":[
+            0.9307958477508651
+        ],
+        "gecriteria_val_accuracy":0.8519480519480519,
+        "gecriteria_test_accuracy":0.8373702422145328
+    }
+}{
+    "Adversarial model":{
+        "validation_accuracy":0.8285714285714286,
+        "test_accuracy":0.7993079584775087
+    },
+    "Weak model":{
+        "num_weak_signal":2,
+        "validation_accuracy":[
+            0.9402597402597402,
+            0.6
+        ],
+        "test_accuracy":[
+            0.9446366782006921,
+            0.6020761245674741
+        ],
+        "baseline_val_accuracy":[
+            0.9402597402597402
+        ],
+        "baseline_test_accuracy":[
+            0.9377162629757786
+        ],
+        "gecriteria_val_accuracy":0.6,
+        "gecriteria_test_accuracy":0.5640138408304498
+    }
+}{
+    "Adversarial model":{
+        "validation_accuracy":0.6597402597402597,
+        "test_accuracy":0.6332179930795848
+    },
+    "Weak model":{
+        "num_weak_signal":3,
+        "validation_accuracy":[
+            0.9402597402597402,
+            0.6,
+            0.625974025974026
+        ],
+        "test_accuracy":[
+            0.9446366782006921,
+            0.6020761245674741,
+            0.5951557093425606
+        ],
+        "baseline_val_accuracy":[
+            0.9298701298701298
+        ],
+        "baseline_test_accuracy":[
+            0.9377162629757786
+        ],
+        "gecriteria_val_accuracy":0.6961038961038961,
+        "gecriteria_test_accuracy":0.6851211072664359
+    }
+}{
+    "Adversarial model":{
+        "validation_accuracy":0.787012987012987,
+        "test_accuracy":0.8442906574394463
+    },
+    "Weak model":{
+        "num_weak_signal":1,
+        "validation_accuracy":[
+            0.9272727272727272
+        ],
+        "test_accuracy":[
+            0.9619377162629758
+        ],
+        "baseline_val_accuracy":[
+            0.9376623376623376
+        ],
+        "baseline_test_accuracy":[
+            0.9653979238754326
+        ],
+        "gecriteria_val_accuracy":0.7948051948051948,
+        "gecriteria_test_accuracy":0.8512110726643599
+    }
+}{
+    "Adversarial model":{
+        "validation_accuracy":0.7844155844155845,
+        "test_accuracy":0.8442906574394463
+    },
+    "Weak model":{
+        "num_weak_signal":2,
+        "validation_accuracy":[
+            0.9272727272727272,
+            0.6
+        ],
+        "test_accuracy":[
+            0.9619377162629758,
+            0.6020761245674741
+        ],
+        "baseline_val_accuracy":[
+            0.9376623376623376
+        ],
+        "baseline_test_accuracy":[
+            0.9550173010380623
+        ],
+        "gecriteria_val_accuracy":0.6727272727272727,
+        "gecriteria_test_accuracy":0.6851211072664359
+    }
+}{
+    "Adversarial model":{
+        "validation_accuracy":0.7896103896103897,
+        "test_accuracy":0.8442906574394463
+    },
+    "Weak model":{
+        "num_weak_signal":3,
+        "validation_accuracy":[
+            0.9272727272727272,
+            0.6,
+            0.6077922077922078
+        ],
+        "test_accuracy":[
+            0.9619377162629758,
+            0.6020761245674741,
+            0.6055363321799307
+        ],
+        "baseline_val_accuracy":[
+            0.9142857142857143
+        ],
+        "baseline_test_accuracy":[
+            0.9446366782006921
+        ],
+        "gecriteria_val_accuracy":0.5688311688311688,
+        "gecriteria_test_accuracy":0.5570934256055363
+    }
+}{
+    "Adversarial model":{
+        "validation_accuracy":0.7896103896103897,
+        "test_accuracy":0.8477508650519031
+    },
+    "Weak model":{
+        "num_weak_signal":1,
+        "validation_accuracy":[
+            0.9272727272727272
+        ],
+        "test_accuracy":[
+            0.9619377162629758
+        ],
+        "baseline_val_accuracy":[
+            0.9376623376623376
+        ],
+        "baseline_test_accuracy":[
+            0.9653979238754326
+        ],
+        "gecriteria_val_accuracy":0.7948051948051948,
+        "gecriteria_test_accuracy":0.8512110726643599
+    }
+}{
+    "Adversarial model":{
+        "validation_accuracy":0.7506493506493507,
+        "test_accuracy":0.8166089965397924
+    },
+    "Weak model":{
+        "num_weak_signal":2,
+        "validation_accuracy":[
+            0.9272727272727272,
+            0.6
+        ],
+        "test_accuracy":[
+            0.9619377162629758,
+            0.6020761245674741
+        ],
+        "baseline_val_accuracy":[
+            0.9376623376623376
+        ],
+        "baseline_test_accuracy":[
+            0.9550173010380623
+        ],
+        "gecriteria_val_accuracy":0.6467532467532467,
+        "gecriteria_test_accuracy":0.6643598615916955
+    }
+}{
+    "Adversarial model":{
+        "validation_accuracy":0.6831168831168831,
+        "test_accuracy":0.7024221453287197
+    },
+    "Weak model":{
+        "num_weak_signal":3,
+        "validation_accuracy":[
+            0.9272727272727272,
+            0.6,
+            0.6077922077922078
+        ],
+        "test_accuracy":[
+            0.9619377162629758,
+            0.6020761245674741,
+            0.6055363321799307
+        ],
+        "baseline_val_accuracy":[
+            0.9142857142857143
+        ],
+        "baseline_test_accuracy":[
+            0.9446366782006921
+        ],
+        "gecriteria_val_accuracy":0.5896103896103896,
+        "gecriteria_test_accuracy":0.5847750865051903
+    }
+}{
+    "Adversarial model":{
+        "validation_accuracy":0.8077922077922078,
+        "test_accuracy":0.8131487889273357
+    },
+    "Weak model":{
+        "num_weak_signal":1,
+        "validation_accuracy":[
+            0.9298701298701298
+        ],
+        "test_accuracy":[
+            0.9411764705882353
+        ],
+        "baseline_val_accuracy":[
+            0.9376623376623376
+        ],
+        "baseline_test_accuracy":[
+            0.9377162629757786
+        ],
+        "gecriteria_val_accuracy":0.8363636363636363,
+        "gecriteria_test_accuracy":0.8615916955017301
+    }
+}{
+    "Adversarial model":{
+        "validation_accuracy":0.8077922077922078,
+        "test_accuracy":0.8131487889273357
+    },
+    "Weak model":{
+        "num_weak_signal":2,
+        "validation_accuracy":[
+            0.9298701298701298,
+            0.6
+        ],
+        "test_accuracy":[
+            0.9411764705882353,
+            0.6020761245674741
+        ],
+        "baseline_val_accuracy":[
+            0.9298701298701298
+        ],
+        "baseline_test_accuracy":[
+            0.9411764705882353
+        ],
+        "gecriteria_val_accuracy":0.6571428571428571,
+        "gecriteria_test_accuracy":0.6955017301038062
+    }
+}{
+    "Adversarial model":{
+        "validation_accuracy":0.8077922077922078,
+        "test_accuracy":0.8131487889273357
+    },
+    "Weak model":{
+        "num_weak_signal":3,
+        "validation_accuracy":[
+            0.9298701298701298,
+            0.6,
+            0.6077922077922078
+        ],
+        "test_accuracy":[
+            0.9411764705882353,
+            0.6020761245674741,
+            0.6228373702422145
+        ],
+        "baseline_val_accuracy":[
+            0.922077922077922
+        ],
+        "baseline_test_accuracy":[
+            0.9377162629757786
+        ],
+        "gecriteria_val_accuracy":0.6181818181818182,
+        "gecriteria_test_accuracy":0.6401384083044983
+    }
+}{
+    "Adversarial model":{
+        "validation_accuracy":0.8103896103896104,
+        "test_accuracy":0.8096885813148789
+    },
+    "Weak model":{
+        "num_weak_signal":1,
+        "validation_accuracy":[
+            0.9298701298701298
+        ],
+        "test_accuracy":[
+            0.9411764705882353
+        ],
+        "baseline_val_accuracy":[
+            0.9376623376623376
+        ],
+        "baseline_test_accuracy":[
+            0.9377162629757786
+        ],
+        "gecriteria_val_accuracy":0.8363636363636363,
+        "gecriteria_test_accuracy":0.8615916955017301
+    }
+}{
+    "Adversarial model":{
+        "validation_accuracy":0.7714285714285715,
+        "test_accuracy":0.7923875432525952
+    },
+    "Weak model":{
+        "num_weak_signal":2,
+        "validation_accuracy":[
+            0.9298701298701298,
+            0.6
+        ],
+        "test_accuracy":[
+            0.9411764705882353,
+            0.6020761245674741
+        ],
+        "baseline_val_accuracy":[
+            0.9298701298701298
+        ],
+        "baseline_test_accuracy":[
+            0.9411764705882353
+        ],
+        "gecriteria_val_accuracy":0.5896103896103896,
+        "gecriteria_test_accuracy":0.6332179930795848
+    }
+}{
+    "Adversarial model":{
+        "validation_accuracy":0.6415584415584416,
+        "test_accuracy":0.6885813148788927
+    },
+    "Weak model":{
+        "num_weak_signal":3,
+        "validation_accuracy":[
+            0.9298701298701298,
+            0.6,
+            0.6077922077922078
+        ],
+        "test_accuracy":[
+            0.9411764705882353,
+            0.6020761245674741,
+            0.6228373702422145
+        ],
+        "baseline_val_accuracy":[
+            0.922077922077922
+        ],
+        "baseline_test_accuracy":[
+            0.9377162629757786
+        ],
+        "gecriteria_val_accuracy":0.625974025974026,
+        "gecriteria_test_accuracy":0.6782006920415224
+    }
+}{
+    "Adversarial model":{
+        "validation_accuracy":0.7818181818181819,
+        "test_accuracy":0.8027681660899654
+    },
+    "Weak model":{
+        "num_weak_signal":1,
+        "validation_accuracy":[
+            0.9402597402597402
+        ],
+        "test_accuracy":[
+            0.9377162629757786
+        ],
+        "baseline_val_accuracy":[
+            0.9402597402597402
+        ],
+        "baseline_test_accuracy":[
+            0.9273356401384083
+        ],
+        "gecriteria_val_accuracy":0.7896103896103897,
+        "gecriteria_test_accuracy":0.8131487889273357
+    }
+}{
+    "Adversarial model":{
+        "validation_accuracy":0.7818181818181819,
+        "test_accuracy":0.8027681660899654
+    },
+    "Weak model":{
+        "num_weak_signal":2,
+        "validation_accuracy":[
+            0.9402597402597402,
+            0.6
+        ],
+        "test_accuracy":[
+            0.9377162629757786,
+            0.6020761245674741
+        ],
+        "baseline_val_accuracy":[
+            0.948051948051948
+        ],
+        "baseline_test_accuracy":[
+            0.9307958477508651
+        ],
+        "gecriteria_val_accuracy":0.612987012987013,
+        "gecriteria_test_accuracy":0.643598615916955
+    }
+}{
+    "Adversarial model":{
+        "validation_accuracy":0.7792207792207793,
+        "test_accuracy":0.8062283737024222
+    },
+    "Weak model":{
+        "num_weak_signal":3,
+        "validation_accuracy":[
+            0.9402597402597402,
+            0.6,
+            0.587012987012987
+        ],
+        "test_accuracy":[
+            0.9377162629757786,
+            0.6020761245674741,
+            0.5847750865051903
+        ],
+        "baseline_val_accuracy":[
+            0.9558441558441558
+        ],
+        "baseline_test_accuracy":[
+            0.9411764705882353
+        ],
+        "gecriteria_val_accuracy":0.6285714285714286,
+        "gecriteria_test_accuracy":0.6643598615916955
+    }
+}{
+    "Adversarial model":{
+        "validation_accuracy":0.7844155844155845,
+        "test_accuracy":0.8096885813148789
+    },
+    "Weak model":{
+        "num_weak_signal":1,
+        "validation_accuracy":[
+            0.9402597402597402
+        ],
+        "test_accuracy":[
+            0.9377162629757786
+        ],
+        "baseline_val_accuracy":[
+            0.9402597402597402
+        ],
+        "baseline_test_accuracy":[
+            0.9273356401384083
+        ],
+        "gecriteria_val_accuracy":0.7896103896103897,
+        "gecriteria_test_accuracy":0.8131487889273357
+    }
+}{
+    "Adversarial model":{
+        "validation_accuracy":0.7948051948051948,
+        "test_accuracy":0.7923875432525952
+    },
+    "Weak model":{
+        "num_weak_signal":2,
+        "validation_accuracy":[
+            0.9402597402597402,
+            0.6
+        ],
+        "test_accuracy":[
+            0.9377162629757786,
+            0.6020761245674741
+        ],
+        "baseline_val_accuracy":[
+            0.948051948051948
+        ],
+        "baseline_test_accuracy":[
+            0.9307958477508651
+        ],
+        "gecriteria_val_accuracy":0.6727272727272727,
+        "gecriteria_test_accuracy":0.71280276816609
+    }
+}{
+    "Adversarial model":{
+        "validation_accuracy":0.6519480519480519,
+        "test_accuracy":0.671280276816609
+    },
+    "Weak model":{
+        "num_weak_signal":3,
+        "validation_accuracy":[
+            0.9402597402597402,
+            0.6,
+            0.587012987012987
+        ],
+        "test_accuracy":[
+            0.9377162629757786,
+            0.6020761245674741,
+            0.5847750865051903
+        ],
+        "baseline_val_accuracy":[
+            0.9558441558441558
+        ],
+        "baseline_test_accuracy":[
+            0.9411764705882353
+        ],
+        "gecriteria_val_accuracy":0.612987012987013,
+        "gecriteria_test_accuracy":0.6470588235294118
+    }
+}{
+    "Adversarial model":{
+        "validation_accuracy":0.8025974025974026,
+        "test_accuracy":0.7854671280276817
+    },
+    "Weak model":{
+        "num_weak_signal":1,
+        "validation_accuracy":[
+            0.9428571428571428
+        ],
+        "test_accuracy":[
+            0.9480968858131488
+        ],
+        "baseline_val_accuracy":[
+            0.9402597402597402
+        ],
+        "baseline_test_accuracy":[
+            0.9446366782006921
+        ],
+        "gecriteria_val_accuracy":0.8077922077922078,
+        "gecriteria_test_accuracy":0.8166089965397924
+    }
+}{
+    "Adversarial model":{
+        "validation_accuracy":0.8025974025974026,
+        "test_accuracy":0.7889273356401384
+    },
+    "Weak model":{
+        "num_weak_signal":2,
+        "validation_accuracy":[
+            0.9428571428571428,
+            0.6
+        ],
+        "test_accuracy":[
+            0.9480968858131488,
+            0.6020761245674741
+        ],
+        "baseline_val_accuracy":[
+            0.9454545454545454
+        ],
+        "baseline_test_accuracy":[
+            0.9619377162629758
+        ],
+        "gecriteria_val_accuracy":0.6987012987012987,
+        "gecriteria_test_accuracy":0.6851211072664359
+    }
+}{
+    "Adversarial model":{
+        "validation_accuracy":0.7974025974025974,
+        "test_accuracy":0.7854671280276817
+    },
+    "Weak model":{
+        "num_weak_signal":3,
+        "validation_accuracy":[
+            0.9428571428571428,
+            0.6,
+            0.5948051948051948
+        ],
+        "test_accuracy":[
+            0.9480968858131488,
+            0.6020761245674741,
+            0.6055363321799307
+        ],
+        "baseline_val_accuracy":[
+            0.9558441558441558
+        ],
+        "baseline_test_accuracy":[
+            0.9515570934256056
+        ],
+        "gecriteria_val_accuracy":0.6779220779220779,
+        "gecriteria_test_accuracy":0.6608996539792388
+    }
+}{
+    "Adversarial model":{
+        "validation_accuracy":0.8025974025974026,
+        "test_accuracy":0.7854671280276817
+    },
+    "Weak model":{
+        "num_weak_signal":1,
+        "validation_accuracy":[
+            0.9428571428571428
+        ],
+        "test_accuracy":[
+            0.9480968858131488
+        ],
+        "baseline_val_accuracy":[
+            0.9402597402597402
+        ],
+        "baseline_test_accuracy":[
+            0.9446366782006921
+        ],
+        "gecriteria_val_accuracy":0.8077922077922078,
+        "gecriteria_test_accuracy":0.8166089965397924
+    }
+}{
+    "Adversarial model":{
+        "validation_accuracy":0.7974025974025974,
+        "test_accuracy":0.8096885813148789
+    },
+    "Weak model":{
+        "num_weak_signal":2,
+        "validation_accuracy":[
+            0.9428571428571428,
+            0.6
+        ],
+        "test_accuracy":[
+            0.9480968858131488,
+            0.6020761245674741
+        ],
+        "baseline_val_accuracy":[
+            0.9454545454545454
+        ],
+        "baseline_test_accuracy":[
+            0.9619377162629758
+        ],
+        "gecriteria_val_accuracy":0.6181818181818182,
+        "gecriteria_test_accuracy":0.6228373702422145
+    }
+}{
+    "Adversarial model":{
+        "validation_accuracy":0.7116883116883117,
+        "test_accuracy":0.698961937716263
+    },
+    "Weak model":{
+        "num_weak_signal":3,
+        "validation_accuracy":[
+            0.9428571428571428,
+            0.6,
+            0.5948051948051948
+        ],
+        "test_accuracy":[
+            0.9480968858131488,
+            0.6020761245674741,
+            0.6055363321799307
+        ],
+        "baseline_val_accuracy":[
+            0.9558441558441558
+        ],
+        "baseline_test_accuracy":[
+            0.9515570934256056
+        ],
+        "gecriteria_val_accuracy":0.6727272727272727,
+        "gecriteria_test_accuracy":0.6643598615916955
+    }
+}{
+    "Adversarial model":{
+        "validation_accuracy":0.7948051948051948,
+        "test_accuracy":0.7716262975778547
+    },
+    "Weak model":{
+        "num_weak_signal":1,
+        "validation_accuracy":[
+            0.9454545454545454
+        ],
+        "test_accuracy":[
+            0.9411764705882353
+        ],
+        "baseline_val_accuracy":[
+            0.9402597402597402
+        ],
+        "baseline_test_accuracy":[
+            0.9377162629757786
+        ],
+        "gecriteria_val_accuracy":0.8077922077922078,
+        "gecriteria_test_accuracy":0.7958477508650519
+    }
+}{
+    "Adversarial model":{
+        "validation_accuracy":0.7948051948051948,
+        "test_accuracy":0.7716262975778547
+    },
+    "Weak model":{
+        "num_weak_signal":2,
+        "validation_accuracy":[
+            0.9454545454545454,
+            0.6
+        ],
+        "test_accuracy":[
+            0.9411764705882353,
+            0.6020761245674741
+        ],
+        "baseline_val_accuracy":[
+            0.948051948051948
+        ],
+        "baseline_test_accuracy":[
+            0.9446366782006921
+        ],
+        "gecriteria_val_accuracy":0.7090909090909091,
+        "gecriteria_test_accuracy":0.6678200692041523
+    }
+}{
+    "Adversarial model":{
+        "validation_accuracy":0.7974025974025974,
+        "test_accuracy":0.7750865051903114
+    },
+    "Weak model":{
+        "num_weak_signal":3,
+        "validation_accuracy":[
+            0.9454545454545454,
+            0.6,
+            0.638961038961039
+        ],
+        "test_accuracy":[
+            0.9411764705882353,
+            0.6020761245674741,
+            0.5813148788927336
+        ],
+        "baseline_val_accuracy":[
+            0.935064935064935
+        ],
+        "baseline_test_accuracy":[
+            0.9307958477508651
+        ],
+        "gecriteria_val_accuracy":0.6753246753246753,
+        "gecriteria_test_accuracy":0.6089965397923875
+    }
+}{
+    "Adversarial model":{
+        "validation_accuracy":0.8,
+        "test_accuracy":0.7716262975778547
+    },
+    "Weak model":{
+        "num_weak_signal":1,
+        "validation_accuracy":[
+            0.9454545454545454
+        ],
+        "test_accuracy":[
+            0.9411764705882353
+        ],
+        "baseline_val_accuracy":[
+            0.9402597402597402
+        ],
+        "baseline_test_accuracy":[
+            0.9377162629757786
+        ],
+        "gecriteria_val_accuracy":0.8077922077922078,
+        "gecriteria_test_accuracy":0.7958477508650519
+    }
+}{
+    "Adversarial model":{
+        "validation_accuracy":0.8051948051948052,
+        "test_accuracy":0.7647058823529411
+    },
+    "Weak model":{
+        "num_weak_signal":2,
+        "validation_accuracy":[
+            0.9454545454545454,
+            0.6
+        ],
+        "test_accuracy":[
+            0.9411764705882353,
+            0.6020761245674741
+        ],
+        "baseline_val_accuracy":[
+            0.948051948051948
+        ],
+        "baseline_test_accuracy":[
+            0.9446366782006921
+        ],
+        "gecriteria_val_accuracy":0.6701298701298701,
+        "gecriteria_test_accuracy":0.6332179930795848
+    }
+}{
+    "Adversarial model":{
+        "validation_accuracy":0.6519480519480519,
+        "test_accuracy":0.629757785467128
+    },
+    "Weak model":{
+        "num_weak_signal":3,
+        "validation_accuracy":[
+            0.9454545454545454,
+            0.6,
+            0.638961038961039
+        ],
+        "test_accuracy":[
+            0.9411764705882353,
+            0.6020761245674741,
+            0.5813148788927336
+        ],
+        "baseline_val_accuracy":[
+            0.935064935064935
+        ],
+        "baseline_test_accuracy":[
+            0.9307958477508651
+        ],
+        "gecriteria_val_accuracy":0.6545454545454545,
+        "gecriteria_test_accuracy":0.615916955017301
+    }
+}{
+    "Adversarial model":{
+        "validation_accuracy":0.8,
+        "test_accuracy":0.7820069204152249
+    },
+    "Weak model":{
+        "num_weak_signal":1,
+        "validation_accuracy":[
+            0.9324675324675324
+        ],
+        "test_accuracy":[
+            0.9584775086505191
+        ],
+        "baseline_val_accuracy":[
+            0.9272727272727272
+        ],
+        "baseline_test_accuracy":[
+            0.9515570934256056
+        ],
+        "gecriteria_val_accuracy":0.8207792207792208,
+        "gecriteria_test_accuracy":0.7958477508650519
+    }
+}{
+    "Adversarial model":{
+        "validation_accuracy":0.8,
+        "test_accuracy":0.7785467128027682
+    },
+    "Weak model":{
+        "num_weak_signal":2,
+        "validation_accuracy":[
+            0.9324675324675324,
+            0.6
+        ],
+        "test_accuracy":[
+            0.9584775086505191,
+            0.6020761245674741
+        ],
+        "baseline_val_accuracy":[
+            0.9298701298701298
+        ],
+        "baseline_test_accuracy":[
+            0.9550173010380623
+        ],
+        "gecriteria_val_accuracy":0.6805194805194805,
+        "gecriteria_test_accuracy":0.6228373702422145
+    }
+}{
+    "Adversarial model":{
+        "validation_accuracy":0.8077922077922078,
+        "test_accuracy":0.7785467128027682
+    },
+    "Weak model":{
+        "num_weak_signal":3,
+        "validation_accuracy":[
+            0.9324675324675324,
+            0.6,
+            0.6285714285714286
+        ],
+        "test_accuracy":[
+            0.9584775086505191,
+            0.6020761245674741,
+            0.6193771626297578
+        ],
+        "baseline_val_accuracy":[
+            0.935064935064935
+        ],
+        "baseline_test_accuracy":[
+            0.9619377162629758
+        ],
+        "gecriteria_val_accuracy":0.6909090909090909,
+        "gecriteria_test_accuracy":0.629757785467128
+    }
+}{
+    "Adversarial model":{
+        "validation_accuracy":0.8103896103896104,
+        "test_accuracy":0.7854671280276817
+    },
+    "Weak model":{
+        "num_weak_signal":1,
+        "validation_accuracy":[
+            0.9324675324675324
+        ],
+        "test_accuracy":[
+            0.9584775086505191
+        ],
+        "baseline_val_accuracy":[
+            0.9272727272727272
+        ],
+        "baseline_test_accuracy":[
+            0.9515570934256056
+        ],
+        "gecriteria_val_accuracy":0.8207792207792208,
+        "gecriteria_test_accuracy":0.7958477508650519
+    }
+}{
+    "Adversarial model":{
+        "validation_accuracy":0.8051948051948052,
+        "test_accuracy":0.7889273356401384
+    },
+    "Weak model":{
+        "num_weak_signal":2,
+        "validation_accuracy":[
+            0.9324675324675324,
+            0.6
+        ],
+        "test_accuracy":[
+            0.9584775086505191,
+            0.6020761245674741
+        ],
+        "baseline_val_accuracy":[
+            0.9298701298701298
+        ],
+        "baseline_test_accuracy":[
+            0.9550173010380623
+        ],
+        "gecriteria_val_accuracy":0.7376623376623377,
+        "gecriteria_test_accuracy":0.6816608996539792
+    }
+}{
+    "Adversarial model":{
+        "validation_accuracy":0.6753246753246753,
+        "test_accuracy":0.629757785467128
+    },
+    "Weak model":{
+        "num_weak_signal":3,
+        "validation_accuracy":[
+            0.9324675324675324,
+            0.6,
+            0.6285714285714286
+        ],
+        "test_accuracy":[
+            0.9584775086505191,
+            0.6020761245674741,
+            0.6193771626297578
+        ],
+        "baseline_val_accuracy":[
+            0.935064935064935
+        ],
+        "baseline_test_accuracy":[
+            0.9619377162629758
+        ],
+        "gecriteria_val_accuracy":0.7220779220779221,
+        "gecriteria_test_accuracy":0.6539792387543253
+    }
+}{
+    "Adversarial model":{
+        "validation_accuracy":0.8025974025974026,
+        "test_accuracy":0.8200692041522492
+    },
+    "Weak model":{
+        "num_weak_signal":1,
+        "validation_accuracy":[
+            0.9428571428571428
+        ],
+        "test_accuracy":[
+            0.9307958477508651
+        ],
+        "baseline_val_accuracy":[
+            0.948051948051948
+        ],
+        "baseline_test_accuracy":[
+            0.9238754325259516
+        ],
+        "gecriteria_val_accuracy":0.8103896103896104,
+        "gecriteria_test_accuracy":0.8373702422145328
+    }
+}{
+    "Adversarial model":{
+        "validation_accuracy":0.8051948051948052,
+        "test_accuracy":0.8200692041522492
+    },
+    "Weak model":{
+        "num_weak_signal":2,
+        "validation_accuracy":[
+            0.9428571428571428,
+            0.6
+        ],
+        "test_accuracy":[
+            0.9307958477508651,
+            0.6020761245674741
+        ],
+        "baseline_val_accuracy":[
+            0.9584415584415584
+        ],
+        "baseline_test_accuracy":[
+            0.9411764705882353
+        ],
+        "gecriteria_val_accuracy":0.6649350649350649,
+        "gecriteria_test_accuracy":0.6851211072664359
+    }
+}{
+    "Adversarial model":{
+        "validation_accuracy":0.8025974025974026,
+        "test_accuracy":0.8200692041522492
+    },
+    "Weak model":{
+        "num_weak_signal":3,
+        "validation_accuracy":[
+            0.9428571428571428,
+            0.6,
+            0.5948051948051948
+        ],
+        "test_accuracy":[
+            0.9307958477508651,
+            0.6020761245674741,
+            0.6228373702422145
+        ],
+        "baseline_val_accuracy":[
+            0.9402597402597402
+        ],
+        "baseline_test_accuracy":[
+            0.9342560553633218
+        ],
+        "gecriteria_val_accuracy":0.6337662337662338,
+        "gecriteria_test_accuracy":0.6228373702422145
+    }
+}{
+    "Adversarial model":{
+        "validation_accuracy":0.8077922077922078,
+        "test_accuracy":0.8200692041522492
+    },
+    "Weak model":{
+        "num_weak_signal":1,
+        "validation_accuracy":[
+            0.9428571428571428
+        ],
+        "test_accuracy":[
+            0.9307958477508651
+        ],
+        "baseline_val_accuracy":[
+            0.948051948051948
+        ],
+        "baseline_test_accuracy":[
+            0.9238754325259516
+        ],
+        "gecriteria_val_accuracy":0.8103896103896104,
+        "gecriteria_test_accuracy":0.8373702422145328
+    }
+}{
+    "Adversarial model":{
+        "validation_accuracy":0.7896103896103897,
+        "test_accuracy":0.8096885813148789
+    },
+    "Weak model":{
+        "num_weak_signal":2,
+        "validation_accuracy":[
+            0.9428571428571428,
+            0.6
+        ],
+        "test_accuracy":[
+            0.9307958477508651,
+            0.6020761245674741
+        ],
+        "baseline_val_accuracy":[
+            0.9584415584415584
+        ],
+        "baseline_test_accuracy":[
+            0.9411764705882353
+        ],
+        "gecriteria_val_accuracy":0.6675324675324675,
+        "gecriteria_test_accuracy":0.6747404844290658
+    }
+}{
+    "Adversarial model":{
+        "validation_accuracy":0.638961038961039,
+        "test_accuracy":0.643598615916955
+    },
+    "Weak model":{
+        "num_weak_signal":3,
+        "validation_accuracy":[
+            0.9428571428571428,
+            0.6,
+            0.5948051948051948
+        ],
+        "test_accuracy":[
+            0.9307958477508651,
+            0.6020761245674741,
+            0.6228373702422145
+        ],
+        "baseline_val_accuracy":[
+            0.9402597402597402
+        ],
+        "baseline_test_accuracy":[
+            0.9342560553633218
+        ],
+        "gecriteria_val_accuracy":0.7064935064935065,
+        "gecriteria_test_accuracy":0.698961937716263
+    }
+}{
+    "Adversarial model":{
+        "validation_accuracy":0.8181818181818182,
+        "test_accuracy":0.8235294117647058
+    },
+    "Weak model":{
+        "num_weak_signal":1,
+        "validation_accuracy":[
+            0.9454545454545454
+        ],
+        "test_accuracy":[
+            0.9550173010380623
+        ],
+        "baseline_val_accuracy":[
+            0.9428571428571428
+        ],
+        "baseline_test_accuracy":[
+            0.9619377162629758
+        ],
+        "gecriteria_val_accuracy":0.8233766233766234,
+        "gecriteria_test_accuracy":0.8339100346020761
+    }
+}{
+    "Adversarial model":{
+        "validation_accuracy":0.8181818181818182,
+        "test_accuracy":0.8235294117647058
+    },
+    "Weak model":{
+        "num_weak_signal":2,
+        "validation_accuracy":[
+            0.9454545454545454,
+            0.5974025974025974
+        ],
+        "test_accuracy":[
+            0.9550173010380623,
+            0.6020761245674741
+        ],
+        "baseline_val_accuracy":[
+            0.9506493506493506
+        ],
+        "baseline_test_accuracy":[
+            0.9584775086505191
+        ],
+        "gecriteria_val_accuracy":0.7948051948051948,
+        "gecriteria_test_accuracy":0.7993079584775087
+    }
+}{
+    "Adversarial model":{
+        "validation_accuracy":0.8155844155844156,
+        "test_accuracy":0.8200692041522492
+    },
+    "Weak model":{
+        "num_weak_signal":3,
+        "validation_accuracy":[
+            0.9454545454545454,
+            0.5974025974025974,
+            0.6233766233766234
+        ],
+        "test_accuracy":[
+            0.9550173010380623,
+            0.6020761245674741,
+            0.6055363321799307
+        ],
+        "baseline_val_accuracy":[
+            0.9272727272727272
+        ],
+        "baseline_test_accuracy":[
+            0.9273356401384083
+        ],
+        "gecriteria_val_accuracy":0.6415584415584416,
+        "gecriteria_test_accuracy":0.657439446366782
+    }
+}{
+    "Adversarial model":{
+        "validation_accuracy":0.8155844155844156,
+        "test_accuracy":0.8269896193771626
+    },
+    "Weak model":{
+        "num_weak_signal":1,
+        "validation_accuracy":[
+            0.9454545454545454
+        ],
+        "test_accuracy":[
+            0.9550173010380623
+        ],
+        "baseline_val_accuracy":[
+            0.9428571428571428
+        ],
+        "baseline_test_accuracy":[
+            0.9619377162629758
+        ],
+        "gecriteria_val_accuracy":0.8233766233766234,
+        "gecriteria_test_accuracy":0.8339100346020761
+    }
+}{
+    "Adversarial model":{
+        "validation_accuracy":0.7844155844155845,
+        "test_accuracy":0.7889273356401384
+    },
+    "Weak model":{
+        "num_weak_signal":2,
+        "validation_accuracy":[
+            0.9454545454545454,
+            0.5974025974025974
+        ],
+        "test_accuracy":[
+            0.9550173010380623,
+            0.6020761245674741
+        ],
+        "baseline_val_accuracy":[
+            0.9506493506493506
+        ],
+        "baseline_test_accuracy":[
+            0.9584775086505191
+        ],
+        "gecriteria_val_accuracy":0.7948051948051948,
+        "gecriteria_test_accuracy":0.7993079584775087
+    }
+}{
+    "Adversarial model":{
+        "validation_accuracy":0.638961038961039,
+        "test_accuracy":0.615916955017301
+    },
+    "Weak model":{
+        "num_weak_signal":3,
+        "validation_accuracy":[
+            0.9454545454545454,
+            0.5974025974025974,
+            0.6233766233766234
+        ],
+        "test_accuracy":[
+            0.9550173010380623,
+            0.6020761245674741,
+            0.6055363321799307
+        ],
+        "baseline_val_accuracy":[
+            0.9272727272727272
+        ],
+        "baseline_test_accuracy":[
+            0.9273356401384083
+        ],
+        "gecriteria_val_accuracy":0.6415584415584416,
+        "gecriteria_test_accuracy":0.657439446366782
+    }
+}

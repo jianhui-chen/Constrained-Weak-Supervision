@@ -1,0 +1,35 @@
+{
+    "cll_label_acc":0.73375,
+    "cll_test_acc":0.82275,
+    "consistency_label_accuracies":[
+        0.942625,
+        0.937625,
+        0.9425625
+    ],
+    "consistency_label_stats":[
+        0.9409375000000001,
+        0.0023424301839471318
+    ],
+    "consistency_test_accuracies":[
+        0.96475,
+        0.9675,
+        0.96925
+    ],
+    "consistency_test_stats":[
+        0.9671666666666666,
+        0.0018521758975743883
+    ],
+    "mv_label_acc":0.7389375,
+    "mv_test_acc":0.78725,
+    "spv_test_acc":0.992
+}{
+    "Cluster_label_accuracies":[
+        0.9980625,
+        0.9980625,
+        0.9980625
+    ],
+    "consistency_stats":[
+        0.9980625,
+        0.0
+    ],
+}

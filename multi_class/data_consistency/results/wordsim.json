@@ -1,0 +1,25 @@
+{
+    "cll_label_acc":0.9,
+    "cll_test_acc":1.0,
+    "consistency_label_accuracies":[
+        0.9,
+        0.8666666666666667,
+        0.9333333333333333
+    ],
+    "consistency_label_stats":[
+        0.9,
+        0.02721655269759086
+    ],
+    "consistency_test_accuracies":[
+        1.0,
+        1.0,
+        1.0
+    ],
+    "consistency_test_stats":[
+        1.0,
+        0.0
+    ],
+    "mv_label_acc":0.8666666666666667,
+    "mv_test_acc":1.0,
+    "spv_test_acc":1.0
+}
