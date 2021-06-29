@@ -390,23 +390,23 @@ class LabelEstimator(BaseClassifier):   # Might want to change the name of Base 
         return probabilities
 
 
-    #def _estimate_labels(self, )
+    def _estimate_labels(self, weak_signals_probas, weak_signals_error_bounds):
+        labels=np.zeros(weak_signals_probas.shape[1]) # no of examples
+        average_weak_labels = np.mean(weak_signals_probas, axis=0)
+        labels[average_weak_labels > 0.5] = 1
+        labels[average_weak_labels <= 0.5] = 0
 
-    def fit(self, X, weak_signals_probas, weak_signals_error_bounds, train_model=None, label_model=None): # can change to get these in init
+        return labels
+
+
+    def fit(self, X, weak_signals_probas, weak_signals_error_bounds, train_model=None): # can change to get these in init
         """
         Option: we can make it so the labels are generated outside of method
             i.e. passed in as y, or change to pass in algo to generate within
             this method
         error_bounds param is not used, but included for consistency
         """
-        labels=np.zeros(weak_signals_probas.shape[1]) # no of examples
-        # Generate labels
-        if label_model is None:
-            average_weak_labels = np.mean(weak_signals_probas, axis=0)
-            labels[average_weak_labels > 0.5] = 1
-            labels[average_weak_labels <= 0.5] = 0
-        else:
-            labels = label_model.fit(X).predict(X) #this can be changed
+        labels = self._estimate_labels(weak_signals_probas, weak_signals_error_bounds)
 
 
         # Fit based on labels generated above
