@@ -7,7 +7,8 @@ import sys
 import numpy as np
 from sklearn.linear_model import LogisticRegression
 from sklearn.metrics import accuracy_score
-from abc import ABC
+from abc import ABC, abstractmethod
+from scipy.optimize import minimize
 
 class BaseClassifier(ABC):
     """
@@ -21,7 +22,7 @@ class BaseClassifier(ABC):
         proba_predictions = self.predict_proba(X)   # the subclass predict_proba will throw an error if not trained
 
         predictions = np.zeros(proba_predictions.size)
-        predictions[probas > 0.5] =1
+        predictions[probas > 0.5] =1    # could also implement by rounding
         return predictions
     
     def get_accuracy(self, true_labels, predicted_labels):
@@ -33,6 +34,33 @@ class BaseClassifier(ABC):
 
     #not abstract
     #def predict_proba
+    def predict_proba(self, X):     # Note to self: this should replace "probablity" function in train_classifier
+        """
+        Computes probability estimates for given class
+        Should be able to be extendable for multi-class implementation
+
+        Parameters
+        ----------
+        X : ndarray of shape (n_features, n_examples)
+            Examples to be assigned a probability (binary)
+
+
+        Returns
+        -------
+        P : ndarray of shape (n_examples,)
+
+        """
+        if self.weights is None:
+            sys.exit("No Data fit")
+        
+        try: 
+            y = self.weights.dot(X)
+        except:
+            y = X(self.weights)
+
+        probas = 1 / (1 + np.exp(-y))    # first line of logistic, squishes y values
+        
+        return probas.ravel()
 
     @abstractmethod 
     def fit(self, X, y=None):
@@ -193,25 +221,11 @@ class ALL(BaseClassifier):
     def get_accuracy(self, true_labels, predicted_labels):
         score = accuracy_score(true_labels, self._predict(predicted_labels))
         return score
-    """
+    
 
 
     def predict_proba(self, X):     # Note to self: this should replace "probablity" function in train_classifier
-        """
-        Computes probability estimates for given class
-        Should be able to be extendable for multi-class implementation
-
-        Parameters
-        ----------
-        X : ndarray of shape (n_features, n_examples)
-            Examples to be assigned a probability (binary)
-
-
-        Returns
-        -------
-        P : ndarray of shape (n_examples,)
-
-        """
+        
         if self.weights is None:
             sys.exit("No Data fit")
         
@@ -223,6 +237,7 @@ class ALL(BaseClassifier):
         probas = 1 / (1 + np.exp(-y))    # first line of logistic, squishes y values
         
         return probas.ravel()
+    """
 
     def _optimize(self, X, learnable_probas, y, rho, gamma, n_examples, lr):
         t = 0
@@ -381,15 +396,184 @@ class Baseline(BaseClassifier):
 
         return probabilities
 
-    def fit(self, X, y=None):
+    def fit(self, X, y=None, train_model=None):
+        """
+        Option: we can make it so the labels are generated outside of method
+            i.e. passed in as y, or change to pass in algo to generate within
+            this method
+        """
+        # Generate labels
         average_weak_labels = np.mean(self.weak_signals_proba, axis=0)
         average_weak_labels[average_weak_labels > 0.5] = 1
         average_weak_labels[average_weak_labels <= 0.5] = 0
 
-        self.model = LogisticRegression(solver = "lbfgs", max_iter= 1000)
+
+        # Fit based on labels generated above
+        if train_model is None:
+            self.model = LogisticRegression(solver = "lbfgs", max_iter= 1000)
+        else:
+            self.model = train_model
         try:
             self.model.fit(X.T, average_weak_labels)
         except:
             print("The mean of the baseline labels is %f" %np.mean(average_weak_labels))
             sys.exit(1)
         return self
+
+
+class GECriterion(BaseClassifier):
+    """
+    GE Criterion class for implementation
+    """
+
+    def __init__(self, weak_signals_proba, weak_signals_error_bounds, 
+                 max_iter=None, log_name=None):
+        # based on args
+        self.weak_signals_proba = weak_signals_proba
+        self.weak_signals_error_bounds = weak_signals_error_bounds #don't need these
+        self.max_iter = max_iter
+
+        if log_name is None:
+            self.logger = None
+        elif type(log_name) is str:
+            self.logger = Logger("logs/Baseline/" + log_name + "/" + 
+                                 str(weak_signals_proba.shape[0]) + 
+                                 "_weak_signals/")      # this can be modified to include date and time in file name
+        else:
+            sys.exit("Not of string type")
+
+        # not based on args bc based on feature number
+        self.weights = None
+    
+    # Uses prediction stuff in parent class
+
+    def _compute_reference_distribution(self, y, weak_signal_proba):
+        """
+        Computes the score value of the reference expectation
+
+        :param labels: size n labels for each instance in the dataset
+        :type labels: array
+        :param weak_signal: weak signal trained using one dimensional feature
+        :type  weak_signal: array
+        :return: tuple containing scalar values of positive and negative reference probability distribution
+        :rtype: float
+        """
+        threshold = 0.5
+        positive_index = np.where(weak_signal_proba >= threshold)
+        negative_index = np.where(weak_signal_proba < threshold)
+        pos_feature_labels = y[positive_index]
+        neg_feature_labels = y[negative_index]
+
+        try:
+            with np.errstate(all='ignore'):
+                reference_pos_probability = np.sum(pos_feature_labels) / pos_feature_labels.size
+                reference_neg_probability = np.sum(neg_feature_labels) / neg_feature_labels.size
+        except:
+            reference_pos_probability = np.nan_to_num(np.sum(pos_feature_labels) / pos_feature_labels.size) + 0
+            reference_neg_probability = np.nan_to_num(np.sum(neg_feature_labels) / neg_feature_labels.size) + 0
+
+        return reference_pos_probability, reference_neg_probability
+
+    def _compute_empirical_distribution(self, est_probability, weak_signal_proba):
+        """
+        Computes the score value of the emperical distribution
+
+        :param est_probability: size n estimated probabtilities for the instances
+        :type labels: array
+        :param weak_signal_proba: weak signal trained using one dimensional feature
+        :type  weak_signal: array
+        :return: (tuple of scalar values of the empirical distribution, tuple of index of instances)
+        :rtype: tuple
+        """
+        threshold = 0.5
+        positive_index = np.where(weak_signal_proba >= threshold)
+        negative_index = np.where(weak_signal_proba < threshold)
+        pos_feature_labels = est_probability[positive_index]
+        neg_feature_labels = est_probability[negative_index]
+
+        try:
+            with np.errstate(all='ignore'):
+                empirical_pos_probability = np.sum(pos_feature_labels) / pos_feature_labels.size
+                empirical_neg_probability = np.sum(neg_feature_labels) / neg_feature_labels.size
+        except:
+            empirical_pos_probability = np.nan_to_num(np.sum(pos_feature_labels) / pos_feature_labels.size) + 0
+            empirical_neg_probability = np.nan_to_num(np.sum(neg_feature_labels) / neg_feature_labels.size) + 0
+
+        empirical_probability = empirical_pos_probability, empirical_neg_probability
+        instances_index = positive_index, negative_index
+        return empirical_probability, instances_index
+
+    def _train_ge_criteria(self, X, y, new_weights):
+        """
+        This internal function returns the objective value of ge criteria
+
+        :param new_weights: weights to use for computing multinomial logistic regression
+        :type new_weights: ndarray
+        :return: tuple containing (objective, gradient)
+        :rtype: (float, array)
+        """
+
+        obj = 0
+        score = X.dot(new_weights)
+        #probs, grad = logistic(score)
+        probs = 1 / (1 + np.exp(-score))
+        grad = probs * (1 - probs)
+        gradient = 0
+        num_weak_signals = self.weak_signals_proba.shape[0]
+        # Code to compute the objective function
+        for i in range(num_weak_signals):
+            weak_signal_proba = self.weak_signal_probas[i]
+            reference_probs = self._compute_reference_distribution(y, weak_signal_proba)
+            empirical_probs, index = self._compute_empirical_distribution(probs, weak_signal_proba)
+
+            # empirical computations
+            pos_empirical_probs, neg_empirical_probs = empirical_probs
+            pos_index, neg_index = index
+
+            # reference computations
+            pos_reference_probs, neg_reference_probs = reference_probs
+
+            try:
+                with np.errstate(all='ignore'):
+                    # compute objective for positive probabilities
+                    obj += pos_reference_probs * np.log(pos_reference_probs / pos_empirical_probs)
+                    gradient += (pos_reference_probs / pos_empirical_probs) * X[pos_index].T.dot(grad[pos_index]) / grad[pos_index].size
+
+                    # compute objective for negative probabilities
+                    obj += neg_reference_probs * np.log(neg_reference_probs / neg_empirical_probs)
+                    gradient += (neg_reference_probs / neg_empirical_probs) * X[neg_index].T.dot(grad[neg_index]) / grad[neg_index].size
+            except:
+                # compute objective for positive probabilities
+                obj += np.nan_to_num(pos_reference_probs * np.log(pos_reference_probs / pos_empirical_probs))
+                gradient += np.nan_to_num((pos_reference_probs / pos_empirical_probs) * X[pos_index].T.dot(grad[pos_index]) / grad[pos_index].size)
+
+                # compute objective for negative probabilities
+                obj += np.nan_to_num(neg_reference_probs * np.log(neg_reference_probs / neg_empirical_probs))
+                gradient += np.nan_to_num((neg_reference_probs / neg_empirical_probs) * X[neg_index].T.dot(grad[neg_index]) / grad[neg_index].size)
+
+        objective = obj + (0.5 * np.sum(new_weights**2))
+        gradient = new_weights - gradient
+
+        return objective, gradient
+
+
+    def fit(self, X, y):
+        """
+        X is passed in as (d, n), to match the other fits.
+        X is thus transposed until this is fixed
+        Removed the check gradient param
+        """
+
+        if y is None:
+            sys.exit("GE Criterion requires labels")
+
+        X = X.T 
+        n, d = X.shape
+        self.weights = np.random.rand(d)
+
+        # optimizer
+        res = minimize(lambda w: self._train_ge_criteria(w)[0], jac=lambda w: self._train_ge_criteria(w)[1].ravel(), x0=self.weights) 
+        self.weights = res.x
+
+        return self
+        

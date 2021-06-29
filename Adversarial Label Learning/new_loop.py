@@ -62,7 +62,13 @@ def new_run_experiment(data_obj, w_data_dicts, constant_bound=False):
 
     num_features, num_data_points = dev_data.shape
     
-
+    """
+    print(w_data_dicts[2]['probabilities'].shape)
+    print(w_data_dicts[2]['probabilities'].shape[0])
+    print(w_data_dicts[0]['probabilities'].shape[0])
+    print(w_data_dicts[2]['probabilities'][0])
+    exit()
+    """
 
     for num_loops, w_data_dict in enumerate(w_data_dicts, 1): #begins from 1
 
