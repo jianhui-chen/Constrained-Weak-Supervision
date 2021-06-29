@@ -88,7 +88,13 @@ def new_run_experiment(data_obj, w_data_dicts, constant_bound=False):
         train_accuracy            = []
         test_accuracy             = []
 
-
+        """
+        print(np.mean(weak_signal_probabilities, axis=0))
+        print(weak_signal_probabilities.shape)
+        print(weak_signal_probabilities.shape[1])
+        print(np.mean(weak_signal_probabilities, axis=0).shape)
+        exit()
+        """
         all_model_const = ALL(weak_signal_probabilities, np.zeros(weak_signal_ub.size) + 0.3, log_name="constant")
         all_model       = ALL(weak_signal_probabilities, weak_signal_ub, log_name="nonconstant")
         baseline_model  = Baseline(weak_signal_probabilities, weak_signal_ub)
@@ -166,7 +172,7 @@ def new_run_experiment(data_obj, w_data_dicts, constant_bound=False):
         # adversarial_acc_dicts.append(adversarial_acc_dict)
         # w_acc_dicts.append(w_acc_dict)
     
-
+    """
     # calculate ge criteria
     print("+++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++")
     print("Running tests on ge criteria...")
@@ -179,7 +185,7 @@ def new_run_experiment(data_obj, w_data_dicts, constant_bound=False):
     # w_acc_dict['gecriteria_train_accuracy'] = ge_train_accuracy
     # w_acc_dict['gecriteria_test_accuracy'] = ge_test_accuracy
     print("+++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++")
-
+    """
     # return adversarial_acc_dicts, w_acc_dicts
 
 

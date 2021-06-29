@@ -403,16 +403,20 @@ class Baseline(BaseClassifier):
 
         return probabilities
 
-    def fit(self, X, y=None, train_model=None):
+    def fit(self, X, y=None, train_model=None, label_model=None): # can change to get these in init
         """
         Option: we can make it so the labels are generated outside of method
             i.e. passed in as y, or change to pass in algo to generate within
             this method
         """
+        labels=np.zeros(self.weak_signals_proba.shape[1]) # no of examples
         # Generate labels
-        average_weak_labels = np.mean(self.weak_signals_proba, axis=0)
-        average_weak_labels[average_weak_labels > 0.5] = 1
-        average_weak_labels[average_weak_labels <= 0.5] = 0
+        if label_model is None:
+            average_weak_labels = np.mean(self.weak_signals_proba, axis=0)
+            labels[average_weak_labels > 0.5] = 1
+            labels[average_weak_labels <= 0.5] = 0
+        else:
+            labels = label_model.fit(X).predict(X) #this can be changed
 
 
         # Fit based on labels generated above
@@ -420,10 +424,11 @@ class Baseline(BaseClassifier):
             self.model = LogisticRegression(solver = "lbfgs", max_iter= 1000)
         else:
             self.model = train_model
+
         try:
-            self.model.fit(X.T, average_weak_labels)
+            self.model.fit(X.T, labels)
         except:
-            print("The mean of the baseline labels is %f" %np.mean(average_weak_labels))
+            print("The mean of the baseline labels is %f" %np.mean(labels))
             sys.exit(1)
         return self
 
