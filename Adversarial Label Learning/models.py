@@ -352,9 +352,9 @@ class ALL(BaseClassifier):
        
 
 
-class Baseline(BaseClassifier):
+class LabelEstimator(BaseClassifier):   # Might want to change the name of Base Classifier?
     """
-    Baseline Classifier
+    Label Estimator + Classifier
     Need to add more on its functionality. 
     """
 
@@ -402,6 +402,9 @@ class Baseline(BaseClassifier):
         
 
         return probabilities
+
+
+    #def _estimate_labels(self, )
 
     def fit(self, X, y=None, train_model=None, label_model=None): # can change to get these in init
         """

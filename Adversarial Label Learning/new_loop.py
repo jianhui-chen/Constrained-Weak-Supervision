@@ -7,7 +7,7 @@ from log import Logger, log_accuracy
 import json
 import math
 
-from models import ALL, Baseline, GECriterion
+from models import ALL, LabelEstimator, GECriterion
 
 
 
@@ -97,10 +97,10 @@ def new_run_experiment(data_obj, w_data_dicts, constant_bound=False):
         """
         all_model_const = ALL(weak_signal_probabilities, np.zeros(weak_signal_ub.size) + 0.3, log_name="constant")
         all_model       = ALL(weak_signal_probabilities, weak_signal_ub, log_name="nonconstant")
-        baseline_model  = Baseline(weak_signal_probabilities, weak_signal_ub)
+        ave_model  = LabelEstimator(weak_signal_probabilities, weak_signal_ub)
         ge_model = GECriterion(weak_signal_probabilities, weak_signal_ub)
 
-        models = [all_model_const, all_model, baseline_model, ge_model]
+        models = [all_model_const, all_model, ave_model, ge_model]
 
         for model_np, model in enumerate(models):
             print("Running: " + experiment_names[model_np] + " with " + str(num_loops) + " weak signals...")
