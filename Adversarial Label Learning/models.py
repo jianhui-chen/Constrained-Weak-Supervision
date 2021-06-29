@@ -74,6 +74,18 @@ class BaseClassifier(ABC):
         """
         pass
 
+
+"""
+Potentially the following methods can be moved out of this class:
+_objective_function
+_gamma_gradient
+_y_gradient
+
+
+"""
+
+
+
 class ALL(BaseClassifier):
     """
     Adversarial Label Learning Classifier
@@ -120,14 +132,13 @@ class ALL(BaseClassifier):
 
         # not based on args bc based on feature number
         self.weights = None
-        self.weak_signals_probas = None
-        self.weak_signals_error_bounds = None
+
        
 
 
     # Following functions beginning with _ may be moved out of class
 
-    def _objective_function(self, y, learnable_probabilities, rho, gamma):
+    def _objective_function(self, y, weak_signals_probas, weak_signals_error_bounds, learnable_probabilities, rho, gamma):
         """
         Computes the value of the objective function
 
@@ -147,8 +158,8 @@ class ALL(BaseClassifier):
         objective = np.dot(learnable_probabilities, 1 - y) + np.dot(1 - learnable_probabilities, y)
         objective = np.sum(objective) / n
 
-        weak_term = np.dot(1 - self.weak_signals_probas, y) + np.dot(self.weak_signals_probas, 1 - y)
-        ineq_constraint = (weak_term / n) - self.weak_signals_error_bounds
+        weak_term = np.dot(1 - weak_signals_probas, y) + np.dot(weak_signals_probas, 1 - y)
+        ineq_constraint = (weak_term / n) - weak_signals_error_bounds
         gamma_term = np.dot(gamma.T, ineq_constraint)
 
         ineq_constraint = ineq_constraint.clip(min=0)
@@ -178,7 +189,7 @@ class ALL(BaseClassifier):
         return grad
 
 
-    def _gamma_gradient(self, y):
+    def _gamma_gradient(self, y, weak_signals_probas, weak_signals_error_bounds):
         """
         Computes the gradient of lagrangian inequality penalty parameters
 
@@ -188,15 +199,15 @@ class ALL(BaseClassifier):
         :return: vector of length gamma containing the gradient of gamma
         :rtype: array
         """
-        _, n = self.weak_signals_probas.shape
+        _, n = weak_signals_probas.shape
 
-        weak_term = np.dot(1 - self.weak_signals_probas, y) + np.dot(self.weak_signals_probas, 1 - y)
-        ineq_constraint = (weak_term / n) - self.weak_signals_error_bounds
+        weak_term = np.dot(1 - weak_signals_probas, y) + np.dot(weak_signals_probas, 1 - y)
+        ineq_constraint = (weak_term / n) - weak_signals_error_bounds
 
         return ineq_constraint
 
 
-    def _y_gradient(self, y, learnable_probabilities, rho, gamma):
+    def _y_gradient(self, y, weak_signals_probas, weak_signals_error_bounds, learnable_probabilities, rho, gamma):
         """
         Computes the gradient y
 
@@ -208,11 +219,11 @@ class ALL(BaseClassifier):
         learnable_term = 1 - (2 * learnable_probabilities)
         learnable_term = np.sum(learnable_term, axis=0) / n
 
-        ls_term = 1 - (2 * self.weak_signals_probas)
+        ls_term = 1 - (2 * weak_signals_probas)
         gamma_term = np.dot(gamma.T, ls_term) / n
 
-        weak_term = np.dot(1 - self.weak_signals_probas, y) + np.dot(self.weak_signals_probas, 1 - y)
-        ineq_constraint = (weak_term / n) - self.weak_signals_error_bounds
+        weak_term = np.dot(1 - weak_signals_probas, y) + np.dot(weak_signals_probas, 1 - y)
+        ineq_constraint = (weak_term / n) - weak_signals_error_bounds
         ineq_constraint = ineq_constraint.clip(min=0)
         ineq_augmented_term = rho * np.dot(ineq_constraint.T, ls_term)
 
@@ -236,7 +247,7 @@ class ALL(BaseClassifier):
         return probas.ravel()
    
 
-    def _optimize(self, X, learnable_probas, y, rho, gamma, n_examples, lr):
+    def _optimize(self, X, weak_signals_probas, weak_signals_error_bounds, learnable_probas, y, rho, gamma, n_examples, lr):
         t = 0
         converged = False
         while not converged and t < self.max_iter:
@@ -244,7 +255,7 @@ class ALL(BaseClassifier):
 
             # update y
             old_y = y
-            y_grad = self._y_gradient(y, learnable_probas, rho, gamma)
+            y_grad = self._y_gradient(y, weak_signals_probas, weak_signals_error_bounds, learnable_probas, rho, gamma)
             y = y + rate * y_grad
             # projection step: clip y to [0, 1]
             y = y.clip(min=0, max=1)
@@ -254,7 +265,7 @@ class ALL(BaseClassifier):
 
             # update gamma
             old_gamma = gamma
-            gamma_grad = self._gamma_gradient(old_y)
+            gamma_grad = self._gamma_gradient(old_y, weak_signals_probas, weak_signals_error_bounds)
             gamma = gamma - rho * gamma_grad
             gamma = gamma.clip(max=0)
 
@@ -271,13 +282,13 @@ class ALL(BaseClassifier):
             conv_y = np.linalg.norm(y - old_y)
 
             # check that inequality constraints are satisfied
-            ineq_constraint = self._gamma_gradient(y)
+            ineq_constraint = self._gamma_gradient(y, weak_signals_probas, weak_signals_error_bounds)
             ineq_infeas = np.linalg.norm(ineq_constraint.clip(min=0))
 
             converged = np.isclose(0, conv_y, atol=1e-6) and np.isclose(0, ineq_infeas, atol=1e-6) and np.isclose(0, conv_weights, atol=1e-5)
 
             if t % 1000 == 0:
-                lagrangian_obj = self._objective_function(y, learnable_probas, rho, gamma) # might be slow
+                lagrangian_obj = self._objective_function(y, weak_signals_probas, weak_signals_error_bounds, learnable_probas, rho, gamma) # might be slow
                 primal_objective = np.dot(learnable_probas, 1 - y) + np.dot(1 - learnable_probas, y)
                 primal_objective = np.sum(primal_objective) / n_examples
                 # print("Iter %d. Weights Infeas: %f, Y_Infeas: %f, Ineq Infeas: %f, lagrangian: %f, obj: %f" % (t, np.sum(conv_weights), conv_y,
@@ -318,8 +329,7 @@ class ALL(BaseClassifier):
 
         """
         self.weights = np.zeros(X.shape[0]) # this should be length of n_features
-        self.weak_signals_probas = weak_signals_probas
-        self.weak_signals_error_bounds = weak_signals_error_bounds
+   
         self.train_data = X
         n_examples = X.shape[1]
 
@@ -333,10 +343,10 @@ class ALL(BaseClassifier):
         learnable_probas = self.predict_proba(X)
 
         if self.logger is None:
-            return self._optimize(X, learnable_probas, y, rho, gamma, n_examples, lr)
+            return self._optimize(X, weak_signals_probas, weak_signals_error_bounds, learnable_probas, y, rho, gamma, n_examples, lr)
         else:
             with self.logger.writer.as_default():
-                return self._optimize(X, learnable_probas, y, rho, gamma, n_examples, lr)
+                return self._optimize(X, weak_signals_probas, weak_signals_error_bounds, learnable_probas, y, rho, gamma, n_examples, lr)
             
         return self
     
