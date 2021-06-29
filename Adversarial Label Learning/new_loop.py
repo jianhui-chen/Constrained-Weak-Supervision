@@ -7,7 +7,7 @@ from log import Logger, log_accuracy
 import json
 import math
 
-from models import ALL, Baseline
+from models import ALL, Baseline, GECriterion
 
 
 
@@ -49,7 +49,7 @@ def new_run_experiment(data_obj, w_data_dicts, constant_bound=False):
     adversarial_acc_dicts = []
     w_acc_dicts = []
 
-    experiment_names = ["ALL w/ constant bounds", "ALL w/ computed bounds", "Avergaing Baseline"]
+    experiment_names = ["ALL w/ constant bounds", "ALL w/ computed bounds", "Avergaing Baseline", "GE Crit"]
 
     data = data_obj.data
 
@@ -62,7 +62,13 @@ def new_run_experiment(data_obj, w_data_dicts, constant_bound=False):
 
     num_features, num_data_points = dev_data.shape
     
-
+    """
+    print(w_data_dicts[2]['probabilities'].shape)
+    print(w_data_dicts[2]['probabilities'].shape[0])
+    print(w_data_dicts[0]['probabilities'].shape[0])
+    print(w_data_dicts[2]['probabilities'][0])
+    exit()
+    """
 
     for num_loops, w_data_dict in enumerate(w_data_dicts, 1): #begins from 1
 
@@ -82,21 +88,42 @@ def new_run_experiment(data_obj, w_data_dicts, constant_bound=False):
         train_accuracy            = []
         test_accuracy             = []
 
-
+        """
+        print(np.mean(weak_signal_probabilities, axis=0))
+        print(weak_signal_probabilities.shape)
+        print(weak_signal_probabilities.shape[1])
+        print(np.mean(weak_signal_probabilities, axis=0).shape)
+        exit()
+        """
         all_model_const = ALL(weak_signal_probabilities, np.zeros(weak_signal_ub.size) + 0.3, log_name="constant")
         all_model       = ALL(weak_signal_probabilities, weak_signal_ub, log_name="nonconstant")
         baseline_model  = Baseline(weak_signal_probabilities, weak_signal_ub)
+        ge_model = GECriterion(weak_signal_probabilities, weak_signal_ub)
 
-        models = [all_model_const, all_model, baseline_model]
+        models = [all_model_const, all_model, baseline_model, ge_model]
 
         for model_np, model in enumerate(models):
             print("Running: " + experiment_names[model_np] + " with " + str(num_loops) + " weak signals...")
-            model = model.fit(train_data)
-
+            try:
+                model = model.fit(train_data)
+            except:
+                model = model.fit(train_data, train_labels)
+            """
+            print(model.weights)
+            exit()
+            """
+            #print(train_data.shape)
             train_probas = model.predict_proba(train_data)
+            #exit()
+            #print(test_data.shape)
+            #print(model.weights.shape)
+            #print(experiment_names[model_np])
             test_probas = model.predict_proba(test_data)
-
+            #exit()
+            #print(train_labels.shape)
+            #print(train_probas.shape)
             train_acc = model.get_accuracy(train_labels, train_probas)
+            #exit()
             test_acc = model.get_accuracy(test_labels, test_probas)
 
             print("The accuracy on the train data is", train_acc)
@@ -105,11 +132,11 @@ def new_run_experiment(data_obj, w_data_dicts, constant_bound=False):
             train_accuracy.append(train_acc)
             test_accuracy.append(test_acc)
 
-        
+        """
         logger = Logger("logs/All/ Accuracies with " + str(num_loops) + " Weak signal")
         log_accuracy(logger, train_accuracy, 'Accuracy on Validation Data')
         log_accuracy(logger, test_accuracy, 'Accuracy on Testing Data')
-
+        """
         
 
 
@@ -145,7 +172,7 @@ def new_run_experiment(data_obj, w_data_dicts, constant_bound=False):
         # adversarial_acc_dicts.append(adversarial_acc_dict)
         # w_acc_dicts.append(w_acc_dict)
     
-
+    """
     # calculate ge criteria
     print("+++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++")
     print("Running tests on ge criteria...")
@@ -158,7 +185,7 @@ def new_run_experiment(data_obj, w_data_dicts, constant_bound=False):
     # w_acc_dict['gecriteria_train_accuracy'] = ge_train_accuracy
     # w_acc_dict['gecriteria_test_accuracy'] = ge_test_accuracy
     print("+++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++")
-
+    """
     # return adversarial_acc_dicts, w_acc_dicts
 
 
