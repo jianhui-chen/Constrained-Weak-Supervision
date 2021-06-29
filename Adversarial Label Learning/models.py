@@ -10,6 +10,11 @@ from sklearn.metrics import accuracy_score
 from abc import ABC, abstractmethod
 from scipy.optimize import minimize
 
+
+
+
+
+
 class BaseClassifier(ABC):
     """
     Abstract Base Class for learning classifiers
@@ -63,11 +68,23 @@ class BaseClassifier(ABC):
         return probas.ravel()
 
     @abstractmethod 
-    def fit(self, X, y=None):
+    def fit(self, X):
         """
 
         """
         pass
+
+
+"""
+Potentially the following methods can be moved out of this class:
+_objective_function
+_gamma_gradient
+_y_gradient
+
+
+"""
+
+
 
 class ALL(BaseClassifier):
     """
@@ -96,31 +113,32 @@ class ALL(BaseClassifier):
 
     """
 
-    def __init__(self, weak_signals_proba, weak_signals_error_bounds, 
-                 max_iter=10000, log_name=None):
+    def __init__(self, max_iter=10000, log_name=None):
     
         # based on args
-        self.weak_signals_proba = weak_signals_proba
-        self.weak_signals_error_bounds = weak_signals_error_bounds
+
         self.max_iter = max_iter
 
         if log_name is None:
             self.logger = None
         elif type(log_name) is str:
+            """
             self.logger = Logger("logs/ALL/" + log_name + "/" + 
                                  str(weak_signals_proba.shape[0]) + 
                                  "_weak_signals/")      # this can be modified to include date and time in file name
+            """
         else:
             sys.exit("Not of string type")
 
         # not based on args bc based on feature number
         self.weights = None
-        self.train_data = None
+
+       
 
 
     # Following functions beginning with _ may be moved out of class
 
-    def _objective_function(self, y, learnable_probabilities, rho, gamma):
+    def _objective_function(self, y, weak_signals_probas, weak_signals_error_bounds, learnable_probabilities, rho, gamma):
         """
         Computes the value of the objective function
 
@@ -140,8 +158,8 @@ class ALL(BaseClassifier):
         objective = np.dot(learnable_probabilities, 1 - y) + np.dot(1 - learnable_probabilities, y)
         objective = np.sum(objective) / n
 
-        weak_term = np.dot(1 - self.weak_signals_proba, y) + np.dot(self.weak_signals_proba, 1 - y)
-        ineq_constraint = (weak_term / n) - self.weak_signals_error_bounds
+        weak_term = np.dot(1 - weak_signals_probas, y) + np.dot(weak_signals_probas, 1 - y)
+        ineq_constraint = (weak_term / n) - weak_signals_error_bounds
         gamma_term = np.dot(gamma.T, ineq_constraint)
 
         ineq_constraint = ineq_constraint.clip(min=0)
@@ -149,7 +167,7 @@ class ALL(BaseClassifier):
 
         return objective + gamma_term - ineq_augmented_term
 
-    def _weight_gradient(self):
+    def _weight_gradient(self, X):
         """
         Computes the gradient the probabilities wrt to the weights
 
@@ -159,19 +177,19 @@ class ALL(BaseClassifier):
         """
 
         try:
-            y = self.weights.dot(self.train_data)
+            y = self.weights.dot(X)
         except:
-            y = self.train_data.dot(self.weights)
+            y = X.dot(self.weights)
 
         # replacing logistic func for now
         y_squish = 1 / (1 + np.exp(-y))
         grad = y_squish * (1 - y_squish)
 
-        grad = self.train_data * grad
+        grad = X * grad
         return grad
 
 
-    def _gamma_gradient(self, y):
+    def _gamma_gradient(self, y, weak_signals_probas, weak_signals_error_bounds):
         """
         Computes the gradient of lagrangian inequality penalty parameters
 
@@ -181,15 +199,15 @@ class ALL(BaseClassifier):
         :return: vector of length gamma containing the gradient of gamma
         :rtype: array
         """
-        _, n = self.weak_signals_proba.shape
+        _, n = weak_signals_probas.shape
 
-        weak_term = np.dot(1 - self.weak_signals_proba, y) + np.dot(self.weak_signals_proba, 1 - y)
-        ineq_constraint = (weak_term / n) - self.weak_signals_error_bounds
+        weak_term = np.dot(1 - weak_signals_probas, y) + np.dot(weak_signals_probas, 1 - y)
+        ineq_constraint = (weak_term / n) - weak_signals_error_bounds
 
         return ineq_constraint
 
 
-    def _y_gradient(self, y, learnable_probabilities, rho, gamma):
+    def _y_gradient(self, y, weak_signals_probas, weak_signals_error_bounds, learnable_probabilities, rho, gamma):
         """
         Computes the gradient y
 
@@ -201,38 +219,23 @@ class ALL(BaseClassifier):
         learnable_term = 1 - (2 * learnable_probabilities)
         learnable_term = np.sum(learnable_term, axis=0) / n
 
-        ls_term = 1 - (2 * self.weak_signals_proba)
+        ls_term = 1 - (2 * weak_signals_probas)
         gamma_term = np.dot(gamma.T, ls_term) / n
 
-        weak_term = np.dot(1 - self.weak_signals_proba, y) + np.dot(self.weak_signals_proba, 1 - y)
-        ineq_constraint = (weak_term / n) - self.weak_signals_error_bounds
+        weak_term = np.dot(1 - weak_signals_probas, y) + np.dot(weak_signals_probas, 1 - y)
+        ineq_constraint = (weak_term / n) - weak_signals_error_bounds
         ineq_constraint = ineq_constraint.clip(min=0)
         ineq_augmented_term = rho * np.dot(ineq_constraint.T, ls_term)
 
         return learnable_term + gamma_term - ineq_augmented_term
 
-    """
-    def _predict(self, probas):
-    
-        predictions = np.zeros(probas.size)
-        predictions[probas > 0.5] =1
-        return predictions
 
-    def get_accuracy(self, true_labels, predicted_labels):
-        score = accuracy_score(true_labels, self._predict(predicted_labels))
-        return score
-    """
-    
 
     def predict_proba(self, X):     # Note to self: this should replace "probablity" function in train_classifier
         
         if self.weights is None:
             sys.exit("No Data fit")
-        """
-        print("In predict")
-        print(X.shape)
-        print(self.weights.shape)
-        """
+   
         try: 
             y = self.weights.dot(X)
         except:
@@ -244,7 +247,7 @@ class ALL(BaseClassifier):
         return probas.ravel()
    
 
-    def _optimize(self, X, learnable_probas, y, rho, gamma, n_examples, lr):
+    def _optimize(self, X, weak_signals_probas, weak_signals_error_bounds, learnable_probas, y, rho, gamma, n_examples, lr):
         t = 0
         converged = False
         while not converged and t < self.max_iter:
@@ -252,7 +255,7 @@ class ALL(BaseClassifier):
 
             # update y
             old_y = y
-            y_grad = self._y_gradient(y, learnable_probas, rho, gamma)
+            y_grad = self._y_gradient(y, weak_signals_probas, weak_signals_error_bounds, learnable_probas, rho, gamma)
             y = y + rate * y_grad
             # projection step: clip y to [0, 1]
             y = y.clip(min=0, max=1)
@@ -262,13 +265,13 @@ class ALL(BaseClassifier):
 
             # update gamma
             old_gamma = gamma
-            gamma_grad = self._gamma_gradient(old_y)
+            gamma_grad = self._gamma_gradient(old_y, weak_signals_probas, weak_signals_error_bounds)
             gamma = gamma - rho * gamma_grad
             gamma = gamma.clip(max=0)
 
             weights_gradient = []
             # compute gradient of probabilities wrt weights
-            dp_dw = self._weight_gradient()
+            dp_dw = self._weight_gradient(X)
             # update weights
             old_weights = self.weights.copy()
             weights_gradient.append(dp_dw.dot(dl_dp))
@@ -279,13 +282,13 @@ class ALL(BaseClassifier):
             conv_y = np.linalg.norm(y - old_y)
 
             # check that inequality constraints are satisfied
-            ineq_constraint = self._gamma_gradient(y)
+            ineq_constraint = self._gamma_gradient(y, weak_signals_probas, weak_signals_error_bounds)
             ineq_infeas = np.linalg.norm(ineq_constraint.clip(min=0))
 
             converged = np.isclose(0, conv_y, atol=1e-6) and np.isclose(0, ineq_infeas, atol=1e-6) and np.isclose(0, conv_weights, atol=1e-5)
 
             if t % 1000 == 0:
-                lagrangian_obj = self._objective_function(y, learnable_probas, rho, gamma) # might be slow
+                lagrangian_obj = self._objective_function(y, weak_signals_probas, weak_signals_error_bounds, learnable_probas, rho, gamma) # might be slow
                 primal_objective = np.dot(learnable_probas, 1 - y) + np.dot(1 - learnable_probas, y)
                 primal_objective = np.sum(primal_objective) / n_examples
                 # print("Iter %d. Weights Infeas: %f, Y_Infeas: %f, Ineq Infeas: %f, lagrangian: %f, obj: %f" % (t, np.sum(conv_weights), conv_y,
@@ -307,7 +310,7 @@ class ALL(BaseClassifier):
             t += 1
         return self
 
-    def fit(self, X, y=None):
+    def fit(self, X, weak_signals_probas, weak_signals_error_bounds):
         """
         Fits the model according to given training data (X)
 
@@ -326,14 +329,13 @@ class ALL(BaseClassifier):
 
         """
         self.weights = np.zeros(X.shape[0]) # this should be length of n_features
-        #print(X.shape[0])
-        #print(X.shape)
+   
         self.train_data = X
         n_examples = X.shape[1]
 
         # initializing algo vars
         y = 0.5 * np.ones(n_examples)
-        gamma = np.zeros(self.weak_signals_proba.shape[0])
+        gamma = np.zeros(weak_signals_probas.shape[0])
         one_vec = np.ones(n_examples)
         rho = 2.5
         lr = 0.0001
@@ -341,10 +343,10 @@ class ALL(BaseClassifier):
         learnable_probas = self.predict_proba(X)
 
         if self.logger is None:
-            return self._optimize(X, learnable_probas, y, rho, gamma, n_examples, lr)
+            return self._optimize(X, weak_signals_probas, weak_signals_error_bounds, learnable_probas, y, rho, gamma, n_examples, lr)
         else:
             with self.logger.writer.as_default():
-                return self._optimize(X, learnable_probas, y, rho, gamma, n_examples, lr)
+                return self._optimize(X, weak_signals_probas, weak_signals_error_bounds, learnable_probas, y, rho, gamma, n_examples, lr)
             
         return self
     
@@ -352,18 +354,15 @@ class ALL(BaseClassifier):
        
 
 
-class Baseline(BaseClassifier):
+class LabelEstimator(BaseClassifier):   # Might want to change the name of Base Classifier?
     """
-    Baseline Classifier
+    Label Estimator + Classifier
     Need to add more on its functionality. 
     """
 
-    def __init__(self, weak_signals_proba, weak_signals_error_bounds, 
-                 max_iter=None, log_name=None):
+    def __init__(self, max_iter=None, log_name=None):
     
-        # based on args
-        self.weak_signals_proba = weak_signals_proba
-        self.weak_signals_error_bounds = weak_signals_error_bounds #don't need these
+   
         self.max_iter = max_iter
 
         if log_name is None:
@@ -378,20 +377,7 @@ class Baseline(BaseClassifier):
         # not based on args bc based on feature number
         self.model = None
 
-    """
-    # _predict and get_accuracy are the same for both classes –– can be moved
-    def _predict(self, probas):
-
-        predictions = np.zeros(probas.size)
-        predictions[probas > 0.5] =1
-        return predictions
-
-    def get_accuracy(self, true_labels, predicted_labels):
-        # NOTE: Predicted labelss are probas
-        score = accuracy_score(true_labels, self._predict(predicted_labels))
-        return score
-
-    """
+ 
 
     def predict_proba(self, X):
         if self.model is None:
@@ -403,16 +389,20 @@ class Baseline(BaseClassifier):
 
         return probabilities
 
-    def fit(self, X, y=None, train_model=None, label_model=None): # can change to get these in init
+
+    #def _estimate_labels(self, )
+
+    def fit(self, X, weak_signals_probas, weak_signals_error_bounds, train_model=None, label_model=None): # can change to get these in init
         """
         Option: we can make it so the labels are generated outside of method
             i.e. passed in as y, or change to pass in algo to generate within
             this method
+        error_bounds param is not used, but included for consistency
         """
-        labels=np.zeros(self.weak_signals_proba.shape[1]) # no of examples
+        labels=np.zeros(weak_signals_probas.shape[1]) # no of examples
         # Generate labels
         if label_model is None:
-            average_weak_labels = np.mean(self.weak_signals_proba, axis=0)
+            average_weak_labels = np.mean(weak_signals_probas, axis=0)
             labels[average_weak_labels > 0.5] = 1
             labels[average_weak_labels <= 0.5] = 0
         else:
@@ -438,19 +428,19 @@ class GECriterion(BaseClassifier):
     GE Criterion class for implementation
     """
 
-    def __init__(self, weak_signals_proba, weak_signals_error_bounds, 
-                 max_iter=None, log_name=None):
+    def __init__(self, max_iter=None, log_name=None):
         # based on args
-        self.weak_signals_proba = weak_signals_proba
-        self.weak_signals_error_bounds = weak_signals_error_bounds #don't need these
+
         self.max_iter = max_iter
 
         if log_name is None:
             self.logger = None
         elif type(log_name) is str:
+            """
             self.logger = Logger("logs/Baseline/" + log_name + "/" + 
                                  str(weak_signals_proba.shape[0]) + 
                                  "_weak_signals/")      # this can be modified to include date and time in file name
+            """
         else:
             sys.exit("Not of string type")
 
@@ -515,7 +505,7 @@ class GECriterion(BaseClassifier):
         instances_index = positive_index, negative_index
         return empirical_probability, instances_index
 
-    def _train_ge_criteria(self, X, y, new_weights):
+    def _train_ge_criteria(self, X, y, new_weights, weak_signals_probas):
         """
         This internal function returns the objective value of ge criteria
 
@@ -531,10 +521,10 @@ class GECriterion(BaseClassifier):
         probs = 1 / (1 + np.exp(-score))
         grad = probs * (1 - probs)
         gradient = 0
-        num_weak_signals = self.weak_signals_proba.shape[0]
+        num_weak_signals = weak_signals_probas.shape[0]
         # Code to compute the objective function
         for i in range(num_weak_signals):
-            weak_signal_proba = self.weak_signals_proba[i]
+            weak_signal_proba = weak_signals_probas[i]
             reference_probs = self._compute_reference_distribution(y, weak_signal_proba)
             empirical_probs, index = self._compute_empirical_distribution(probs, weak_signal_proba)
 
@@ -569,11 +559,13 @@ class GECriterion(BaseClassifier):
         return objective, gradient
 
 
-    def fit(self, X, y):
+    def fit(self, X, weak_signals_probas, weak_signals_error_bounds, y):
         """
         X is passed in as (d, n), to match the other fits.
         X is thus transposed until this is fixed
         Removed the check gradient param
+
+        error_bounds param is not used, but included for consistency
         """
 
         if y is None:
@@ -584,7 +576,7 @@ class GECriterion(BaseClassifier):
         self.weights = np.random.rand(d)
 
         # optimizer
-        res = minimize(lambda w: self._train_ge_criteria(X, y, w)[0], jac=lambda w: self._train_ge_criteria(X, y, w)[1].ravel(), x0=self.weights) 
+        res = minimize(lambda w: self._train_ge_criteria(X, y, w, weak_signals_probas)[0], jac=lambda w: self._train_ge_criteria(X, y, w, weak_signals_probas)[1].ravel(), x0=self.weights) 
         self.weights = res.x
 
         return self
