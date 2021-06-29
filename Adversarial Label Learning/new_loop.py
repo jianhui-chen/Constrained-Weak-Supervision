@@ -7,7 +7,7 @@ from log import Logger, log_accuracy
 import json
 import math
 
-from models import ALL, Baseline
+from models import ALL, Baseline, GECriterion
 
 
 
@@ -49,7 +49,7 @@ def new_run_experiment(data_obj, w_data_dicts, constant_bound=False):
     adversarial_acc_dicts = []
     w_acc_dicts = []
 
-    experiment_names = ["ALL w/ constant bounds", "ALL w/ computed bounds", "Avergaing Baseline"]
+    experiment_names = ["ALL w/ constant bounds", "ALL w/ computed bounds", "Avergaing Baseline", "GE Crit"]
 
     data = data_obj.data
 
@@ -92,12 +92,16 @@ def new_run_experiment(data_obj, w_data_dicts, constant_bound=False):
         all_model_const = ALL(weak_signal_probabilities, np.zeros(weak_signal_ub.size) + 0.3, log_name="constant")
         all_model       = ALL(weak_signal_probabilities, weak_signal_ub, log_name="nonconstant")
         baseline_model  = Baseline(weak_signal_probabilities, weak_signal_ub)
+        ge_model = GECriterion(weak_signal_probabilities, weak_signal_ub)
 
-        models = [all_model_const, all_model, baseline_model]
+        models = [all_model_const, all_model, baseline_model, ge_model]
 
         for model_np, model in enumerate(models):
             print("Running: " + experiment_names[model_np] + " with " + str(num_loops) + " weak signals...")
-            model = model.fit(train_data)
+            try:
+                model = model.fit(train_data)
+            except:
+                model = model.fit(train_data, train_labels)
             """
             print(model.weights)
             exit()
@@ -122,11 +126,11 @@ def new_run_experiment(data_obj, w_data_dicts, constant_bound=False):
             train_accuracy.append(train_acc)
             test_accuracy.append(test_acc)
 
-        
+        """
         logger = Logger("logs/All/ Accuracies with " + str(num_loops) + " Weak signal")
         log_accuracy(logger, train_accuracy, 'Accuracy on Validation Data')
         log_accuracy(logger, test_accuracy, 'Accuracy on Testing Data')
-
+        """
         
 
 

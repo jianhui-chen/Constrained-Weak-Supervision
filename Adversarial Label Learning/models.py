@@ -529,7 +529,7 @@ class GECriterion(BaseClassifier):
         num_weak_signals = self.weak_signals_proba.shape[0]
         # Code to compute the objective function
         for i in range(num_weak_signals):
-            weak_signal_proba = self.weak_signal_probas[i]
+            weak_signal_proba = self.weak_signals_proba[i]
             reference_probs = self._compute_reference_distribution(y, weak_signal_proba)
             empirical_probs, index = self._compute_empirical_distribution(probs, weak_signal_proba)
 
@@ -579,7 +579,7 @@ class GECriterion(BaseClassifier):
         self.weights = np.random.rand(d)
 
         # optimizer
-        res = minimize(lambda w: self._train_ge_criteria(w)[0], jac=lambda w: self._train_ge_criteria(w)[1].ravel(), x0=self.weights) 
+        res = minimize(lambda w: self._train_ge_criteria(X, y, w)[0], jac=lambda w: self._train_ge_criteria(X, y, w)[1].ravel(), x0=self.weights) 
         self.weights = res.x
 
         return self
