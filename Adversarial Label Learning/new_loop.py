@@ -98,11 +98,22 @@ def new_run_experiment(data_obj, w_data_dicts, constant_bound=False):
         for model_np, model in enumerate(models):
             print("Running: " + experiment_names[model_np] + " with " + str(num_loops) + " weak signals...")
             model = model.fit(train_data)
-
+            """
+            print(model.weights)
+            exit()
+            """
+            #print(train_data.shape)
             train_probas = model.predict_proba(train_data)
+            #exit()
+            #print(test_data.shape)
+            #print(model.weights.shape)
+            #print(experiment_names[model_np])
             test_probas = model.predict_proba(test_data)
-
+            #exit()
+            #print(train_labels.shape)
+            #print(train_probas.shape)
             train_acc = model.get_accuracy(train_labels, train_probas)
+            #exit()
             test_acc = model.get_accuracy(test_labels, test_probas)
 
             print("The accuracy on the train data is", train_acc)

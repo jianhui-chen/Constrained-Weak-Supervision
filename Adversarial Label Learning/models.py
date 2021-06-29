@@ -15,21 +15,21 @@ class BaseClassifier(ABC):
     Abstract Base Class for learning classifiers
     """
 
-    def predict(self, X):
+    def predict(self, predicted_probas):
         """
 
         """
-        proba_predictions = self.predict_proba(X)   # the subclass predict_proba will throw an error if not trained
+        #proba_predictions = self.predict_proba(X)   # the subclass predict_proba will throw an error if not trained
 
-        predictions = np.zeros(proba_predictions.size)
-        predictions[probas > 0.5] =1    # could also implement by rounding
+        predictions = np.zeros(predicted_probas.size)
+        predictions[predicted_probas > 0.5] =1    # could also implement by rounding
         return predictions
     
-    def get_accuracy(self, true_labels, predicted_labels):
+    def get_accuracy(self, true_labels, predicted_probas):
         """
 
         """
-        score = accuracy_score(true_labels, self._predict(predicted_labels))
+        score = accuracy_score(true_labels, self.predict(predicted_probas))
         return score
 
     #not abstract
@@ -56,7 +56,7 @@ class BaseClassifier(ABC):
         try: 
             y = self.weights.dot(X)
         except:
-            y = X(self.weights)
+            y = X.dot(self.weights)
 
         probas = 1 / (1 + np.exp(-y))    # first line of logistic, squishes y values
         
@@ -221,23 +221,28 @@ class ALL(BaseClassifier):
     def get_accuracy(self, true_labels, predicted_labels):
         score = accuracy_score(true_labels, self._predict(predicted_labels))
         return score
+    """
     
-
 
     def predict_proba(self, X):     # Note to self: this should replace "probablity" function in train_classifier
         
         if self.weights is None:
             sys.exit("No Data fit")
-        
+        """
+        print("In predict")
+        print(X.shape)
+        print(self.weights.shape)
+        """
         try: 
             y = self.weights.dot(X)
         except:
-            y = X(self.weights)
+            y = X.dot(self.weights)
 
         probas = 1 / (1 + np.exp(-y))    # first line of logistic, squishes y values
         
+        #exit()
         return probas.ravel()
-    """
+   
 
     def _optimize(self, X, learnable_probas, y, rho, gamma, n_examples, lr):
         t = 0
@@ -321,6 +326,8 @@ class ALL(BaseClassifier):
 
         """
         self.weights = np.zeros(X.shape[0]) # this should be length of n_features
+        #print(X.shape[0])
+        #print(X.shape)
         self.train_data = X
         n_examples = X.shape[1]
 
@@ -339,7 +346,7 @@ class ALL(BaseClassifier):
             with self.logger.writer.as_default():
                 return self._optimize(X, learnable_probas, y, rho, gamma, n_examples, lr)
             
-
+        return self
     
 
        
