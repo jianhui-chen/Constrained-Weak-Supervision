@@ -23,6 +23,8 @@ import mxnet as mx
 stemmer = LancasterStemmer()
 
 
+# to use, download 'glove.42B.300d.txt' from  https://www.kaggle.com/yutanakamura/glove42b300dtxt
+# File too large to save to github
 df = pd.read_csv('glove.42B.300d.txt', sep=" ", quoting=3, header=None, index_col=0)
 glove_model = {key: val.values for key, val in df.T.items()}
 
