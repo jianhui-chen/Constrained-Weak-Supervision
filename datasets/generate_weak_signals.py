@@ -199,9 +199,9 @@ def get_error_bounds(true_labels, weak_signals):
 
 
 
-# # # # # # # # # #
-#  SST-2 Dataset  #
-# # # # # # # # # #
+# # # # # # # # # # #
+# #  SST-2 Dataset  #
+# # # # # # # # # # #
 
 def SST_2_generator():
     datapath = './sst-2/'
@@ -209,55 +209,45 @@ def SST_2_generator():
     test_data = pd.read_csv(datapath+'sst2-test.csv')
     train_data.head()
 
+
     NEGATIVE_LABELS = [['bad','better','leave','never','disaster'], 
-                   ['nothing','action','fail','suck','difficult'], 
-                   ['mess','dull','dumb', 'bland','outrageous'], 
-                   ['slow', 'terrible', 'boring', 'insult','weird','damn'],
-                   # ['drag','awful','waste', 'flat','worse'],
-                   ['drag','no','not','awful','waste', 'flat'], 
-                   ['horrible','ridiculous','stupid', 'annoying','painful'], 
-                   ['poor','pathetic','pointless','offensive','silly']]
+                    ['nothing','action','fail','suck','difficult'], 
+                    ['mess','dull','dumb', 'bland','outrageous'], 
+                    ['slow', 'terrible', 'boring', 'insult','weird','damn'],
+                    # ['drag','awful','waste', 'flat','worse'],
+                    ['drag','no','not','awful','waste', 'flat'], 
+                    ['horrible','ridiculous','stupid', 'annoying','painful'], 
+                    ['poor','pathetic','pointless','offensive','silly']]
 
     positive_labels = keyword_labeling(train_data.sentence.values, POSITIVE_LABELS)
     negative_labels = keyword_labeling(train_data.sentence.values, NEGATIVE_LABELS, sentiment='neg')
     weak_signals = np.hstack([positive_labels, negative_labels])
-    print("\n\n weak_signals shape: ", weak_signals.shape) 
-
+    weak_signals.shape
 
     # weak_signals, indices = remove_indices(train_data, weak_signals)
+
+    # debugging code
+    print("\n\n Before: \n weak_signals: ",  weak_signals) 
+    print("weak_signals shape: ",  weak_signals.shape, "\n\n")
+
+
+
     weak_signals, indices = remove_indices(weak_signals)
+    weak_signals.shape
+
+    # debugging code
+    print("\n\n after: \n weak_signals: ",  weak_signals) 
+    print("weak_signals shape: ",  weak_signals.shape, "\n\n")
+
 
     train_labels = train_data.label.values
     test_labels = test_data.label.values
 
-    # add signals not covered to test data
-    test_data = np.append(test_data, train_data[indices])
-    test_labels = np.append(test_labels, train_labels[indices])
-
-    # delete train data not covered by weak signals
-    train_data = np.delete(train_data, indices, axis=0)
-    train_labels = np.delete(train_labels, indices)
-
-    #debugging code
-    print("\n\n train_data shape: ",  train_data.shape) 
-    print("\weak_signals shape: ",  weak_signals.shape, "\n\n")
-
-    n,m = weak_signals.shape
-    weak_signal_probabilities = weak_signals.T.reshape(m,n,1)
-
-
-
-    # # # # # # # # # # # # # # # # # # # # # # # # # # # # # # # # # # # # # # # # 
-    # Broken code, because predicted_labels.shape != true_labels.shape, maybe fix later
-    # # # # # # # # # # # # # # # # # # # # # # # # # # # # # # # # # # # # # # # # 
-
+    # n,m = weak_signals.shape
+    # weak_signal_probabilities = weak_signals.T.reshape(m,n,1)
     # weak_signals_mask = weak_signal_probabilities >=0
-    # true_error_rates = get_error_bounds(train_labels, weak_signals_mask)
-    true_error_rates = get_error_bounds(train_labels, weak_signal_probabilities)
-    print("error: ", np.asarray(true_error_rates))
-
-
-
+    # true_error_rates = get_error_bounds(train_labels, weak_signal_probabilities, weak_signals_mask)
+    # print("error: ", np.asarray(true_error_rates))
 
     # Clean data and reset index
     train_data.reset_index(drop=True, inplace=True)
@@ -270,31 +260,43 @@ def SST_2_generator():
     test_data = cleanTweets(test_data.drop(columns=['label']))
     # test_data = post_process_tweets(test_data)
 
-    print(train_data[0].shape, train_labels.shape)
-    print(test_data[0].shape, test_labels.shape)
+    # # debugging code
+    # print("\n\n train_data shape: ",  train_data.shape) 
+    # print("test_data shape: ",  test_data.shape, "\n\n")
 
+    print(train_data.shape, train_labels.shape)
+    print(test_data.shape, test_labels.shape)
 
-
-
-
-    train_features, train_index = get_text_vectors(train_data[0].values.ravel(), glove_model)
-    test_features, test_index = get_text_vectors(test_data[0].values.ravel(), glove_model)
+    train_features, train_index = get_text_vectors(train_data, glove_model)
+    test_features, test_index = get_text_vectors(test_data, glove_model)
 
     # save sst-2 data
     np.save(datapath+'data_features.npy', train_features)
     np.save(datapath+'test_features.npy', test_features)
 
-    indexes = train_data[1]
-    indexes = indexes[train_index]
+
     # save sst-2 labels
-    np.save(datapath+'data_labels.npy', train_labels[indexes])
-    np.save(datapath+'test_labels.npy', test_labels[test_data[1]])
+    np.save(datapath+'data_labels.npy', train_labels[train_index])
+    np.save(datapath+'test_labels.npy', test_labels[test_index])
+
+    # # debugging code
+    # print("\n\n weak_signals: ",  weak_signals) 
+    # print("weak_signals shape: ",  weak_signals.shape)
+    # print("\n\ntrain_index: ",  train_index) 
+    # print("train_data: ",  train_data) 
+    # print("train_data shape: ",  train_data.shape)
+    # print("\n\ntest_index: ",  test_index) 
+    # print("test_data: ",  test_data) 
+    # print("test_data shape: ",  test_data.shape)
+
+    # indexes = train_data
+    # indexes = indexes[0]
+
+    m, n = weak_signals.shape 
+    indexes = range(0, m)
 
     # save the one-hot signals
     np.save(datapath+'weak_signals.npy', weak_signals[indexes])
-
-
-
 
 
 # # # # # # # # #
@@ -335,8 +337,6 @@ def IMDB_generator():
     weak_signals = np.hstack([positive_labels, negative_labels])
     weak_signals, indices = remove_indices(weak_signals)
     weak_signals.shape
-
-    
     
     
     # add signals not covered to test data
@@ -363,12 +363,23 @@ def IMDB_generator():
     np.save(datapath+'data_labels.npy', train_labels[train_index])
     np.save(datapath+'test_labels.npy', test_labels[test_index])
 
+
+    # debugging code
+    print("\n\n weak_signals: ",  weak_signals) 
+    print("weak_signals shape: ",  weak_signals.shape)
+    print("\n\ntrain_index: ",  train_index) 
+    print("train_data: ",  train_data) 
+    print("train_data shape: ",  train_data.shape)
+    print("\n\ntest_index: ",  test_index) 
+    print("test_index: ",  test_data) 
+    print("train_data shape: ",  test_data.shape)
+
     # save the weak_signals
     np.save(datapath+'weak_signals.npy', weak_signals[train_index])
 
 
-# print("\n\n working on SST_2 \n\n" )
-# SST_2_generator()
+print("\n\n working on SST_2 \n\n" )
+SST_2_generator()
 
-print("\n\n working on IMDB \n\n" )
-IMDB_generator()
+# print("\n\n working on IMDB \n\n" )
+# IMDB_generator()
