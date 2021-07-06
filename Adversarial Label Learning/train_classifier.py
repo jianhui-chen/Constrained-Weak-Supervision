@@ -30,6 +30,7 @@ def objective_function(y, learnable_probabilities, weak_signal_probabilities, we
 	ineq_constraint = (weak_term / n) - weak_signal_ub
 	gamma_term = np.dot(gamma.T, ineq_constraint)
 
+	# Note: ineq_augmented_term always negative 
 	ineq_constraint = ineq_constraint.clip(min=0)
 	ineq_augmented_term = (rho/2) * ineq_constraint.T.dot(ineq_constraint)
 
@@ -153,8 +154,6 @@ def train_all(data, weights, weak_signal_probabilities, weak_signal_ub, logger, 
 	:rtype: tuple
 	"""
 
-	# could initialize weights here
-
 	learnable_probabilities = probability(data, weights)
 	n = learnable_probabilities.size
 
@@ -203,22 +202,19 @@ def train_all(data, weights, weak_signal_probabilities, weak_signal_ub, logger, 
 			# check that inequality constraints are satisfied
 			ineq_constraint = gamma_gradient(y, weak_signal_probabilities, weak_signal_ub)
 			ineq_infeas = np.linalg.norm(ineq_constraint.clip(min=0))
-
 			converged = np.isclose(0, conv_y, atol=1e-6) and np.isclose(0, ineq_infeas, atol=1e-6) and np.isclose(0, conv_weights, atol=1e-5)
 
+
+            # every 1000 iterations, log current state of modle
 			if t % 1000 == 0:
 				lagrangian_obj = objective_function(y, learnable_probabilities, weak_signal_probabilities, weak_signal_ub, rho, gamma) # might be slow
 				primal_objective = np.dot(learnable_probabilities, 1 - y) + np.dot(1 - learnable_probabilities, y)
 				primal_objective = np.sum(primal_objective) / n
-				# print("Iter %d. Weights Infeas: %f, Y_Infeas: %f, Ineq Infeas: %f, lagrangian: %f, obj: %f" % (t, np.sum(conv_weights), conv_y,
-				# 									ineq_infeas, lagrangian_obj, primal_objective))
-				
+
 				logger.log_scalar("Primal Objective", primal_objective, t)
 				logger.log_scalar("lagrangian", lagrangian_obj, t)
 				logger.log_scalar("Change in y", conv_y, t)
 				logger.log_scalar("Change in Weights", conv_weights, t)
-
-                # So small, does not even register????
 				logger.log_scalar("Ineq Infeas", ineq_infeas, t)
 
 
@@ -228,4 +224,4 @@ def train_all(data, weights, weak_signal_probabilities, weak_signal_ub, logger, 
 			t += 1
 
 	return weights, ineq_constraint
-	# ineq_constraints are not used anywhere
+	# ineq_constraints are not used anywhere in current expirments
