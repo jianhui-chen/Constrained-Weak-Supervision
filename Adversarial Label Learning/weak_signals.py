@@ -29,6 +29,20 @@ def get_weak_signals(data_obj):
         weak_signal_test_data.append(test_data[:, f:f+1])
 
     weak_signal_data = [weak_signal_dev_data, weak_signal_train_data, weak_signal_test_data]
+    """
+    print(dev_data.shape)
+    print(train_data.shape)
+    print(test_data.shape)
+    print(len(weak_signal_dev_data))
+    print(weak_signal_dev_data)
+    print(len(weak_signal_train_data))
+    print(weak_signal_train_data)
+    print(len(weak_signal_test_data))
+    print(weak_signal_test_data)
+    print(len(weak_signal_data))
+    print(weak_signal_data)
+    exit()
+    """
 
     return weak_signal_data
 
