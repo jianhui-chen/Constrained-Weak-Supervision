@@ -5,9 +5,9 @@ from sklearn.model_selection import train_test_split
 from sklearn import preprocessing
 
 """
-Weak signals will be in the form of (# of training examples, # signals)
-    This will have to be transposed for the current set up of Binary ALL
-
+Weak signals will be in the form of (# signals, # training examples)
+    This has to be transposed, but all the code is already like this :(
+        
     Binary ALL has three sets –– Dev, Train, Test
     Multi ALL and CLL has 2 sets –– Train, Test
         Dev and Train are combined into one

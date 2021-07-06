@@ -337,7 +337,7 @@ class ALL(BaseClassifier):
         y = 0.5 * np.ones(n_examples)
         gamma = np.zeros(weak_signals_probas.shape[0])
 
-        gamma = np.zeros(self.weak_signals_proba.shape[0])
+        gamma = np.zeros(weak_signals_probas.shape[0])
         one_vec = np.ones(n_examples)
         rho = 2.5
         lr = 0.0001
