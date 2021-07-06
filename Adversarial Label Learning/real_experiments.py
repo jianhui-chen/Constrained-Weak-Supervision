@@ -22,15 +22,10 @@ def run_experiment(data_obj, multiple_weak_signals):
 
     # retrieve data from object
     data = data_obj.data
-    dev_data = data['dev_data'][0].T
-    dev_labels = data['dev_data'][1]
     train_data, train_labels = data['train_data']
     train_data = train_data.T
     test_data = data['test_data'][0].T
     test_labels = data['test_data'][1]
-
-    num_features, num_data_points = dev_data.shape
-
 
     # loop through all weak signals provided to preform expirments 
     for num_loops, weak_signals in enumerate(multiple_weak_signals, 1): #begins from 1

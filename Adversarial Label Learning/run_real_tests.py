@@ -27,35 +27,37 @@ def run_tests():
 
 
     
-    # # # # # # # # # # # #
-    # obs network         #
-    # # # # # # # # # # # #
+    # # # # # # # # # # # # #
+    # # obs network         #
+    # # # # # # # # # # # # #
 
-    # #for obs network dataset, select the Utilized Bandwidth Rate, Packet drop rate and Flood Status as weak signals
-    print("\n\n\n\n# # # # # # # # # # # # # # # # # # # # #")
-    print("# Running obs network experiment...     #")
-    print("# # # # # # # # # # # # # # # # # # # # #\n")
-
-
-    obs_data = Data("OBS", [1, 2, 20], 'datasets/obs-network/obs_network.data', 'results/json/obs_network.json', obs_load_and_process_data)
-    # w_data_dicts = get_w_data_dicts(obs_data, 1, 3)
-    # adversarial_acc_dicts, w_acc_dicts = run_experiment(obs_data, w_data_dicts)
-    multiple_weak_signals = get_multiple_weak_signals(obs_data, 1, 3, 'ALL/')
-    run_experiment(obs_data, multiple_weak_signals)
+    # # #for obs network dataset, select the Utilized Bandwidth Rate, Packet drop rate and Flood Status as weak signals
+    # print("\n\n\n\n# # # # # # # # # # # # # # # # # # # # #")
+    # print("# Running obs network experiment...     #")
+    # print("# # # # # # # # # # # # # # # # # # # # #\n")
 
 
-    # # # # # # # # # # # #
-    # cardio              #
-    # # # # # # # # # # # #
+    # obs_data = Data("OBS", [1, 2, 20], 'datasets/obs-network/obs_network.data', 'results/json/obs_network.json', obs_load_and_process_data)
+    # # w_data_dicts = get_w_data_dicts(obs_data, 1, 3)
+    # # adversarial_acc_dicts, w_acc_dicts = run_experiment(obs_data, w_data_dicts)
+    # multiple_weak_signals = get_multiple_weak_signals(obs_data, 1, 3, 'ALL/')
+    # run_experiment(obs_data, multiple_weak_signals)
+
+
+    # # # # # # # # # # # # #
+    # # cardio              #
+    # # # # # # # # # # # # #
  
-    # #Use AC, MLTV and Median as weak signal views
-    print("\n\n\n\n# # # # # # # # # # # # # # # # # # # # #")
-    print("# Running cardio experiment...          #")
-    print("# # # # # # # # # # # # # # # # # # # # #\n")
+    # # #Use AC, MLTV and Median as weak signal views
+    # print("\n\n\n\n# # # # # # # # # # # # # # # # # # # # #")
+    # print("# Running cardio experiment...          #")
+    # print("# # # # # # # # # # # # # # # # # # # # #\n")
 
-    cardio_data = Data("Cardio", [1, 10, 18], 'datasets/cardiotocography/cardio.csv', 'results/json/cardio.json', cardio_load_and_process_data)
-    multiple_weak_signals = get_multiple_weak_signals(cardio_data, 1, 3, 'ALL/')
-    run_experiment(cardio_data, multiple_weak_signals)
+    # cardio_data = Data("Cardio", [1, 10, 18], 'datasets/cardiotocography/cardio.csv', 'results/json/cardio.json', cardio_load_and_process_data)
+    # multiple_weak_signals = get_multiple_weak_signals(cardio_data, 1, 3, 'ALL/')
+    # run_experiment(cardio_data, multiple_weak_signals)
+
+
 
 def run_bounds_experiment():
     """
