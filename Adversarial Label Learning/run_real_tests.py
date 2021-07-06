@@ -3,13 +3,13 @@ from data_readers import *
 from classes_file import Data
 from generate_weak_signals import *
 from weak_signals import *
-from new_loop import *
+# from new_loop import *
 
 
 def run_tests():
     """
-    Runs experiment.
-    :return: None
+        Runs experiment.
+        :return: None
     """
     
     # # # # # # # # # # # #
@@ -20,47 +20,47 @@ def run_tests():
     print("\n\n# # # # # # # # # # # # # # # # # # # # #")
     print("# Running breast cancer experiment...   #")
     print("# # # # # # # # # # # # # # # # # # # # #\n")
+
     bc_data = Data("Breast Cancer", [0, 10, 20], 'datasets/breast-cancer/wdbc.data', 'results/json/breast_cancer.json', breast_cancer_load_and_process_data)
     multiple_weak_signals = get_multiple_weak_signals(bc_data, 1, 3, 'ALL/')
-    #w_data_dicts = get_w_data_dicts(bc_data, 1, 3)
-    #adversarial_acc_dicts, w_acc_dicts = run_experiment(bc_data, w_data_dicts)
-    new_run_experiment(bc_data, multiple_weak_signals)
+    run_experiment(bc_data, multiple_weak_signals)
 
 
     
-    # # # # # # # # # # # # #
-    # # obs network         #
-    # # # # # # # # # # # # #
+    # # # # # # # # # # # #
+    # obs network         #
+    # # # # # # # # # # # #
 
-    # # #for obs network dataset, select the Utilized Bandwidth Rate, Packet drop rate and Flood Status as weak signals
-    # print("\n\n\n\n# # # # # # # # # # # # # # # # # # # # #")
-    # print("# Running obs network experiment...     #")
-    # print("# # # # # # # # # # # # # # # # # # # # #\n")
+    # #for obs network dataset, select the Utilized Bandwidth Rate, Packet drop rate and Flood Status as weak signals
+    print("\n\n\n\n# # # # # # # # # # # # # # # # # # # # #")
+    print("# Running obs network experiment...     #")
+    print("# # # # # # # # # # # # # # # # # # # # #\n")
 
 
-    # obs_data = Data("OBS", [1, 2, 20], 'datasets/obs-network/obs_network.data', 'results/json/obs_network.json', obs_load_and_process_data)
+    obs_data = Data("OBS", [1, 2, 20], 'datasets/obs-network/obs_network.data', 'results/json/obs_network.json', obs_load_and_process_data)
     # w_data_dicts = get_w_data_dicts(obs_data, 1, 3)
     # adversarial_acc_dicts, w_acc_dicts = run_experiment(obs_data, w_data_dicts)
+    multiple_weak_signals = get_multiple_weak_signals(obs_data, 1, 3, 'ALL/')
+    run_experiment(obs_data, multiple_weak_signals)
 
 
-    # # # # # # # # # # # # #
-    # # cardio              #
-    # # # # # # # # # # # # #
+    # # # # # # # # # # # #
+    # cardio              #
+    # # # # # # # # # # # #
  
-    # # #Use AC, MLTV and Median as weak signal views
-    # print("\n\n\n\n# # # # # # # # # # # # # # # # # # # # #")
-    # print("# Running cardio experiment...          #")
-    # print("# # # # # # # # # # # # # # # # # # # # #\n")
+    # #Use AC, MLTV and Median as weak signal views
+    print("\n\n\n\n# # # # # # # # # # # # # # # # # # # # #")
+    print("# Running cardio experiment...          #")
+    print("# # # # # # # # # # # # # # # # # # # # #\n")
 
-    # cardio_data = Data("Cardio", [1, 10, 18], 'datasets/cardiotocography/cardio.csv', 'results/json/cardio.json', cardio_load_and_process_data)
-    # w_data_dicts = get_w_data_dicts(cardio_data, 1, 3)
-    # adversarial_acc_dicts, w_acc_dicts = run_experiment(cardio_data, w_data_dicts)
-    
+    cardio_data = Data("Cardio", [1, 10, 18], 'datasets/cardiotocography/cardio.csv', 'results/json/cardio.json', cardio_load_and_process_data)
+    multiple_weak_signals = get_multiple_weak_signals(cardio_data, 1, 3, 'ALL/')
+    run_experiment(cardio_data, multiple_weak_signals)
 
 def run_bounds_experiment():
     """
-    Runs experiment.
-    :return: None
+        Runs bounds experiments
+        :return: None
     """
 
     # # # # # # # # # # # #
@@ -94,6 +94,10 @@ def run_bounds_experiment():
 
 
 def run_dep_err_experiment():
+    """
+        Runs error experiment on cardio data set
+        :return: None
+    """
 
     # # # # # # # # # # # #
     # cardio              #
@@ -113,6 +117,10 @@ def run_dep_err_experiment():
 if __name__ == '__main__':
     run_tests()
 
+
+    """
+       Bellow fucntions are not yet comptabile with new classes
+    """
     # # un-comment to run bounds experimrnt in the paper
     # run_bounds_experiment()
 

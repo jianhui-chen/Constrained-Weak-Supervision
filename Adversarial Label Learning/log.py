@@ -49,12 +49,12 @@ def log_accuracy(logger, values, title):
     fig = plt.figure()
     ax = fig.add_subplot(111)
     ax.set_title(title)
-    methods = ['ALL w/ Constant Bounds', 'ALL w/ Computed bounds','Baseline']
+    methods = ['ALL w/ Constant Bounds', 'ALL w/ Computed bounds','Baseline', 'GE Crit']
 
     # add labels on graph 
     for i, v in enumerate(values):
         ax.text(i - 0.25, v + 0.01, str(round(v, 5)), color='seagreen', fontweight='bold')
-    ax.bar(methods, values, color=['skyblue', 'saddlebrown', 'olivedrab'])
+    ax.bar(methods, values, color=['skyblue', 'saddlebrown', 'olivedrab', 'plum'])
 
     # set y demensions of plots
     min_value = min(values)
