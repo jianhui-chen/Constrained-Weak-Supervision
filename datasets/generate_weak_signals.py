@@ -214,18 +214,20 @@ def get_error_bounds(true_labels, weak_signals):
 # # # # # # # # # # #
 
 def SST_2_generator():
+
+    # get data from files
     datapath = './sst-2/'
     train_data = pd.read_csv(datapath+'sst2-train.csv')
     test_data = pd.read_csv(datapath+'sst2-test.csv')
     train_data.head()
 
+    # get labes from data
     train_labels = train_data.label.values
     test_labels = test_data.label.values
 
-
+    # remove labels from data
     train_data = cleanTweets(train_data.drop(columns=['label']))
-
-    test_data = cleanTweets(test_data.drop(columns=['label']))
+    test_data  = cleanTweets(test_data.drop(columns=['label']))
 
 
     NEGATIVE_LABELS = [['bad','better','leave','never','disaster'], 
@@ -238,76 +240,45 @@ def SST_2_generator():
                     ['poor','pathetic','pointless','offensive','silly']]
 
 
-                    
-
+    # get weak signals
     positive_labels = keyword_labeling(train_data.sentence.values, POSITIVE_LABELS)
     negative_labels = keyword_labeling(train_data.sentence.values, NEGATIVE_LABELS, sentiment='neg')
     weak_signals = np.hstack([positive_labels, negative_labels])
     weak_signals.shape
     
+
+    # Clean data and reset index
     train_data.reset_index(drop=True, inplace=True)
 
-
+    # convert dataframe to nparrays 
     train_data = train_data.values
     test_data = test_data.values
 
-    # test_data = df.review.values[test_data]
-    # train_data = df.review.values[train_data]
-
-
-
-
-
-    # train_labels = train_data.label.values
-    # test_labels = test_data.label.values
     print(train_data.shape, train_labels.shape)
     print(test_data.shape, test_labels.shape)
 
+
+    # remove data points no covered by weak signals
     weak_signals, indices = remove_indices(weak_signals)
     weak_signals.shape
+    train_data   = np.delete(train_data, indices, axis=0)
+    train_labels = np.delete(train_labels, indices)
 
 
-    indices = indices
+    # indices = indices
 
-    # debugging code
-    # print("\n\n after: \n weak_signals: ",  weak_signals) 
-    # print("weak_signals shape: ",  weak_signals.shape, "\n\n")
-    # print("\n\nindices: ",  indices) 
-    # print("indices shape: ",  indices.shape, "\n\n")
-    # print("\n\ntest_data shape: ",  train_data.shape) 
-
-
-    # train_labels = train_data.label.values
-    # test_labels = test_data.label.values
-
+    # # # # # # # # # #
+    # Fix Code later  #
+    # # # # # # # # # #
     # n,m = weak_signals.shape
     # weak_signal_probabilities = weak_signals.T.reshape(m,n,1)
     # weak_signals_mask = weak_signal_probabilities >=0
     # true_error_rates = get_error_bounds(train_labels, weak_signal_probabilities, weak_signals_mask)
     # print("error: ", np.asarray(true_error_rates))
 
-    # Clean data and reset index
-    # train_data.reset_index(drop=True, inplace=True)
-
-    train_data   = np.delete(train_data, indices, axis=0)
-    train_labels = np.delete(train_labels, indices)
-
+    # Convert data from np arrays of np arrays to np arrays of strings 
     train_data = train_data.flatten()
     test_data  = test_data.flatten()
-    # train_data = pd.DataFrame(train_data)
-    # test_data = pd.DataFrame(test_data)
-
-
-
-
-
-    # # apply on train data
-    # train_data = cleanTweets(train_data.drop(columns=['label']))
-    # # train_data = post_process_tweets(train_data)
-
-    # # apply on test data
-    # test_data = cleanTweets(test_data.drop(columns=['label']))
-    # # test_data = post_process_tweets(test_data)
 
     print(train_data.shape, train_labels.shape)
     print(test_data.shape, test_labels.shape)
@@ -319,36 +290,13 @@ def SST_2_generator():
     np.save(datapath+'data_features.npy', train_features)
     np.save(datapath+'test_features.npy', test_features)
 
-    # # debugging code
-    # print("\n\nweak_signals shape: ",  weak_signals.shape)
-    # print("\n\ntest_labels shape: ",  test_labels.shape)
-    # print("test_features: ",  test_features.shape) 
-    # print("\n\ndata_labels shape: ",  train_labels.shape)
-    # print("data_features: ",  train_features.shape) 
-
-
     # save sst-2 labels
     np.save(datapath+'data_labels.npy', train_labels)
     np.save(datapath+'test_labels.npy', test_labels)
 
-    # # debugging code
-    # print("\n\n weak_signals: ",  weak_signals) 
-    # print("weak_signals shape: ",  weak_signals.shape)
-    # print("\n\ntrain_index: ",  train_index) 
-    # print("train_data: ",  train_data) 
-    # print("train_data shape: ",  train_data.shape)
-    # print("\n\ntest_index: ",  test_index) 
-    # print("test_data: ",  test_data) 
-    # print("test_data shape: ",  test_data.shape)
-
-    # indexes = train_data
-    # indexes = indexes[0]
-
-    m, n = weak_signals.shape 
-    indexes = range(0, m)
-
     # save the one-hot signals
     np.save(datapath+'weak_signals.npy', weak_signals)
+
 
 
 # # # # # # # # #
