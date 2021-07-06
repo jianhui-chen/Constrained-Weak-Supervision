@@ -12,19 +12,16 @@ from nltk.tokenize import WordPunctTokenizer
 from nltk.corpus import stopwords
 from nltk.stem import PorterStemmer, LancasterStemmer
 import mxnet as mx
-# from model_utilities import get_error_bounds
-
-
-
-
 
 
 # Preprocessing steps
 stemmer = LancasterStemmer()
 
 
-# to use, download 'glove.42B.300d.txt' from  https://www.kaggle.com/yutanakamura/glove42b300dtxt
-# File too large to save to github
+"""
+    To use glove class, download 'glove.42B.300d.txt' from  https://www.kaggle.com/yutanakamura/glove42b300dtxt
+    File is too large to save to github
+"""
 df = pd.read_csv('glove.42B.300d.txt', sep=" ", quoting=3, header=None, index_col=0)
 glove_model = {key: val.values for key, val in df.T.items()}
 
@@ -48,6 +45,13 @@ def removeStopWords(text):
     return (" ".join(words)).strip()
 
 def cleanTweets(tweets):
+
+    """
+        cleans tweets by removing unwanted symbols and text into a workable format
+
+        :param tweets: tweet data
+        :type  tweets: numpy array of strings 
+    """
 
     # decode tweets from html tags
     cleaned_tweets = decodeHTMLencoding(tweets)
@@ -77,16 +81,17 @@ def cleanTweets(tweets):
     return cleaned_tweets
 
 def get_text_vectors(tweets, model):
+    """
+        cleans tweets by removing unwanted symbols and text into a workable format
+
+        :param tweets: tweet data
+        :type  tweets: numpy array of strings 
+    """
+
     # dataset should be a pandas dataframe
     dimension = 300
     data_array = np.empty(shape=[0, dimension])
     indexes = []
-
-    # print("\n\n tweets :")
-    # print("tweet type :", type(tweets))
-    # print("tweet shape :", tweets.shape)
-    # print("tweets :", tweets)
-
     
     for i, tweet in enumerate(tweets):
         words = tweet.split()
@@ -106,29 +111,36 @@ def get_text_vectors(tweets, model):
                 continue
     indexes = np.asarray(indexes)
 
-    # print("\n\n end :")
-    # print("\n indexes.size:", indexes.size)
-    # print("\n data_array.shape[0]:", data_array.shape[0])
-
     assert indexes.size == data_array.shape[0]
     return data_array, indexes
 
 
 
 def remove_indices(weak_signals):
-    # remove indexes of weak_signals that do not have coverage
+    """
+        remove indexes of weak_signals that do not have coverage
+
+        :param weak_signals: list of weak signals for all examples
+        :type  weak_signals: numpy array of strings 
+    """
     indices = np.where(np.sum(weak_signals, axis=1) == -1*weak_signals.shape[1])[0]
     weak_signals = np.delete(weak_signals, indices, axis=0)
     
     return weak_signals, indices
 
 
-# test word vectors
-# from scipy import spatial
-# result = 1 - spatial.distance.cosine(glove_model['horrible'], glove_model['terrible'])
-# result
-
 def keyword_labeling(data, keywords, sentiment='pos'):
+    """
+        finds data points that belong to either to pos or negative classes
+
+        :param data: text data to look through
+        :type  data: np array of strings
+        :param keywords: keywords to detect if a word belongs to a class
+        :type  keywords: lists of lists of strings to detect if a word belongs to a class
+        :param sentiment: positive or negative class
+        :type  sentiment: defualt positive class unless otherwise specified
+    """
+    
     mask = 1 if sentiment == 'pos' else 0
     weak_signals = []
     for terms in keywords:
@@ -214,6 +226,9 @@ def get_error_bounds(true_labels, weak_signals):
 # # # # # # # # # # #
 
 def SST_2_generator():
+    """
+        breaks down data from SST dataset
+    """
 
     # get data from files
     datapath = './sst-2/'
@@ -304,6 +319,9 @@ def SST_2_generator():
 # # # # # # # # #
 
 def IMDB_generator():
+    """
+        breaks down data from IMDB dataset
+    """
 
     datapath = './imdb/'
     df = pd.read_csv(datapath+'IMDB Dataset.csv')
@@ -366,17 +384,6 @@ def IMDB_generator():
     np.save(datapath+'data_labels.npy', train_labels[train_index])
     np.save(datapath+'test_labels.npy', test_labels[test_index])
 
-
-    # debugging code
-    # print("\n\n weak_signals: ",  weak_signals) 
-    # print("weak_signals shape: ",  weak_signals.shape)
-    # print("\n\ntrain_index: ",  train_index) 
-    # print("train_data: ",  train_data) 
-    # print("train_data shape: ",  train_data.shape)
-    # print("\n\ntest_index: ",  test_index) 
-    # print("test_index: ",  test_data) 
-    # print("train_data shape: ",  test_data.shape)
-
     # save the weak_signals
     np.save(datapath+'weak_signals.npy', weak_signals[train_index])
 
@@ -384,5 +391,5 @@ def IMDB_generator():
 print("\n\n working on SST_2 \n\n" )
 SST_2_generator()
 
-# print("\n\n working on IMDB \n\n" )
-# IMDB_generator()
+print("\n\n working on IMDB \n\n" )
+IMDB_generator()
