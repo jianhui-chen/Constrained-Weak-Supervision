@@ -88,6 +88,11 @@ def new_run_experiment(data_obj, w_data_dicts, constant_bound=False):
         train_accuracy            = []
         test_accuracy             = []
 
+        print(weak_signal_probabilities.shape)
+        print(train_data.shape)
+        print(test_data.shape)
+        exit()
+
         """
         print(np.mean(weak_signal_probabilities, axis=0))
         print(weak_signal_probabilities.shape)

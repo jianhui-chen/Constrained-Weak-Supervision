@@ -55,9 +55,10 @@ def train_weak_signals(data_obj, num_weak_signals):
 
     w_data = get_weak_signals(data_obj)
 
-    weak_signal_dev_data = w_data[0]
-    weak_signal_train_data = w_data[1]
-    weak_signal_test_data = w_data[2]
+    # This is to train the LR model + get statistics
+    weak_signal_dev_data = w_data[0]    # Used for fitting the model
+    weak_signal_train_data = w_data[1]  # Used for stats
+    weak_signal_test_data = w_data[2]   # This is not used at all
 
     weak_signals = []
     stats = np.zeros(num_weak_signals)
@@ -101,16 +102,17 @@ def train_weak_signals(data_obj, num_weak_signals):
 
     return w_data_dict
 
-def get_w_data_dicts(data_obj, min_weak_signals, total_weak_signals, weak_sig_datapath="none"):
+def get_w_data_dicts(data_obj, min_weak_signals, total_weak_signals, weak_sig_datapath=None):
        
     w_data_dicts = []
 
     #train weak signals when none are presented
-    if weak_sig_datapath == "none":
+    if weak_sig_datapath is None:
         for num_weak_signals in range(min_weak_signals, total_weak_signals + 1):
             w_data_dicts.append(train_weak_signals(data_obj, num_weak_signals))
 
     #train get weak signals from path
+    # This mimics what's in the generate_weak_signals code
     else:
         w_data_dict = {}
         w_data_dict['probabilities'] = np.load(weak_sig_datapath + 'weak_signals.npy', allow_pickle=True)[()]
