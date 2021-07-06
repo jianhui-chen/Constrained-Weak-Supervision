@@ -336,6 +336,8 @@ class ALL(BaseClassifier):
         # initializing algo vars
         y = 0.5 * np.ones(n_examples)
         gamma = np.zeros(weak_signals_probas.shape[0])
+
+        gamma = np.zeros(weak_signals_probas.shape[0])
         one_vec = np.ones(n_examples)
         rho = 2.5
         lr = 0.0001
@@ -395,6 +397,8 @@ class LabelEstimator(BaseClassifier):   # Might want to change the name of Base 
         average_weak_labels = np.mean(weak_signals_probas, axis=0)
         labels[average_weak_labels > 0.5] = 1
         labels[average_weak_labels <= 0.5] = 0
+
+        #Add call to CLL here? 
 
         return labels
 

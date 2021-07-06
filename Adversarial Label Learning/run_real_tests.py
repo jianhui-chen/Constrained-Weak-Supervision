@@ -1,6 +1,7 @@
 from real_experiments import run_experiment, bound_experiment, dependent_error_exp
 from data_readers import *
 from classes_file import Data
+from generate_weak_signals import *
 from weak_signals import *
 from new_loop import *
 
@@ -20,9 +21,10 @@ def run_tests():
     print("# Running breast cancer experiment...   #")
     print("# # # # # # # # # # # # # # # # # # # # #\n")
     bc_data = Data("Breast Cancer", [0, 10, 20], 'datasets/breast-cancer/wdbc.data', 'results/json/breast_cancer.json', breast_cancer_load_and_process_data)
-    w_data_dicts = get_w_data_dicts(bc_data, 1, 3)
+    multiple_weak_signals = get_multiple_weak_signals(bc_data, 1, 3, 'ALL/')
+    #w_data_dicts = get_w_data_dicts(bc_data, 1, 3)
     #adversarial_acc_dicts, w_acc_dicts = run_experiment(bc_data, w_data_dicts)
-    new_run_experiment(bc_data, w_data_dicts)
+    new_run_experiment(bc_data, multiple_weak_signals)
 
 
     

@@ -81,10 +81,29 @@ def run_experiment(dataset, true_bound=False):
     mv_labels = majority_vote_signal(weak_signals)
 
     y = train_algorithm(constraints)
+
+    # debugging code
+    # print("\n first accuracy: \n\n test_labels:", train_labels)
+    # print("test_labels shape:", train_labels.shape,"\n\n")
+    # print("\n\n y:", y)
+    # print("y shape:", y.shape," \n\n")
+
+
+
     accuracy = accuracy_score(train_labels, y)
+
+
+
     model = mlp_model(train_data.shape[1], k)
     model.fit(train_data, y, batch_size=batch_size, epochs=20, verbose=1)
     test_predictions = model.predict(test_data)
+
+    # debugging code
+    # print("\n second accuracy: \n\ntest_labels:", test_labels)
+    # print("test_labels shape:", test_labels.shape,"\n\n")
+    # print("\n\ntest_predictions:", test_predictions)
+    # print("test_predictions shape:", test_predictions.shape," \n\n")
+
     test_accuracy = accuracy_score(test_labels, test_predictions)
 
     print("CLL Label accuracy is: ", accuracy)
@@ -92,7 +111,14 @@ def run_experiment(dataset, true_bound=False):
     print("Majority vote accuracy is: ", accuracy_score(train_labels, mv_labels))
 
 
+print("\nsynthetic data experiment\n")
 run_experiment(generate_synthetic_data())
-# run_experiment(read_text_data('../datasets/sst-2/'))
-# run_experiment(read_text_data('../datasets/imdb/'))
+
+print("\nsst-2 experiment\n")
+run_experiment(read_text_data('../datasets/sst-2/'))
+
+print("\nimdb experiment\n")
+run_experiment(read_text_data('../datasets/imdb/'))
+
+# print("\nyelp experiment\n")
 # run_experiment(read_text_data('../datasets/yelp/'))
