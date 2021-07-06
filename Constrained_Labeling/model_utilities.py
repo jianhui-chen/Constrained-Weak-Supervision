@@ -107,7 +107,7 @@ def accuracy_score(y_true, y_pred):
     except:
         if len(y_true.shape) == 1:
             y_pred = np.round(y_pred.ravel())
-
+ 
     assert y_true.shape == y_pred.shape
     return np.mean(np.equal(y_true, np.round(y_pred)))
 
