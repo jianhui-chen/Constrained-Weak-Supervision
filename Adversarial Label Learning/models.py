@@ -1,45 +1,89 @@
-# Note for ALL model class –– inherit from sklean base.py?
 
-# Need to consider if we want to create an abstract base class
-
-from log import Logger
 import sys
 import numpy as np
 from sklearn.linear_model import LogisticRegression
 from sklearn.metrics import accuracy_score
 from abc import ABC, abstractmethod
 from scipy.optimize import minimize
+from log import Logger
 
 
+"""
+Contains abstract base class BaseClassifier
+
+Also contains ALL, LabelEstimator, and GECriterion
+
+All code takes in data as (n_features, n_examples), which is BAD and should
+be changed, along with the weak signals.
 
 
+To work on:
+    Silent try/catches should be removed.
+    Add logging to console.
+    Switch data forms.
+    Modify predict() and get_accuracy() as needed.
+    Add more algos.
 
+"""
 
 class BaseClassifier(ABC):
     """
     Abstract Base Class for learning classifiers
+
+    Constructors are all defined in subclasses
+
+    Current purely abstract methods are:
+    - fit
     """
 
     def predict(self, predicted_probas):
         """
+        Computes predicted labels based on probability predictions.
+        
+        NOTE: It may be good to have a version that takes in data X, instead
+        of precomputed probabilities. 
 
+        Parameters
+        ----------
+        predicted_probas : ndarray of shape (n_examples,)
+            Precomputed probabilities
+
+        Returns
+        -------
+        predicted_labels : ndarray of shape (n_examples,)
+            Binary labels
         """
-        #proba_predictions = self.predict_proba(X)   # the subclass predict_proba will throw an error if not trained
+  
+        predicted_labels = np.zeros(predicted_probas.size)
 
-        predictions = np.zeros(predicted_probas.size)
-        predictions[predicted_probas > 0.5] =1    # could also implement by rounding
-        return predictions
+        # could also implement by rounding
+        predicted_labels[predicted_probas > 0.5] =1    
+        return predicted_labels
     
     def get_accuracy(self, true_labels, predicted_probas):
         """
+        Computes accuracy of predicted labels based on the true labels.
+        This may be good to move out of the class, also make it take in 
+        predicted labels, not probas.
+
+        Parameters
+        ----------
+        true_labels : ndarray of shape (n_examples,)
+
+        predicted_probas : ndarray of shape (n_examples,)
+            I don't know why I pass in probas instead of labels
+
+        Returns
+        -------
+        score : float
+            Value between 0 to 1.00
 
         """
         score = accuracy_score(true_labels, self.predict(predicted_probas))
         return score
 
-    #not abstract
-    #def predict_proba
-    def predict_proba(self, X):     # Note to self: this should replace "probablity" function in train_classifier
+ 
+    def predict_proba(self, X):   
         """
         Computes probability estimates for given class
         Should be able to be extendable for multi-class implementation
@@ -52,7 +96,7 @@ class BaseClassifier(ABC):
 
         Returns
         -------
-        P : ndarray of shape (n_examples,)
+        probas : ndarray of shape (n_examples,)
 
         """
         if self.weights is None:
@@ -63,26 +107,21 @@ class BaseClassifier(ABC):
         except:
             y = X.dot(self.weights)
 
-        probas = 1 / (1 + np.exp(-y))    # first line of logistic, squishes y values
+        # first line of logistic from orig code, squishes y values
+        probas = 1 / (1 + np.exp(-y))    
         
         return probas.ravel()
 
     @abstractmethod 
     def fit(self, X):
         """
+        Abstract method to fit models
 
+        Parameters
+        ----------
+        X : ndarry 
         """
         pass
-
-
-"""
-Potentially the following methods can be moved out of this class:
-_objective_function
-_gamma_gradient
-_y_gradient
-
-
-"""
 
 
 
@@ -91,20 +130,14 @@ class ALL(BaseClassifier):
     Adversarial Label Learning Classifier
 
     This class implements ALL training on a set of data
-    Comments to be modified
+
+        Potentially the following methods can be moved out of this class:
+            _objective_function
+            _gamma_gradient
+            _y_gradient
 
     Parameters
     ----------
-    weak_signals_proba : ndarray of shape (n_weak_signals, n_examples)
-        A set of soft or hard weak estimates for data examples.
-        This may later be changed to accept just the weak signals, and these 
-        probabilities will be calculated within the ALL class. 
-            __init__ would then store the models, and probabilities would have 
-            to be calculated in fit() according to the training data.
-
-    weak_signals_error_bounds : ndarray of shape (n_weak_signals,)
-        Stores upper bounds of error rates for each weak signal.
-
     max_iter : int, default=10000
         Maximum number of iterations taken for solvers to converge.
 
@@ -114,8 +147,6 @@ class ALL(BaseClassifier):
     """
 
     def __init__(self, max_iter=10000, log_name=None):
-    
-        # based on args
 
         self.max_iter = max_iter
 
@@ -130,15 +161,15 @@ class ALL(BaseClassifier):
         else:
             sys.exit("Not of string type")
 
-        # not based on args bc based on feature number
         self.weights = None
 
        
 
-
     # Following functions beginning with _ may be moved out of class
 
-    def _objective_function(self, y, weak_signals_probas, weak_signals_error_bounds, learnable_probabilities, rho, gamma):
+    def _objective_function(self, y, weak_signals_probas, 
+                            weak_signals_error_bounds, learnable_probabilities, 
+                            rho, gamma):
         """
         Computes the value of the objective function
 
@@ -155,10 +186,12 @@ class ALL(BaseClassifier):
         """
 
         n = learnable_probabilities.size
-        objective = np.dot(learnable_probabilities, 1 - y) + np.dot(1 - learnable_probabilities, y)
+        objective = np.dot(learnable_probabilities, 1 - y) + \
+                    np.dot(1 - learnable_probabilities, y)
         objective = np.sum(objective) / n
 
-        weak_term = np.dot(1 - weak_signals_probas, y) + np.dot(weak_signals_probas, 1 - y)
+        weak_term = np.dot(1 - weak_signals_probas, y) + \
+                    np.dot(weak_signals_probas, 1 - y)
         ineq_constraint = (weak_term / n) - weak_signals_error_bounds
         gamma_term = np.dot(gamma.T, ineq_constraint)
 
@@ -171,9 +204,12 @@ class ALL(BaseClassifier):
         """
         Computes the gradient the probabilities wrt to the weights
 
-    
-        :return: ndarray of size (n_of_features, n) gradients for probability wrt to weight
-        :rtype: ndarray
+        See description in fit() for the Parameters
+
+        Returns
+        -------
+        ndarray of size (n_of_features, n) gradients for probability wrt to weight
+  
         """
 
         try:
@@ -193,27 +229,32 @@ class ALL(BaseClassifier):
         """
         Computes the gradient of lagrangian inequality penalty parameters
 
-        :param y: vector of estimated labels for the data
-        :type y: array
-  
-        :return: vector of length gamma containing the gradient of gamma
-        :rtype: array
+        See description in fit() for the Parameters
+
+        Returns
+        -------
+        vector of length gamma containing the gradient of gamma
+
         """
         _, n = weak_signals_probas.shape
 
-        weak_term = np.dot(1 - weak_signals_probas, y) + np.dot(weak_signals_probas, 1 - y)
+        weak_term = np.dot(1 - weak_signals_probas, y) + \
+                    np.dot(weak_signals_probas, 1 - y)
         ineq_constraint = (weak_term / n) - weak_signals_error_bounds
 
         return ineq_constraint
 
 
-    def _y_gradient(self, y, weak_signals_probas, weak_signals_error_bounds, learnable_probabilities, rho, gamma):
+    def _y_gradient(self, y, weak_signals_probas, weak_signals_error_bounds, 
+                    learnable_probabilities, rho, gamma):
         """
         Computes the gradient y
 
-        See description in objective function for the variables
-        :return: vector of length y containing the gradient of y
-        :rtype: array
+        See description in objective function for the Parameters
+
+        Returns
+        -------
+        Gradient of y
         """
         n = learnable_probabilities.size
         learnable_term = 1 - (2 * learnable_probabilities)
@@ -222,7 +263,8 @@ class ALL(BaseClassifier):
         ls_term = 1 - (2 * weak_signals_probas)
         gamma_term = np.dot(gamma.T, ls_term) / n
 
-        weak_term = np.dot(1 - weak_signals_probas, y) + np.dot(weak_signals_probas, 1 - y)
+        weak_term = np.dot(1 - weak_signals_probas, y) + \
+                    np.dot(weak_signals_probas, 1 - y)
         ineq_constraint = (weak_term / n) - weak_signals_error_bounds
         ineq_constraint = ineq_constraint.clip(min=0)
         ineq_augmented_term = rho * np.dot(ineq_constraint.T, ls_term)
@@ -231,23 +273,43 @@ class ALL(BaseClassifier):
 
 
 
-    def predict_proba(self, X):     # Note to self: this should replace "probablity" function in train_classifier
-        
-        if self.weights is None:
-            sys.exit("No Data fit")
-   
-        try: 
-            y = self.weights.dot(X)
-        except:
-            y = X.dot(self.weights)
+    def _optimize(self, X, weak_signals_probas, weak_signals_error_bounds, 
+                  learnable_probas, y, rho, gamma, n_examples, lr):
+        """
+        Optimizes model according to given training data (X)
 
-        probas = 1 / (1 + np.exp(-y))    # first line of logistic, squishes y values
-        
-        #exit()
-        return probas.ravel()
-   
+        Parameters
+        ----------
+        X : view comments for fit()
 
-    def _optimize(self, X, weak_signals_probas, weak_signals_error_bounds, learnable_probas, y, rho, gamma, n_examples, lr):
+        weak_signals_proba : view comments for fit()
+
+        weak_signals_error_bounds : view comments for fit()
+
+        learnable_probas : ndarray of size (n_examples,)
+            Estimated probabilities for data
+
+        y : ndarray of size (n_examples,)
+            Estimated labels for data
+
+        rho : float
+            Scalar tuning hyperparameter
+
+        gamma : ndarray of size (n_weak_signals,)
+            Lagrangian inequality penalty parameters
+
+        n_examples : int
+            Denotes number of examples
+
+        lr : float
+
+
+        Returns
+        -------
+        self
+            Fitted and optimized estimator
+
+        """
         t = 0
         converged = False
         while not converged and t < self.max_iter:
@@ -255,7 +317,9 @@ class ALL(BaseClassifier):
 
             # update y
             old_y = y
-            y_grad = self._y_gradient(y, weak_signals_probas, weak_signals_error_bounds, learnable_probas, rho, gamma)
+            y_grad = self._y_gradient(y, weak_signals_probas, 
+                                      weak_signals_error_bounds, 
+                                      learnable_probas, rho, gamma)
             y = y + rate * y_grad
             # projection step: clip y to [0, 1]
             y = y.clip(min=0, max=1)
@@ -265,7 +329,8 @@ class ALL(BaseClassifier):
 
             # update gamma
             old_gamma = gamma
-            gamma_grad = self._gamma_gradient(old_y, weak_signals_probas, weak_signals_error_bounds)
+            gamma_grad = self._gamma_gradient(old_y, weak_signals_probas, 
+                                              weak_signals_error_bounds)
             gamma = gamma - rho * gamma_grad
             gamma = gamma.clip(max=0)
 
@@ -282,14 +347,18 @@ class ALL(BaseClassifier):
             conv_y = np.linalg.norm(y - old_y)
 
             # check that inequality constraints are satisfied
-            ineq_constraint = self._gamma_gradient(y, weak_signals_probas, weak_signals_error_bounds)
+            ineq_constraint = self._gamma_gradient(y, weak_signals_probas, 
+                                                   weak_signals_error_bounds)
             ineq_infeas = np.linalg.norm(ineq_constraint.clip(min=0))
 
-            converged = np.isclose(0, conv_y, atol=1e-6) and np.isclose(0, ineq_infeas, atol=1e-6) and np.isclose(0, conv_weights, atol=1e-5)
+            converged = np.isclose(0, conv_y, atol=1e-6) and \
+                        np.isclose(0, ineq_infeas, atol=1e-6) and \
+                        np.isclose(0, conv_weights, atol=1e-5)
 
             if t % 1000 == 0:
                 lagrangian_obj = self._objective_function(y, weak_signals_probas, weak_signals_error_bounds, learnable_probas, rho, gamma) # might be slow
-                primal_objective = np.dot(learnable_probas, 1 - y) + np.dot(1 - learnable_probas, y)
+                primal_objective = np.dot(learnable_probas, 1 - y) + \
+                                   np.dot(1 - learnable_probas, y)
                 primal_objective = np.sum(primal_objective) / n_examples
                 # print("Iter %d. Weights Infeas: %f, Y_Infeas: %f, Ineq Infeas: %f, lagrangian: %f, obj: %f" % (t, np.sum(conv_weights), conv_y,
                 # 									ineq_infeas, lagrangian_obj, primal_objective))
@@ -316,11 +385,20 @@ class ALL(BaseClassifier):
 
         Parameters
         ----------
-        X : ndarray of shape (n_features, n_examples)       NOTE: Usually this is transposed, might want to change for consistency with other models
+        X : ndarray of shape (n_features, n_examples)      
             Training matrix, where n_examples is the number of examples and 
             n_features is the number of features for each example
 
-        y : Not to be used for this function, would be used with GE computations
+            NOTE: Usually this is transposed, might want to change for 
+            consistency with other models
+
+        weak_signals_proba : ndarray of shape (n_weak_signals, n_examples)
+            A set of soft or hard weak estimates for data examples.
+            This may later be changed to accept just the weak signals, and these 
+            probabilities will be calculated within the ALL class. 
+
+        weak_signals_error_bounds : ndarray of shape (n_weak_signals,)
+            Stores upper bounds of error rates for each weak signal.
 
         Returns
         -------
@@ -345,10 +423,15 @@ class ALL(BaseClassifier):
         learnable_probas = self.predict_proba(X)
 
         if self.logger is None:
-            return self._optimize(X, weak_signals_probas, weak_signals_error_bounds, learnable_probas, y, rho, gamma, n_examples, lr)
+            return self._optimize(X, weak_signals_probas, 
+                                  weak_signals_error_bounds, learnable_probas, 
+                                  y, rho, gamma, n_examples, lr)
         else:
             with self.logger.writer.as_default():
-                return self._optimize(X, weak_signals_probas, weak_signals_error_bounds, learnable_probas, y, rho, gamma, n_examples, lr)
+                return self._optimize(X, weak_signals_probas, 
+                                      weak_signals_error_bounds, 
+                                      learnable_probas, y, rho, gamma, 
+                                      n_examples, lr)
             
         return self
     
@@ -359,7 +442,15 @@ class ALL(BaseClassifier):
 class LabelEstimator(BaseClassifier):   # Might want to change the name of Base Classifier?
     """
     Label Estimator + Classifier
-    Need to add more on its functionality. 
+    Subclasses can redefine _estimate_labels process
+
+    Parameters
+    ----------
+    max_iter : int, default=None
+        Maximum number of iterations taken for solvers to converge.
+
+    log_name : string, default=None
+        Specifies directory name for a logger object.
     """
 
     def __init__(self, max_iter=None, log_name=None):
@@ -382,34 +473,66 @@ class LabelEstimator(BaseClassifier):   # Might want to change the name of Base 
  
 
     def predict_proba(self, X):
+        """
+        Computes probability estimates for given class
+
+        Parameters
+        ----------
+        X : ndarray of shape (n_features, n_examples)
+            Examples to be assigned a probability (binary)
+
+
+        Returns
+        -------
+        probas : ndarray of shape (n_examples,)
+        """
         if self.model is None:
             sys.exit("No Data fit")
 
         probabilities = self.model.predict_proba(X.T)[:,1]
 
-        
-
         return probabilities
 
 
     def _estimate_labels(self, weak_signals_probas, weak_signals_error_bounds):
+        """
+        Estimates labels by averaging weak signals
+
+        Parameters
+        ----------
+        weak_signals_proba : ndarray of shape (n_weak_signals, n_examples)
+            A set of soft or hard weak estimates for data examples.
+            This may later be changed to accept just the weak signals, and these 
+            probabilities will be calculated within the ALL class. 
+
+        weak_signals_error_bounds : ndarray of shape (n_weak_signals,)
+            Stores upper bounds of error rates for each weak signal.
+
+
+        Returns
+        -------
+        Estimated labels
+
+        """
         labels=np.zeros(weak_signals_probas.shape[1]) # no of examples
         average_weak_labels = np.mean(weak_signals_probas, axis=0)
         labels[average_weak_labels > 0.5] = 1
         labels[average_weak_labels <= 0.5] = 0
 
-        #Add call to CLL here? 
 
         return labels
 
 
-    def fit(self, X, weak_signals_probas, weak_signals_error_bounds, train_model=None): # can change to get these in init
+    def fit(self, X, weak_signals_probas, weak_signals_error_bounds, 
+            train_model=None): 
         """
         Option: we can make it so the labels are generated outside of method
             i.e. passed in as y, or change to pass in algo to generate within
             this method
         error_bounds param is not used, but included for consistency
         """
+
+        # Estimates labels
         labels = self._estimate_labels(weak_signals_probas, weak_signals_error_bounds)
 
 
