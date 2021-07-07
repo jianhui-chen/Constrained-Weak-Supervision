@@ -1,45 +1,87 @@
-# Note for ALL model class –– inherit from sklean base.py?
 
-# Need to consider if we want to create an abstract base class
-
-from log import Logger
 import sys
 import numpy as np
 from sklearn.linear_model import LogisticRegression
 from sklearn.metrics import accuracy_score
 from abc import ABC, abstractmethod
 from scipy.optimize import minimize
+from log import Logger
 
 
+"""
+Contains abstract base class BaseClassifier
+
+Also contains ALL, LabelEstimator, and GECriterion
+
+All code takes in data as (n_features, n_examples), which is BAD and should
+be changed, along with the weak signals.
 
 
+To work on:
+    Silent try/catches should be removed.
+    Add logging to console.
+    Switch data forms.
+    Modify predict() and get_accuracy() as needed.
+    Add more algos.
 
+"""
 
 class BaseClassifier(ABC):
     """
     Abstract Base Class for learning classifiers
+
+    Constructors are all defined in subclasses
+
+    Current purely abstract methods are:
+    - fit
     """
 
     def predict(self, predicted_probas):
         """
+        Computes predicted labels based on probability predictions.
+        
+        NOTE: It may be good to have a version that takes in data X, instead
+        of precomputed probabilities. 
 
+        Parameters
+        ----------
+        predicted_probas : ndarray of shape (n_examples,)
+            Precomputed probabilities
+
+        Returns
+        -------
+        predicted_labels : ndarray of shape (n_examples,)
+            Binary labels
         """
-        #proba_predictions = self.predict_proba(X)   # the subclass predict_proba will throw an error if not trained
-
-        predictions = np.zeros(predicted_probas.size)
-        predictions[predicted_probas > 0.5] =1    # could also implement by rounding
-        return predictions
+  
+        predicted_labels = np.zeros(predicted_probas.size)
+        predicted_labels[predicted_probas > 0.5] =1    # could also implement by rounding
+        return predicted_labels
     
     def get_accuracy(self, true_labels, predicted_probas):
         """
+        Computes accuracy of predicted labels based on the true labels.
+        This may be good to move out of the class, also make it take in 
+        predicted labels, not probas.
+
+        Parameters
+        ----------
+        true_labels : ndarray of shape (n_examples,)
+
+        predicted_probas : ndarray of shape (n_examples,)
+            I don't know why I pass in probas instead of labels
+
+        Returns
+        -------
+        score : float
+            Value between 0 to 1.00
 
         """
         score = accuracy_score(true_labels, self.predict(predicted_probas))
         return score
 
-    #not abstract
-    #def predict_proba
-    def predict_proba(self, X):     # Note to self: this should replace "probablity" function in train_classifier
+ 
+    def predict_proba(self, X):   
         """
         Computes probability estimates for given class
         Should be able to be extendable for multi-class implementation
@@ -52,7 +94,7 @@ class BaseClassifier(ABC):
 
         Returns
         -------
-        P : ndarray of shape (n_examples,)
+        probas : ndarray of shape (n_examples,)
 
         """
         if self.weights is None:
@@ -63,26 +105,21 @@ class BaseClassifier(ABC):
         except:
             y = X.dot(self.weights)
 
-        probas = 1 / (1 + np.exp(-y))    # first line of logistic, squishes y values
+        # first line of logistic from orig code, squishes y values
+        probas = 1 / (1 + np.exp(-y))    
         
         return probas.ravel()
 
     @abstractmethod 
     def fit(self, X):
         """
+        Abstract method to fit models
 
+        Parameters
+        ----------
+        X : ndarry 
         """
         pass
-
-
-"""
-Potentially the following methods can be moved out of this class:
-_objective_function
-_gamma_gradient
-_y_gradient
-
-
-"""
 
 
 
@@ -91,19 +128,15 @@ class ALL(BaseClassifier):
     Adversarial Label Learning Classifier
 
     This class implements ALL training on a set of data
-    Comments to be modified
+
+        Potentially the following methods can be moved out of this class:
+            _objective_function
+            _gamma_gradient
+            _y_gradient
 
     Parameters
     ----------
-    weak_signals_proba : ndarray of shape (n_weak_signals, n_examples)
-        A set of soft or hard weak estimates for data examples.
-        This may later be changed to accept just the weak signals, and these 
-        probabilities will be calculated within the ALL class. 
-            __init__ would then store the models, and probabilities would have 
-            to be calculated in fit() according to the training data.
-
-    weak_signals_error_bounds : ndarray of shape (n_weak_signals,)
-        Stores upper bounds of error rates for each weak signal.
+    
 
     max_iter : int, default=10000
         Maximum number of iterations taken for solvers to converge.
@@ -130,11 +163,9 @@ class ALL(BaseClassifier):
         else:
             sys.exit("Not of string type")
 
-        # not based on args bc based on feature number
         self.weights = None
 
        
-
 
     # Following functions beginning with _ may be moved out of class
 
@@ -320,7 +351,13 @@ class ALL(BaseClassifier):
             Training matrix, where n_examples is the number of examples and 
             n_features is the number of features for each example
 
-        y : Not to be used for this function, would be used with GE computations
+        weak_signals_proba : ndarray of shape (n_weak_signals, n_examples)
+            A set of soft or hard weak estimates for data examples.
+            This may later be changed to accept just the weak signals, and these 
+            probabilities will be calculated within the ALL class. 
+
+        weak_signals_error_bounds : ndarray of shape (n_weak_signals,)
+            Stores upper bounds of error rates for each weak signal.
 
         Returns
         -------
