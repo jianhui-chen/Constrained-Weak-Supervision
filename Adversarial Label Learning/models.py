@@ -442,7 +442,15 @@ class ALL(BaseClassifier):
 class LabelEstimator(BaseClassifier):   # Might want to change the name of Base Classifier?
     """
     Label Estimator + Classifier
-    Need to add more on its functionality. 
+    Subclasses can redefine _estimate_labels process
+
+    Parameters
+    ----------
+    max_iter : int, default=None
+        Maximum number of iterations taken for solvers to converge.
+
+    log_name : string, default=None
+        Specifies directory name for a logger object.
     """
 
     def __init__(self, max_iter=None, log_name=None):
@@ -465,34 +473,66 @@ class LabelEstimator(BaseClassifier):   # Might want to change the name of Base 
  
 
     def predict_proba(self, X):
+        """
+        Computes probability estimates for given class
+
+        Parameters
+        ----------
+        X : ndarray of shape (n_features, n_examples)
+            Examples to be assigned a probability (binary)
+
+
+        Returns
+        -------
+        probas : ndarray of shape (n_examples,)
+        """
         if self.model is None:
             sys.exit("No Data fit")
 
         probabilities = self.model.predict_proba(X.T)[:,1]
 
-        
-
         return probabilities
 
 
     def _estimate_labels(self, weak_signals_probas, weak_signals_error_bounds):
+        """
+        Estimates labels by averaging weak signals
+
+        Parameters
+        ----------
+        weak_signals_proba : ndarray of shape (n_weak_signals, n_examples)
+            A set of soft or hard weak estimates for data examples.
+            This may later be changed to accept just the weak signals, and these 
+            probabilities will be calculated within the ALL class. 
+
+        weak_signals_error_bounds : ndarray of shape (n_weak_signals,)
+            Stores upper bounds of error rates for each weak signal.
+
+
+        Returns
+        -------
+        Estimated labels
+
+        """
         labels=np.zeros(weak_signals_probas.shape[1]) # no of examples
         average_weak_labels = np.mean(weak_signals_probas, axis=0)
         labels[average_weak_labels > 0.5] = 1
         labels[average_weak_labels <= 0.5] = 0
 
-        #Add call to CLL here? 
 
         return labels
 
 
-    def fit(self, X, weak_signals_probas, weak_signals_error_bounds, train_model=None): # can change to get these in init
+    def fit(self, X, weak_signals_probas, weak_signals_error_bounds, 
+            train_model=None): 
         """
         Option: we can make it so the labels are generated outside of method
             i.e. passed in as y, or change to pass in algo to generate within
             this method
         error_bounds param is not used, but included for consistency
         """
+
+        # Estimates labels
         labels = self._estimate_labels(weak_signals_probas, weak_signals_error_bounds)
 
 
