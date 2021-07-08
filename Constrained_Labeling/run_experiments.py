@@ -1,6 +1,7 @@
 import numpy as np
 from model_utilities import *
 from train_CLL import train_algorithm
+from models import CLL
 
 def generate_synthetic_data():
     """ Generate synthetic data """
@@ -63,11 +64,15 @@ def generate_synthetic_data():
 def run_experiment(dataset, true_bound=False):
     """ Run CLL experiments """
 
+    current_CLL = CLL(log_name="Label_Estimator ")
+
     batch_size = 32
     train_data, train_labels = dataset['train']
     test_data, test_labels = dataset['test']
     weak_signals = dataset['weak_signals']
     m, n, k = weak_signals.shape
+
+    print("\n\n WEKA SINGALS:", weak_signals.shape)
 
     weak_errors = np.ones((m, k)) * 0.01
 
@@ -80,7 +85,11 @@ def run_experiment(dataset, true_bound=False):
     constraints['weak_signals'] = weak_signals
     mv_labels = majority_vote_signal(weak_signals)
 
-    y = train_algorithm(constraints)
+    # y = train_algorithm(constraints)
+
+
+    error = constraints['error']
+    y = current_CLL.fit(weak_signals, error)
 
     # debugging code
     # print("\n first accuracy: \n\n test_labels:", train_labels)
@@ -111,11 +120,11 @@ def run_experiment(dataset, true_bound=False):
     print("Majority vote accuracy is: ", accuracy_score(train_labels, mv_labels))
 
 
-print("\nsynthetic data experiment\n")
-run_experiment(generate_synthetic_data())
+# print("\nsynthetic data experiment\n")
+# run_experiment(generate_synthetic_data())
 
-print("\nsst-2 experiment\n")
-run_experiment(read_text_data('../datasets/sst-2/'))
+# print("\nsst-2 experiment\n")
+# run_experiment(read_text_data('../datasets/sst-2/'))
 
 print("\nimdb experiment\n")
 run_experiment(read_text_data('../datasets/imdb/'))
