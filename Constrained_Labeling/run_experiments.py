@@ -1,10 +1,22 @@
 import numpy as np
-from model_utilities import *
-from train_CLL import train_algorithm
+from model_utilities import majority_vote_signal, mlp_model, set_up_constraint, get_error_bounds
+from data_readers import read_text_data
 from models import CLL
 
 def generate_synthetic_data():
-    """ Generate synthetic data """
+    """ 
+        Generates synthetic data
+
+        Parameters
+        ----------
+        none
+
+        Returns
+        -------
+        :returns: training set, testing set, and weak signals 
+                  of synthetic data
+        :return type: dictionary of ndarrays
+    """
 
     np.random.seed(900)
     n  = 20000
@@ -62,72 +74,87 @@ def generate_synthetic_data():
 
 
 def run_experiment(dataset, true_bound=False):
-    """ Run CLL experiments """
+    """ 
+        Run CLL experiments on real data
+
+        Parameters
+        ----------
+        :param dataset: training set, testing set, and weak signals 
+                        of dataset
+        :type  dataset: dictionary of ndarrays
+        :param true_bound: determinds wether errors are random or 
+                           based on training labels or 
+        :type  true_bound: boolean
+
+        Returns
+        -------
+        nothing
+    """
+
+
+    print("\nrunning expirements\n")
+
+    # Set up variables
+    train_data, train_labels  = dataset['train']
+    test_data, test_labels    = dataset['test']
+    weak_signals              = dataset['weak_signals']
+    m, n, k                   = weak_signals.shape
 
     current_CLL = CLL(log_name="Label_Estimator ")
+    current_mlp = mlp_model(train_data.shape[1], k)
 
-    batch_size = 32
-    train_data, train_labels = dataset['train']
-    test_data, test_labels = dataset['test']
-    weak_signals = dataset['weak_signals']
-    m, n, k = weak_signals.shape
-
-    print("\n\n WEKA SINGALS:", weak_signals.shape)
-
+    # Set up the error bounds 
     weak_errors = np.ones((m, k)) * 0.01
-
     if true_bound:
         weak_errors = get_error_bounds(train_labels, weak_signals)
         weak_errors = np.asarray(weak_errors)
+    error_set     = set_up_constraint(weak_signals, weak_errors)
 
-    # Set up the constraints
-    constraints = set_up_constraint(weak_signals, weak_errors)
-    constraints['weak_signals'] = weak_signals
-    mv_labels = majority_vote_signal(weak_signals)
+    # run CLL to estimate labels
+    y             = current_CLL.fit(weak_signals, error_set)
+    accuracy      = current_CLL.get_accuracy(train_labels, y)
 
-    # y = train_algorithm(constraints)
-
-
-    error = constraints['error']
-    y = current_CLL.fit(weak_signals, error)
-
-    # debugging code
-    # print("\n first accuracy: \n\n test_labels:", train_labels)
-    # print("test_labels shape:", train_labels.shape,"\n\n")
-    # print("\n\n y:", y)
-    # print("y shape:", y.shape," \n\n")
-
-
-
-    accuracy = accuracy_score(train_labels, y)
-
-
-
-    model = mlp_model(train_data.shape[1], k)
-    model.fit(train_data, y, batch_size=batch_size, epochs=20, verbose=1)
-    test_predictions = model.predict(test_data)
-
-    # debugging code
-    # print("\n second accuracy: \n\ntest_labels:", test_labels)
-    # print("test_labels shape:", test_labels.shape,"\n\n")
-    # print("\n\ntest_predictions:", test_predictions)
-    # print("test_predictions shape:", test_predictions.shape," \n\n")
-
-    test_accuracy = accuracy_score(test_labels, test_predictions)
+    # Use estimated labels to train a new algorithm
+    current_mlp.fit(train_data, y, batch_size=32, epochs=20, verbose=1)
+    test_predictions = current_mlp.predict(test_data)
+    test_accuracy    = current_CLL.get_accuracy(test_labels, test_predictions)
 
     print("CLL Label accuracy is: ", accuracy)
     print("CLL Test accuracy is: \n", test_accuracy)
-    print("Majority vote accuracy is: ", accuracy_score(train_labels, mv_labels))
+
+    # Compare against majority vote expirment 
+    mv_labels = majority_vote_signal(weak_signals)
+    print("Majority vote accuracy is: ", current_CLL.get_accuracy(train_labels, mv_labels))
 
 
-# print("\nsynthetic data experiment\n")
+
+
+
+
+# # Expiriments:
+# # ------------
+
+# print("\n\n# # # # # # # # # # # # # # # #")
+# print("#  synthetic data experiment  #")
+# print("# # # # # # # # # # # # # # # #\n")
 # run_experiment(generate_synthetic_data())
 
-# print("\nsst-2 experiment\n")
+
+# print("\n\n# # # # # # # # # # # #")
+# print("#  sst-2  experiment  #")
+# print("# # # # # # # # # # # #\n")
 # run_experiment(read_text_data('../datasets/sst-2/'))
 
-print("\nimdb experiment\n")
+print("\n\n# # # # # # # # # # #")
+print("#  imdb experiment  #")
+print("# # # # # # # # # # #\n")
 run_experiment(read_text_data('../datasets/imdb/'))
 
+# # NOT READY YET:
+# # ------------
+
+# print("\n\n# # # # # # # # # # # #")
+# print("#   yelp experiment   #")
+# print("# # # # # # # # # # # #\n")
 # print("\nyelp experiment\n")
 # run_experiment(read_text_data('../datasets/yelp/'))
