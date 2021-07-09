@@ -1,10 +1,10 @@
-
 import sys
 import numpy as np
+
 from sklearn.linear_model import LogisticRegression
 from sklearn.metrics import accuracy_score
 from abc import ABC, abstractmethod
-from scipy.optimize import minimize
+
 from log import Logger
 
 
@@ -151,8 +151,6 @@ class CLL(BaseClassifier):
         else:
             sys.exit("Not of string type")
 
-        # self.weights = None
-        # not based on args bc based on feature number
         self.model = None
 
     def get_accuracy(self, true_labels, predicted_probas): 
@@ -188,7 +186,7 @@ class CLL(BaseClassifier):
     # Fit code # 
     ############
 
-    def bound_loss(self, y, a_matrix, bounds):
+    def _bound_loss(self, y, a_matrix, bounds):
         """
         Computes the gradient of lagrangian inequality penalty parameters
 
@@ -214,7 +212,7 @@ class CLL(BaseClassifier):
         return constraint - bounds
 
 
-    def y_gradient(self, y, error_bounds):
+    def _y_gradient(self, y, error_bounds):
         """
         Computes y gradient
 
@@ -241,7 +239,7 @@ class CLL(BaseClassifier):
         return gradient
 
 
-    def run_constraints(self, y, rho, error_constraints, enable_print=True):
+    def _run_constraints(self, y, rho, error_constraints, enable_print=True):
         """
         Run constraints from CLL
 
@@ -272,14 +270,14 @@ class CLL(BaseClassifier):
             bounds = current_constraint['b']
 
             # get bound loss for constraint
-            loss = self.bound_loss(y, a_matrix, bounds)
+            loss = self._bound_loss(y, a_matrix, bounds)
 
             # update constraint values
             error_constraints['bound_loss'] = loss
             violation = np.linalg.norm(loss.clip(min=0))
 
             # Update y˜ with its gradient
-            y_grad = self.y_gradient(y, error_constraints)
+            y_grad = self._y_gradient(y, error_constraints)
             grad_sum += y_grad**2
             y = y - y_grad / np.sqrt(grad_sum + 1e-8)
             y = np.clip(y, a_min=0, a_max=1)
@@ -323,7 +321,7 @@ class CLL(BaseClassifier):
         t = 3  # number of random trials
         ys = []
         for i in range(t):
-            ys.append( self.run_constraints(y, rho, error_bounds) )
+            ys.append( self._run_constraints(y, rho, error_bounds) )
 
         return np.mean(ys, axis=0)
 

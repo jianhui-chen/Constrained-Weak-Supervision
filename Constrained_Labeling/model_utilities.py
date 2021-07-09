@@ -2,6 +2,7 @@ import numpy as np
 import codecs
 import json
 import tensorflow as tf
+
 from tensorflow.python.keras.models import Sequential
 from tensorflow.python.keras.layers import Dropout, Dense
 
@@ -90,14 +91,14 @@ def set_up_constraint(weak_signals, error_bounds):
     """
     constraint_set = dict()
     m, n, k = weak_signals.shape
-    precision_amatrix = np.zeros((m, n, k))
+    # precision_amatrix = np.zeros((m, n, k))
     error_amatrix = np.zeros((m, n, k))
     constants = []
 
     for i, weak_signal in enumerate(weak_signals):
         active_signal = weak_signal >= 0
-        precision_amatrix[i] = -1 * weak_signal * active_signal / \
-            (np.sum(active_signal*weak_signal, axis=0) + 1e-8)
+        # precision_amatrix[i] = -1 * weak_signal * active_signal / \
+        #     (np.sum(active_signal*weak_signal, axis=0) + 1e-8)
         error_amatrix[i] = (1 - 2 * weak_signal) * active_signal
 
         # error denom to check abstain signals
@@ -112,7 +113,6 @@ def set_up_constraint(weak_signals, error_bounds):
     constants = np.sum(constants, axis=1)
     assert len(constants.shape) == len(error_bounds.shape)
     bounds = error_bounds - constants
-    # error_set = build_constraints(error_amatrix, bounds)
 
     m, n, k = error_amatrix.shape
     assert (m, k) == bounds.shape, \
@@ -183,10 +183,6 @@ def mlp_model(dimension, output):
 
 
 """ bellow are Not used currently """
-
-
-
-
 
 def prepare_mmce(weak_signals, labels):
     """ 

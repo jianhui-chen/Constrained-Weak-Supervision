@@ -1,4 +1,5 @@
 import numpy as np
+
 from model_utilities import majority_vote_signal, mlp_model, set_up_constraint, get_error_bounds
 from data_readers import read_text_data
 from models import CLL
@@ -79,7 +80,7 @@ def run_experiment(dataset, true_bound=False):
 
         Parameters
         ----------
-        :param dataset: training set, testing set, and weak signals 
+        :param dataset: training set, testing set, and weak signals
                         of dataset
         :type  dataset: dictionary of ndarrays
         :param true_bound: determinds wether errors are random or 
@@ -91,14 +92,13 @@ def run_experiment(dataset, true_bound=False):
         nothing
     """
 
-
     print("\nrunning expirements\n")
 
     # Set up variables
-    train_data, train_labels  = dataset['train']
-    test_data, test_labels    = dataset['test']
-    weak_signals              = dataset['weak_signals']
-    m, n, k                   = weak_signals.shape
+    train_data, train_labels = dataset['train']
+    test_data, test_labels = dataset['test']
+    weak_signals = dataset['weak_signals']
+    m, n, k = weak_signals.shape
 
     current_CLL = CLL(log_name="Label_Estimator ")
     current_mlp = mlp_model(train_data.shape[1], k)
@@ -108,16 +108,16 @@ def run_experiment(dataset, true_bound=False):
     if true_bound:
         weak_errors = get_error_bounds(train_labels, weak_signals)
         weak_errors = np.asarray(weak_errors)
-    error_set     = set_up_constraint(weak_signals, weak_errors)
+    error_set = set_up_constraint(weak_signals, weak_errors)
 
     # run CLL to estimate labels
-    y             = current_CLL.fit(weak_signals, error_set)
-    accuracy      = current_CLL.get_accuracy(train_labels, y)
+    y = current_CLL.fit(weak_signals, error_set)
+    accuracy = current_CLL.get_accuracy(train_labels, y)
 
     # Use estimated labels to train a new algorithm
     current_mlp.fit(train_data, y, batch_size=32, epochs=20, verbose=1)
     test_predictions = current_mlp.predict(test_data)
-    test_accuracy    = current_CLL.get_accuracy(test_labels, test_predictions)
+    test_accuracy = current_CLL.get_accuracy(test_labels, test_predictions)
 
     print("CLL Label accuracy is: ", accuracy)
     print("CLL Test accuracy is: \n", test_accuracy)
@@ -134,16 +134,16 @@ def run_experiment(dataset, true_bound=False):
 # # Expiriments:
 # # ------------
 
-# print("\n\n# # # # # # # # # # # # # # # #")
-# print("#  synthetic data experiment  #")
-# print("# # # # # # # # # # # # # # # #\n")
-# run_experiment(generate_synthetic_data())
+print("\n\n# # # # # # # # # # # # # # # #")
+print("#  synthetic data experiment  #")
+print("# # # # # # # # # # # # # # # #\n")
+run_experiment(generate_synthetic_data())
 
 
-# print("\n\n# # # # # # # # # # # #")
-# print("#  sst-2  experiment  #")
-# print("# # # # # # # # # # # #\n")
-# run_experiment(read_text_data('../datasets/sst-2/'))
+print("\n\n# # # # # # # # # # # #")
+print("#  sst-2  experiment  #")
+print("# # # # # # # # # # # #\n")
+run_experiment(read_text_data('../datasets/sst-2/'))
 
 print("\n\n# # # # # # # # # # #")
 print("#  imdb experiment  #")
