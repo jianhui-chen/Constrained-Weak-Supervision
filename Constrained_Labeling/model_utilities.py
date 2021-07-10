@@ -1,7 +1,4 @@
 import numpy as np
-import codecs
-import json
-import tensorflow as tf
 
 from tensorflow.python.keras.models import Sequential
 from tensorflow.python.keras.layers import Dropout, Dense
@@ -182,7 +179,7 @@ def mlp_model(dimension, output):
 
 
 
-""" bellow are Not used currently """
+""" bellow are NOT used currently """
 
 def prepare_mmce(weak_signals, labels):
     """ 

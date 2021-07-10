@@ -12,18 +12,6 @@ from log import Logger
 Contains abstract base class BaseClassifier
 
 Also contains CLL
-
-All code takes in data as (n_features, n_examples), which is BAD and should
-be changed, along with the weak signals.
-
-
-To work on:
-    Silent try/catches should be removed.
-    Add logging to console.
-    Switch data forms.
-    Modify predict() and get_accuracy() as needed.
-    Add more algos.
-
 """
 
 class BaseClassifier(ABC):
@@ -182,10 +170,6 @@ class CLL(BaseClassifier):
         assert true_labels.shape == y_pred.shape
         return np.mean(np.equal(true_labels, np.round(y_pred)))
 
-    ############
-    # Fit code # 
-    ############
-
     def _bound_loss(self, y, a_matrix, bounds):
         """
         Computes the gradient of lagrangian inequality penalty parameters
@@ -239,7 +223,7 @@ class CLL(BaseClassifier):
         return gradient
 
 
-    def _run_constraints(self, y, rho, error_constraints, enable_print=True):
+    def _run_constraints(self, y, rho, error_constraints):
         """
         Run constraints from CLL
 
@@ -253,7 +237,6 @@ class CLL(BaseClassifier):
         :return: estimated learned labels
         :rtype: ndarray
         """
-        # constraint_keys = constraint_set['constraints']
         n, k = y.shape
         rho = n
         grad_sum = 0
@@ -315,15 +298,16 @@ class CLL(BaseClassifier):
 
         # initialize y and hyperparameters
         y = np.random.rand(n, k)
-        #not sure what rho is for 
-        rho = 0.1
+        
+        rho = 0.1  #not sure what rho is for 
 
-        t = 3  # number of random trials
-        ys = []
-        for i in range(t):
-            ys.append( self._run_constraints(y, rho, error_bounds) )
-
-        return np.mean(ys, axis=0)
+        # t = 3  # number of random trials
+        # ys = []
+        # for i in range(t):
+        #     ys.append( self._run_constraints(y, rho, error_bounds) )
+        # return np.mean(ys, axis=0)
+        
+        return self._run_constraints(y, rho, error_bounds)
 
     
 
