@@ -177,6 +177,9 @@ def build_constraints(a_matrix, bounds):
     constraints['b'] = bounds
     constraints['gamma'] = np.zeros(bounds.shape)
 
+    # temp for now
+    constraints['c'] = np.zeros(a_matrix.shape)
+
     return constraints
 
 
@@ -213,6 +216,15 @@ def set_up_constraint(weak_probabilities, precision, error_bounds):
     bounds = error_bounds - constants
     error_set = build_constraints(error_amatrix, bounds)
     constraint_set['error'] = error_set
+
+    # print(constants.shape)
+    # print(constant)
+    # print(error_amatrix.shape)
+    # print(bounds.shape)
+    # exit()
+
+    # print(error_set)
+    # exit()
 
     return constraint_set
 

@@ -1,11 +1,13 @@
 import numpy as np
 import matplotlib.pyplot as plt
-from setup_supervision import accuracy_score, writeToFile
+#from setup_supervision import accuracy_score, writeToFile
+from setup_model import accuracy_score, writeToFile, mlp_model
 from scipy.optimize import check_grad
 import random, json, sys, gc
-from utilities import projection_simplex
+#from utilities import projection_simplex
+from data_utilities import projection_simplex
 from tensorflow.python.keras import backend as K
-from setup_model import convnet_model
+#from setup_model import convnet_model
 
 
 def multiclass_loss(y, learnable_probabilities):
@@ -70,7 +72,7 @@ def objective_function(y, learnable_probabilities, constraint_set, rho):
     augmented_term = 0
     constraint_keys = constraint_set['constraints']
     loss = constraint_set['loss']
-    active_mask = constraint_set['active_mask']
+    #active_mask = constraint_set['active_mask']
 
     objective = loss_functions(y, learnable_probabilities, loss)
 
@@ -83,7 +85,8 @@ def objective_function(y, learnable_probabilities, constraint_set, rho):
         constraint = np.zeros(bounds.shape)
 
         for i, current_a in enumerate(a_matrix):
-            constraint[i] = np.sum((active_mask[i]*current_a) * y + (constant[i]*active_mask[i]), axis=0)
+            # constraint[i] = np.sum((active_mask[i]*current_a) * y + (constant[i]*active_mask[i]), axis=0)
+            constraint[i] = np.sum(current_a * y + constant[i], axis=0)
 
         constraint = constraint - bounds
 
@@ -94,7 +97,8 @@ def objective_function(y, learnable_probabilities, constraint_set, rho):
     return objective + gamma_constraint - augmented_term
 
 
-def bound_loss(y, a_matrix, active_mask, constant, bounds):
+#def bound_loss(y, a_matrix, active_mask, constant, bounds):
+def bound_loss(y, a_matrix, constant, bounds):
     """
     Computes the gradient of lagrangian inequality penalty parameters
 
@@ -113,8 +117,8 @@ def bound_loss(y, a_matrix, active_mask, constant, bounds):
     n, k = y.shape
 
     for i, current_a in enumerate(a_matrix):
-        constraint[i] = np.sum((active_mask[i]*current_a) * y + (constant[i]*active_mask[i]), axis=0)
-
+        #constraint[i] = np.sum((active_mask[i]*current_a) * y + (constant[i]*active_mask[i]), axis=0)
+        constraint[i] = np.sum(current_a * y + constant[i], axis=0)
     return constraint - bounds
 
 
@@ -139,7 +143,7 @@ def y_gradient(learnable_probabilities, constraint_set, rho, y, quadratic=False)
     upper_bound_term = 0
     constraint_keys = constraint_set['constraints']
     loss = constraint_set['loss']
-    active_mask = constraint_set['active_mask']
+    #active_mask = constraint_set['active_mask']
 
     obj_grad = 1 - learnable_probabilities \
                     if loss == 'multiclass' else 1 - 2*learnable_probabilities
@@ -154,7 +158,8 @@ def y_gradient(learnable_probabilities, constraint_set, rho, y, quadratic=False)
         gamma = current_constraint['gamma']
 
         for i, current_a in enumerate(a_matrix):
-            constraint = a_matrix[i] * active_mask[i]
+            #constraint = a_matrix[i] * active_mask[i]
+            constraint = a_matrix[i]
             upper_bound_term += gamma[i] * constraint
             augmented_term += bound_loss[i].clip(min=0) * constraint
 
@@ -167,14 +172,16 @@ def run_constraints(label, predicted_probs, rho, constraint_set, iters=300, enab
     constraint_keys = constraint_set['constraints']
     weak_signals = constraint_set['weak_signals']
     num_weak_signal = constraint_set['num_weak_signals']
-    true_bounds = constraint_set['true_bounds'] # boolean value
+    # true_bounds = constraint_set['true_bounds'] # boolean value
+    true_bounds = False
     loss = constraint_set['loss']
-    active_mask = constraint_set['active_mask']
+    #active_mask = constraint_set['active_mask']
+   
     grad_sum = 0
     y = label.copy()
     n,k = y.shape
 
-    weak_signals = weak_signals * active_mask
+    #weak_signals = weak_signals * active_mask
 
     # get the min weak_signal vector
     min_vector = np.min(weak_signals[:num_weak_signal, :, :], axis=0)
@@ -188,14 +195,24 @@ def run_constraints(label, predicted_probs, rho, constraint_set, iters=300, enab
         viol_text = ''
 
         for key in constraint_keys:
+
             current_constraint = constraint_set[key]
+
+            # print(constraint_keys)
+            # print(current_constraint)
+            # exit()
+
             a_matrix = current_constraint['A']
             bounds = current_constraint['b']
             constant = current_constraint['c']
             gamma = current_constraint['gamma']
 
+            # print(a_matrix.shape)
+            # exit()
+
             # get bound loss for constraint
-            full_loss = bound_loss(y, a_matrix, active_mask, constant, bounds)
+            #full_loss = bound_loss(y, a_matrix, active_mask, constant, bounds)
+            full_loss = bound_loss(y, a_matrix, constant, bounds)
             gamma_grad = full_loss
             if optim == 'max':
                 gamma = gamma - rho * gamma_grad
@@ -236,7 +253,7 @@ def run_constraints(label, predicted_probs, rho, constraint_set, iters=300, enab
 
 def train_stochgall(data_info, constraint_set, max_epoch=20):
     """
-    Trains the cnn model for image classification
+    Trains the cnn model for image classification NOPE NOT ANYMORE
 
     :param labels: True labels for the data, only used for debugging
     :type labels: ndarray
@@ -251,13 +268,25 @@ def train_stochgall(data_info, constraint_set, max_epoch=20):
     data = data_info['train_data']
     labels = data_info['train_labels']
     test_data, test_labels = data_info['test_data'], data_info['test_labels']
+
+
+    # why image
+    """
     img_rows, img_cols = data_info['img_rows'], data_info['img_cols']
     channels = data_info['channels']
+    """
+
     num_weak_signal = data_info['num_weak_signals']
     constraint_keys = constraint_set['constraints']
     weak_signals = constraint_set['weak_signals']
+
+    print(weak_signals)
+    print(weak_signals.shape)
+    exit()
+
+    # What is loss and optim
     loss = constraint_set['loss']
-    optim = constraint_set['optim']
+    #optim = constraint_set['optim']
 
     results = dict()
     m, n, k = weak_signals.shape
@@ -283,7 +312,16 @@ def train_stochgall(data_info, constraint_set, max_epoch=20):
     y, constraint_set = run_constraints(y, learnable_probabilities, rho, constraint_set, optim='max')
 
     # Train Stoch-gall
-    model = convnet_model(img_rows, img_cols, channels, loss)
+    #model = covnet_model(img_rows, img_cols, channels, loss)
+
+    #MLP model here         IS THIS THE CORRECT FORM
+    # print(k)
+    # print(data.shape)
+    # print(n)
+    # print(m)
+    model = mlp_model(data.shape[1], k)
+    # exit()
+
     print("Running adversarial label learning..")
     grad_sum = 0
     epoch = 0
@@ -305,10 +343,17 @@ def train_stochgall(data_info, constraint_set, max_epoch=20):
                 model.train_on_batch(data[batch], y[batch])
             learnable_probabilities = model.predict(data)
 
+        print(learnable_probabilities)
+
         if epoch % 2 == 0:
             y, constraint_set = run_constraints(y, learnable_probabilities, rho, constraint_set, iters=10, enable_print=False)
             print_builder += constraint_set['violation'][0]
             print_constraints.extend(constraint_set['violation'][1])
+
+        # if ((y==old_y).all()):
+        #     print("same")
+        #     print(y)
+        #     exit()
 
         # calculate change in y
         # change_y = np.linalg.norm(y - old_y)
@@ -327,6 +372,7 @@ def train_stochgall(data_info, constraint_set, max_epoch=20):
         print(print_builder % tuple(print_constraints))
 
     print("")
+    # print(y) For some reason, everything in 1
 
     label_accuracy = accuracy_score(labels, y)
 
@@ -347,7 +393,11 @@ def train_stochgall(data_info, constraint_set, max_epoch=20):
     del model
     gc.collect()
 
-    print("Saving to file...")
-    filename = 'results/new_results/stoch-gall_results.json'
-    writeToFile(results, filename)
+    # print("Saving to file...")
+    # filename = 'results/new_results/stoch-gall_results.json'
+    # writeToFile(results, filename)
+
+    #need to return something
+    exit()
+    return results
 

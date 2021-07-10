@@ -4,7 +4,8 @@ import random, gc, time, sys
 import tensorflow as tf
 from sklearn.linear_model import LogisticRegression
 from tensorflow.python.keras import backend as K
-from setup_model import set_up_constraint, convnet_model, mlp_model, accuracy_score, writeToFile, prepare_mmce
+#from setup_model import set_up_constraint, mlp_model, mlp_model, accuracy_score, writeToFile, prepare_mmce
+from setup_model import set_up_constraint, mlp_model, accuracy_score, writeToFile, prepare_mmce
 from image_utilities import get_supervision_data
 from train_CLL import train_algorithm
 from text_utilities import get_textsupervision_data
@@ -12,7 +13,7 @@ from mmce import MinimaxEntropy_crowd_model
 from data_utilities import *
 
 # from sklearn.metrics import f1_score, precision_score, recall_score
-# from train_stochgall import train_stochgall
+from train_stochgall import train_stochgall
 
 def run_experiment(data_set, savename):
     """
@@ -73,7 +74,7 @@ def run_experiment(data_set, savename):
     # mmce_crowd_labels, transformed_labels = prepare_mmce(mmce_crowd_labels, train_labels)
     # mmce_labels, mmce_error_rate = MinimaxEntropy_crowd_model(mmce_crowd_labels, transformed_labels)
     # mmce_labels -=1
-    # model = convnet_model(img_rows, img_cols, channels, loss)
+    # model = mlp_model(img_rows, img_cols, channels, loss)
     # mmce_labels = tf.one_hot(mmce_labels, 10)
     # model.fit(train_data, mmce_labels, batch_size=batch_size, epochs=20, verbose=1)
     # test_predictions = model.predict(test_data)
@@ -100,14 +101,14 @@ def run_experiment(data_set, savename):
         new_constraint_set['num_weak_signals'] = num_weak_signals
 
         print("Running tests...")
-        # y = train_stochgall(data_info, new_constraint_set)
-        y = train_algorithm(new_constraint_set)
+        y = train_stochgall(data_info, new_constraint_set)
+        #y = train_algorithm(new_constraint_set)
 
         results = {}
         label_accuracy = accuracy_score(train_labels, y)
         print(label_accuracy)
         print("Running constrained label learning...")
-        model = convnet_model(img_rows, img_cols, channels)
+        model = mlp_model(img_rows, img_cols, channels)
         model.fit(train_data, np.round(y), batch_size=batch_size, epochs=20, verbose=1)
 
         # update cll results
@@ -133,7 +134,7 @@ def run_experiment(data_set, savename):
         label_accuracy = accuracy_score(train_labels, mv_weak_labels)
         baseline_label_accuracy.append(label_accuracy)
         print("Accuracy of the baseline labels is ", label_accuracy)
-        baseline = convnet_model(img_rows, img_cols, channels, loss)
+        baseline = mlp_model(img_rows, img_cols, channels, loss)
         baseline.fit(train_data, mv_weak_labels, batch_size=batch_size, epochs=20, verbose=1)
 
         # calculate train results
@@ -164,7 +165,7 @@ def run_experiment(data_set, savename):
     #########################################################################################
     # # Comment if baseline not supervised, uncomment above
     # print("Running supervised experiment as baseline...")
-    # baseline = convnet_model(img_rows, img_cols, channels, loss)
+    # baseline = mlp_model(img_rows, img_cols, channels, loss)
     # baseline.fit(train_data, train_labels, batch_size=batch_size, epochs=20, verbose=1)
     # label_accuracy = 1.0
     #########################################################################################
@@ -203,11 +204,19 @@ def run_text_experiment(data_set, savename):
     weak_model = data['weak_model']
     weak_signal_probabilities = weak_model['weak_signals']
     active_signals = weak_model['active_mask']
+    # print(active_signals)
+    # exit()
 
     model_names = data['model_names']
     train_data, train_labels = data['train_data']
     test_data, test_labels = data['test_data']
     has_labels, has_test_data = data['has_labels']
+
+    # print(train_labels[train_labels==1].shape)
+    # print(train_labels.shape)
+    # print(test_labels[test_labels==1].shape)
+    # print(test_labels.shape)
+    # exit()
 
     max_weak_signals = weak_signal_probabilities.shape[0]
     num_weak_signals= max_weak_signals
@@ -215,6 +224,7 @@ def run_text_experiment(data_set, savename):
     # build up data_info for the algorithm
     data_info = dict()
     data_info['train_data'], data_info['train_labels'] = data['train_data']
+    data_info['test_data'], data_info['test_labels'] = data['test_data']
     print("train_data", train_data.shape)
     print("test_data", test_data.shape)
     print("No of weak signals", num_weak_signals)
@@ -260,12 +270,31 @@ def run_text_experiment(data_set, savename):
         new_constraint_set['constraints'] = constraint_keys
         new_constraint_set['weak_signals'] = weak_signal_probabilities[:num_weak_signals, :, :] * active_signals[:num_weak_signals, :, :]
 
+        # print(new_constraint_set['weak_signals'].shape)
+        # print(num_weak_signals)
+        # exit()
+
+        #Adding this in
+        new_constraint_set['loss'] = 'multiclass' # do i want multilabel
+        new_constraint_set['num_weak_signals'] = num_weak_signals
+
         print("Running tests...")
-        y = train_algorithm(new_constraint_set)
-        label_accuracy = accuracy_score(train_labels, y)
-        print("CLL label accuracy: %f" % label_accuracy)
+
+        # print(train_data.shape)
+        # print(test_data.shape)
+        # print(k)
+   
+
+        results = train_stochgall(data_info, new_constraint_set)
+        #y = train_algorithm(new_constraint_set)
+        #label_accuracy = accuracy_score(train_labels, y)
+        print("ALL label accuracy: %f" % results['label_accuracy'])
         print("mv label accuracy: %f" % accuracy_score(train_labels, mv_weak_labels))
 
+        #PRINT MORE RESULTS
+
+        # Below is stuff needed for CLL 
+        """
         results = {}
         model = mlp_model(train_data.shape[1], k)
         model.fit(train_data, y, batch_size=batch_size, epochs=20, verbose=1)
@@ -313,6 +342,7 @@ def run_text_experiment(data_set, savename):
         K.clear_session()
         del model
         gc.collect()
+        """
 
         mv_baseline = {}
         mv_baseline['num_weak_signal'] = num_weak_signals
@@ -375,6 +405,7 @@ def run_text_experiment(data_set, savename):
     output['Adversarial model'] = adversarial_model
     output['Weak model'] = mv_baseline
 
+    """
     print("Saving to file...")
     filename = 'results/new_results/'+savename+'_results.json'
     # filename = savename+'_results.json'
@@ -386,7 +417,7 @@ def run_text_experiment(data_set, savename):
     output['test'] = test_data, test_labels
     output['num_weak_signals'] = num_weak_signals
     np.save(filename, output)
-
+    """
 
 
 def run_snorkel_experiment(data_set, pathname, loss='multilabel'):
@@ -417,7 +448,7 @@ def run_snorkel_experiment(data_set, pathname, loss='multilabel'):
     test_accuracies = []
 
     for i in range(3):
-        # model = convnet_model(img_rows, img_cols, channels, loss)
+        # model = mlp_model(img_rows, img_cols, channels, loss)
         model = mlp_model(train_data.shape[1], k)
         model.fit(train_data, snorkel_labels, batch_size=32, epochs=20, verbose=1)
 
@@ -473,12 +504,12 @@ def get_results(snorkel=False):
         # run_snorkel_experiment('../datasets/yelp/','yelp/')
         pass
     else:
-        run_text_experiment(read_text_data('../datasets/imbd/'),'imbd')
-        run_text_experiment(read_text_data('../datasets/yelp/'),'yelp')
+        run_text_experiment(read_text_data('../datasets/imdb/'),'imbd')
+        #run_text_experiment(read_text_data('../datasets/yelp/'),'yelp')
         run_text_experiment(read_text_data('../datasets/sst-2/'), 'sst-2')
-        run_text_experiment(read_text_data('../datasets/trec-6/'),'trec-6')
-        run_experiment(load_svhn(),'svhn')
-        run_experiment(load_fashion_mnist(),'fmnist')
+        #run_text_experiment(read_text_data('../datasets/trec-6/'),'trec-6')
+        #run_experiment(load_svhn(),'svhn')
+        #run_experiment(load_fashion_mnist(),'fmnist')
 
         # run_text_experiment(synthetic_experiment(),'synthetic-independent')
         pass
