@@ -275,7 +275,8 @@ def run_text_experiment(data_set, savename):
         # exit()
 
         #Adding this in
-        new_constraint_set['loss'] = 'multiclass' # do i want multilabel
+        # new_constraint_set['loss'] = 'multiclass' # do i want multilabel
+        new_constraint_set['loss'] = 'multilabel'
         new_constraint_set['num_weak_signals'] = num_weak_signals
 
         print("Running tests...")

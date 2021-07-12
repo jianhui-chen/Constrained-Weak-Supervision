@@ -173,7 +173,8 @@ def run_constraints(label, predicted_probs, rho, constraint_set, iters=300, enab
     weak_signals = constraint_set['weak_signals']
     num_weak_signal = constraint_set['num_weak_signals']
     # true_bounds = constraint_set['true_bounds'] # boolean value
-    true_bounds = False
+    # true_bounds = False
+    true_bounds = True
     loss = constraint_set['loss']
     #active_mask = constraint_set['active_mask']
    
@@ -213,13 +214,39 @@ def run_constraints(label, predicted_probs, rho, constraint_set, iters=300, enab
             # get bound loss for constraint
             #full_loss = bound_loss(y, a_matrix, active_mask, constant, bounds)
             full_loss = bound_loss(y, a_matrix, constant, bounds)
+            if iter == 0 or iter == (iters - 1):
+                print("full loss")
+                print(full_loss)
             gamma_grad = full_loss
+            
+            if iter == 0 or iter == (iters - 1):
+                print("Gamma pre ")
+                print(gamma)
             if optim == 'max':
+                if iter == 0 or iter == (iters - 1):
+                    print("max")
                 gamma = gamma - rho * gamma_grad
+
+                if iter == 0 or iter == (iters - 1):
+                    print("Gamma pre clip")
+                    print(gamma)
                 gamma = gamma.clip(max=0)
+                if iter == 0 or iter == (iters - 1):
+                    print("Gamma postclip ")
+                    print(gamma)
             else:
+                if iter == 0 or iter == (iters - 1):
+                    print("min")
                 gamma = gamma + rho * gamma_grad
+                if iter == 0 or iter == (iters - 1):
+                    print("Gamma pre clip")
+                    print(gamma)
                 gamma = gamma.clip(min=0)
+                if iter == 0 or iter == (iters - 1):
+                    print("Gamma postclip ")
+                    print(gamma)
+
+           
 
             # update constraint values
             constraint_set[key]['gamma'] = gamma
@@ -234,18 +261,36 @@ def run_constraints(label, predicted_probs, rho, constraint_set, iters=300, enab
 
         y_grad = y_gradient(predicted_probs, constraint_set, rho, y, quadratic=True)
         grad_sum += y_grad**2
+
+        if iter == 0 or iter == (iters - 1):
+            print("y grad and grad sum and y")
+            print(y_grad)
+            print(grad_sum)
+            print(y)
+
         if optim == 'max':
             y = y + y_grad / np.sqrt(grad_sum + 1e-8)
         else:
             y = y - y_grad / np.sqrt(grad_sum + 1e-8)
 
+        if iter == 0 or iter == (iters - 1):
+            print("y post calc update")
+            print(y)
+
+        # Commenting out just to see y values
         y = np.clip(y, a_min=min_vector, a_max=max_vector)  if not true_bounds \
                                 else (y if loss == 'multiclass' else np.clip(y, a_min=0, a_max=1))
         y = projection_simplex(y, axis=1) if loss == 'multiclass' else y
 
+        if iter == 0 or iter == (iters - 1):
+            print("y post clip code")
+            print(y)
+
         constraint_set['violation'] = [viol_text, constraint_viol]
-        if enable_print:
-            print(print_builder % tuple(print_constraints))
+        # if enable_print:
+        #     print(print_builder % tuple(print_constraints))
+
+    print(np.count_nonzero(y<.5))
 
     return y, constraint_set
 
@@ -280,9 +325,9 @@ def train_stochgall(data_info, constraint_set, max_epoch=20):
     constraint_keys = constraint_set['constraints']
     weak_signals = constraint_set['weak_signals']
 
-    print(weak_signals)
-    print(weak_signals.shape)
-    exit()
+    # print(weak_signals)
+    # print(weak_signals.shape)
+    # exit()
 
     # What is loss and optim
     loss = constraint_set['loss']
@@ -308,6 +353,8 @@ def train_stochgall(data_info, constraint_set, max_epoch=20):
     rho = 0.1
     batch_size = 32
 
+
+    print("Initial running")
     # This is to prevent the learning algo from wasting effort fitting a model to arbitrary y values.
     y, constraint_set = run_constraints(y, learnable_probabilities, rho, constraint_set, optim='max')
 
@@ -343,12 +390,19 @@ def train_stochgall(data_info, constraint_set, max_epoch=20):
                 model.train_on_batch(data[batch], y[batch])
             learnable_probabilities = model.predict(data)
 
+        print("learnable probs ")
         print(learnable_probabilities)
+        # exit()
 
         if epoch % 2 == 0:
             y, constraint_set = run_constraints(y, learnable_probabilities, rho, constraint_set, iters=10, enable_print=False)
             print_builder += constraint_set['violation'][0]
             print_constraints.extend(constraint_set['violation'][1])
+
+            # exit()
+
+
+            
 
         # if ((y==old_y).all()):
         #     print("same")
@@ -382,6 +436,8 @@ def train_stochgall(data_info, constraint_set, max_epoch=20):
     # calculate test results
     y_pred = model.predict(test_data)
     test_accuracy = accuracy_score(test_labels, y_pred)
+
+    print('label acc: %f' %(label_accuracy))
 
     print('Stoch-gall train_acc: %f, test_accu: %f' %(train_accuracy, test_accuracy))
 
