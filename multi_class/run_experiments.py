@@ -264,6 +264,11 @@ def run_text_experiment(data_set, savename):
     # file.close()
 
     for i in range(3):
+        # print(weak_signal_probabilities.shape)
+        # print(weak_model['precision'].shape)
+        # print(weak_model['error_bounds'].shape)
+        # print(weak_signal_probabilities[:num_weak_signals, :, :].shape)
+        # exit()
         new_constraint_set = set_up_constraint(weak_signal_probabilities[:num_weak_signals, :, :],
                                                weak_model['precision'][:num_weak_signals, :],
                                                weak_model['error_bounds'][:num_weak_signals, :])
