@@ -38,12 +38,12 @@ class MultiALL(BaseClassifier):
             n_features is the number of features for each example
 
 
-        weak_signals_proba : ndarray of shape (n_weak_signals, n_examples, n_class)
+        weak_signals_proba : ndarray of shape (n_weak_signals, n_examples, n_classes)
             A set of soft or hard weak estimates for data examples.
             This may later be changed to accept just the weak signals, and these 
             probabilities will be calculated within the ALL class. 
 
-        weak_signals_error_bounds : ndarray of shape (n_weak_signals, n_class)
+        weak_signals_error_bounds : ndarray of shape (n_weak_signals, n_classes)
             Stores upper bounds of error rates for each weak signal.
 
         weak_signals_precision : ndarray of shape (n_weak_signals, n_class)
