@@ -1,7 +1,12 @@
+from setup_model import set_up_constraint
+
+# Importing form another directory
 import sys
 sys.path.append('../')
 
 from ALL_code.BaseClassifier import BaseClassifier
+
+
 
 """ Multi-ALL class """
 
@@ -26,6 +31,7 @@ class MultiALL(BaseClassifier):
 
         self.weights = None
 
+    
 
     def fit(self, X, weak_signals_probas, weak_signals_error_bounds, weak_signals_precision):
         """
@@ -54,3 +60,26 @@ class MultiALL(BaseClassifier):
             Fitted estimator
 
         """
+
+        # original variables
+        constraint_keys = ["error"]
+        loss = 'multilabel'
+        batch_size = 32
+        num_weak_signals = weak_signals_probas.shape[0]
+
+        constraint_set = set_up_constraint(weak_signals_probas[:num_weak_signals, :, :],
+                                           weak_signals_precision[:num_weak_signals, :],
+                                           weak_signals_error_bounds[:num_weak_signals, :])
+        
+        constraint_set['constraints'] = constraint_keys
+        constraint_set['weak_signals'] = weak_signals_probas[:num_weak_signals, :, :] * active_signals[:num_weak_signals, :, :]
+        constraint_set['num_weak_signals'] = num_weak_signals
+
+        # Code for fitting algo
+        results = dict()
+
+        m, n, k = weak
+
+
+        # Return statement
+

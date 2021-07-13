@@ -204,8 +204,8 @@ def run_text_experiment(data_set, savename):
     weak_model = data['weak_model']
     weak_signal_probabilities = weak_model['weak_signals']
     active_signals = weak_model['active_mask']
-    # print(active_signals)
-    # exit()
+    print(active_signals)
+    exit()
 
     model_names = data['model_names']
     train_data, train_labels = data['train_data']
