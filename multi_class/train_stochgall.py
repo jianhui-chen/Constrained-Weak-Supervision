@@ -335,6 +335,8 @@ def train_stochgall(data_info, constraint_set, max_epoch=20):
 
     results = dict()
     m, n, k = weak_signals.shape
+
+    ## THIS IS FOR COMPARING ACCURACY LATER 
     if k==1:
        labels = labels.reshape(n,k)
 

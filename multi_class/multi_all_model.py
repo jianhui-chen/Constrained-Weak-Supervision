@@ -1,4 +1,5 @@
 from setup_model import set_up_constraint
+from train_stochgall import *
 
 # Importing form another directory
 import sys
@@ -18,22 +19,32 @@ class MultiALL(BaseClassifier):
 
     Parameters
     ----------
-    max_iter : int, default=10000
-        Maximum number of iterations taken for solvers to converge.
+    max_iter : int, default=300
+        For run_constraints
 
     log_name : Can be added, need to deal with some issues with imports
 
     """
 
-    def __init__(self, max_iter=10000):
+    def __init__(self, max_iter=10, max_epoch=20, rho=0.1, loss='multilabel', batch_size=32):
     
         self.max_iter = max_iter
+        self.max_epoch = max_epoch
+        self.model = None
+        self.rho = rho
+        self.loss = loss
+        self.batch_size = batch_size
 
-        self.weights = None
+
+    def predict_proba(self, X):
+        if self.model is None:
+            sys.exit("no model")
+
+        return self.model.predict(X)
 
     
 
-    def fit(self, X, weak_signals_probas, weak_signals_error_bounds, weak_signals_precision):
+    def fit(self, X, weak_signals_probas, weak_signals_error_bounds, weak_signals_precision, active_signals):
         """
         Fits MultiAll model
 
@@ -63,8 +74,6 @@ class MultiALL(BaseClassifier):
 
         # original variables
         constraint_keys = ["error"]
-        loss = 'multilabel'
-        batch_size = 32
         num_weak_signals = weak_signals_probas.shape[0]
 
         constraint_set = set_up_constraint(weak_signals_probas[:num_weak_signals, :, :],
@@ -74,11 +83,55 @@ class MultiALL(BaseClassifier):
         constraint_set['constraints'] = constraint_keys
         constraint_set['weak_signals'] = weak_signals_probas[:num_weak_signals, :, :] * active_signals[:num_weak_signals, :, :]
         constraint_set['num_weak_signals'] = num_weak_signals
+        constraint_set['loss'] = self.loss
 
         # Code for fitting algo
         results = dict()
 
-        m, n, k = weak
+        m, n, k = constraint_set['weak_signals'].shape
+
+        m = 2 if k == 1 else k
+
+        # initialize final values
+        learnable_probabilities = np.ones((n,k)) * 1/m
+        y = np.ones((n,k)) * 0.1
+        assert y.shape[0] == X.shape[0]
+
+        # initialize hyperparams -- CAN THIS BE IN INIT
+        rho = 0.1
+        loss = 'multilabel'
+        batch_size = 32
+
+        # This is to prevent the learning algo from wasting effort fitting a model to arbitrary y values.
+        y, constraint_set = run_constraints(y, learnable_probabilities, rho, constraint_set, optim='max')
+
+        self.model = mlp_model(X.shape[1], k)
+
+        grad_sum = 0
+        epoch = 0
+        while epoch < self.max_epoch:
+            indices = list(range(n))
+            random.shuffle(indices)
+            batches = np.array_split(indices, int(n / batch_size))
+
+            rate = 1.0
+            old_y = y.copy()
+
+            # Currently leaving out print statements
+
+            if epoch % 1 == 0:
+                for batch in batches:
+                    self.model.train_on_batch(X[batch], y[batch])
+                learnable_probabilities = self.model.predict(X)
+            
+            if epoch % 2 == 0:
+                y, constraint_set = run_constraints(y, learnable_probabilities, rho, constraint_set, iters=10, enable_print=False)
+
+                #Leaving out print stuff for now
+            
+            epoch += 1
+
+        return self
 
 
         # Return statement
