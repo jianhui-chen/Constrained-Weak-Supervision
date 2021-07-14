@@ -1,6 +1,6 @@
 import numpy as np
 
-from model_utilities import majority_vote_signal, mlp_model, set_up_constraint, get_error_bounds
+from model_utilities import majority_vote_signal, set_up_constraint, get_error_bounds
 from data_readers import read_text_data
 from models import CLL
 
@@ -76,14 +76,14 @@ def generate_synthetic_data():
 
 def run_experiment(dataset, true_bound=False):
     """ 
-        Run CLL experiments on real data
+        Run CLL experiments on provided dataset
 
         Parameters
         ----------
         :param dataset: training set, testing set, and weak signals
                         of dataset
         :type  dataset: dictionary of ndarrays
-        :param true_bound: determinds wether errors are random or 
+        :param true_bound: determinds whether errors are random or 
                            based on training labels or 
         :type  true_bound: boolean
 
@@ -99,9 +99,7 @@ def run_experiment(dataset, true_bound=False):
     test_data, test_labels = dataset['test']
     weak_signals = dataset['weak_signals']
     m, n, k = weak_signals.shape
-
     current_CLL = CLL(log_name="Label_Estimator ")
-    current_mlp = mlp_model(train_data.shape[1], k)
 
     # Set up the error bounds 
     weak_errors = np.ones((m, k)) * 0.01
@@ -111,12 +109,12 @@ def run_experiment(dataset, true_bound=False):
     error_set = set_up_constraint(weak_signals, weak_errors)
 
     # run CLL to estimate labels
-    y = current_CLL.fit(weak_signals, error_set)
+    y = current_CLL._estimate_labels(weak_signals, error_set)
     accuracy = current_CLL.get_accuracy(train_labels, y)
 
     # Use estimated labels to train a new algorithm
-    current_mlp.fit(train_data, y, batch_size=32, epochs=20, verbose=1)
-    test_predictions = current_mlp.predict(test_data)
+    current_CLL.fit(train_data, weak_signals, error_set)
+    test_predictions = current_CLL.predict(test_data)
     test_accuracy = current_CLL.get_accuracy(test_labels, test_predictions)
 
     print("CLL Label accuracy is: ", accuracy)

@@ -4,6 +4,8 @@ import numpy as np
 from sklearn.linear_model import LogisticRegression
 from sklearn.metrics import accuracy_score
 from abc import ABC, abstractmethod
+from tensorflow.python.keras.models import Sequential
+from tensorflow.python.keras.layers import Dropout, Dense
 
 from log import Logger
 
@@ -124,13 +126,17 @@ class CLL(BaseClassifier):
     max_iter : int, default=300
         Maximum number of iterations taken for solvers to converge.
 
+    num_trials : int, default=3
+        number of time's labels are estimated before the mean is taken
+    
     log_name : string, default=None
         Specifies directory name for a logger object.
     """
 
-    def __init__(self, max_iter=300, log_name=None):
+    def __init__(self, max_iter=300, num_trials=3, log_name=None,):
 
         self.max_iter = max_iter
+        self.num_trials = num_trials
 
         if log_name is None:
             self.logger = None
@@ -138,6 +144,7 @@ class CLL(BaseClassifier):
             self.logger = Logger("logs/CLL/" + log_name)      # this can be modified to include date and time in file name
         else:
             sys.exit("Not of string type")
+        
 
         self.model = None
 
@@ -170,6 +177,28 @@ class CLL(BaseClassifier):
         assert true_labels.shape == y_pred.shape
         return np.mean(np.equal(true_labels, np.round(y_pred)))
 
+    def predict(self, X):
+        """
+        Computes probability estimates for given class
+
+        Parameters
+        ----------
+        X : ndarray of shape (n_features, n_examples)
+            Examples to be assigned a probability (binary)
+
+
+        Returns
+        -------
+        probas : ndarray of shape (n_examples,)
+        """
+        if self.model is None:
+            sys.exit("No Data fit")
+
+        probabilities = self.model.predict(X)
+
+        return probabilities
+
+
     def _bound_loss(self, y, a_matrix, bounds):
         """
         Computes the gradient of lagrangian inequality penalty parameters
@@ -189,7 +218,6 @@ class CLL(BaseClassifier):
         :rtype: ndarray
         """
         constraint = np.zeros(bounds.shape)
-        # n, k = y.shape
 
         for i, current_a in enumerate(a_matrix):
             constraint[i] = np.sum(current_a * y, axis=0)
@@ -223,29 +251,20 @@ class CLL(BaseClassifier):
         return gradient
 
 
-    def _run_constraints(self, y, rho, error_constraints):
+    def _run_constraints(self, y, error_constraints):
         """
         Run constraints from CLL
 
         :param y: Random starting values for labels
         :type  y: ndarray 
-        :param rho: ????????????
-        :type  rho: 0.1 (for some reason) 
         :param error_constraints: error constraints (a_matrix and bounds) of the weak signals 
         :type  error_constraints: dictionary
 
         :return: estimated learned labels
         :rtype: ndarray
         """
-        n, k = y.shape
-        rho = n
         grad_sum = 0
-        lamdas_sum = 0
 
-        """
-            should this loop be for while not converged??? 
-            Maybe when violation and loss reach/nears 0
-        """
         for iter in range(self.max_iter):
             
             current_constraint = error_constraints
@@ -265,18 +284,17 @@ class CLL(BaseClassifier):
             y = y - y_grad / np.sqrt(grad_sum + 1e-8)
             y = np.clip(y, a_min=0, a_max=1)
 
-            # logg current data 
+            # log current data 
             if self.logger is not None and iter % 10 == 0:
                 with self.logger.writer.as_default():
                     self.logger.log_scalar("y", np.average(y), iter)
                     self.logger.log_scalar("y_grad", np.average(y_grad), iter)
-                    # might not need both violation and loss
                     self.logger.log_scalar("loss", np.average(loss), iter)
                     self.logger.log_scalar("violation", np.average(violation), iter)
         return y
+    
 
-
-    def fit(self, weak_signals_probas, error_bounds):
+    def _estimate_labels(self, weak_signals_probas, weak_signals_error_bounds):
         """
         Finds estimated labels
 
@@ -296,18 +314,83 @@ class CLL(BaseClassifier):
         assert len(weak_signals_probas.shape) == 3, "Reshape weak signals to num_weak x num_data x num_class"
         m, n, k = weak_signals_probas.shape
 
-        # initialize y and hyperparameters
+        # initialize y and lists
         y = np.random.rand(n, k)
-        
-        rho = 0.1  #not sure what rho is for 
+        ys = []
 
-        # t = 3  # number of random trials
-        # ys = []
-        # for i in range(t):
-        #     ys.append( self._run_constraints(y, rho, error_bounds) )
-        # return np.mean(ys, axis=0)
-        
-        return self._run_constraints(y, rho, error_bounds)
+        for i in range(self.num_trials):
+            ys.append( self._run_constraints(y, weak_signals_error_bounds) )
+        return np.mean(ys, axis=0)    
+
+
+    def _mlp_model(self, dimension, output):
+        """ 
+            Builds Simple MLP model
+
+            Parameters
+            ----------
+            :param dimension: amount of input
+            :type  dimension: int
+            :param output: amount of final states
+            :type  output: int
+
+            Returns
+            -------
+            :returns: Simple MLP 
+            :return type: Sequential tensor model
+        """
+
+        model = Sequential()
+        model.add(Dense(512, activation='relu', input_shape=(dimension,)))
+        model.add(Dense(256, activation='relu'))
+        model.add(Dropout(0.2))
+        model.add(Dense(64, activation='relu'))
+        model.add(Dense(output, activation='sigmoid'))
+
+        model.compile(loss='binary_crossentropy',
+                    optimizer='adagrad', metrics=['accuracy'])
+
+        return model
+
+
+
+    def fit(self, X, weak_signals_probas, weak_signals_error_bounds, train_model=None):
+        """
+        Finds estimated labels
+
+        Parameters
+        ----------
+        :param X: current data examples to fit model with
+        :type  X: ndarray 
+        :param weak_signals_probas: weak signal probabilites containing -1, 0, 1 for each example
+        :type  weak_signals_probas: ndarray 
+        :param weak_signals_error_bounds: error constraints (a_matrix and bounds) of the weak signals. Contains both 
+                                          left (a_matrix) and right (bounds) hand matrix of the inequality 
+        :type  weak_signals_error_bounds: dictionary 
+
+        Returns
+        -------
+        :return: average of learned labels over several trials
+        :rtype: ndarray
+        """
+
+        # Estimates labels
+        labels = self._estimate_labels(weak_signals_probas, weak_signals_error_bounds)
+
+        # Fit based on labels generated above
+        if train_model is None:
+            m, n, k = weak_signals_probas.shape
+            self.model = self._mlp_model(X.shape[1], k)
+            self.model.fit(X, labels, batch_size=32, epochs=20, verbose=1)
+        else:
+            self.model = train_model
+            try:
+                self.model.fit(X.T, labels)
+            except:
+                print("The mean of the baseline labels is %f" %np.mean(labels))
+                sys.exit(1)
+
+        return self
 
     
 
