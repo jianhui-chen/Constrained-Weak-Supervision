@@ -147,34 +147,34 @@ def majority_vote_signal(weak_signals):
     return mv_weak_labels
 
 
-def mlp_model(dimension, output):
-    """ 
-        Builds Simple MLP model
+# def mlp_model(dimension, output):
+#     """ 
+#         Builds Simple MLP model
 
-        Parameters
-        ----------
-        :param dimension: amount of input
-        :type  dimension: int
-        :param output: amount of final states
-        :type  output: int
+#         Parameters
+#         ----------
+#         :param dimension: amount of input
+#         :type  dimension: int
+#         :param output: amount of final states
+#         :type  output: int
 
-        Returns
-        -------
-        :returns: Simple MLP 
-        :return type: Sequential tensor model
-    """
+#         Returns
+#         -------
+#         :returns: Simple MLP 
+#         :return type: Sequential tensor model
+#     """
 
-    model = Sequential()
-    model.add(Dense(512, activation='relu', input_shape=(dimension,)))
-    model.add(Dense(256, activation='relu'))
-    model.add(Dropout(0.2))
-    model.add(Dense(64, activation='relu'))
-    model.add(Dense(output, activation='sigmoid'))
+#     model = Sequential()
+#     model.add(Dense(512, activation='relu', input_shape=(dimension,)))
+#     model.add(Dense(256, activation='relu'))
+#     model.add(Dropout(0.2))
+#     model.add(Dense(64, activation='relu'))
+#     model.add(Dense(output, activation='sigmoid'))
 
-    model.compile(loss='binary_crossentropy',
-                  optimizer='adagrad', metrics=['accuracy'])
+#     model.compile(loss='binary_crossentropy',
+#                   optimizer='adagrad', metrics=['accuracy'])
 
-    return model
+#     return model
 
 
 
