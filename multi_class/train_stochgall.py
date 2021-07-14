@@ -1,11 +1,13 @@
 import numpy as np
 import matplotlib.pyplot as plt
-from setup_supervision import accuracy_score, writeToFile
+#from setup_supervision import accuracy_score, writeToFile
+from setup_model import accuracy_score, writeToFile, mlp_model
 from scipy.optimize import check_grad
 import random, json, sys, gc
-from utilities import projection_simplex
+#from utilities import projection_simplex
+from data_utilities import projection_simplex
 from tensorflow.python.keras import backend as K
-from setup_model import convnet_model
+#from setup_model import convnet_model
 
 
 def multiclass_loss(y, learnable_probabilities):
@@ -70,7 +72,7 @@ def objective_function(y, learnable_probabilities, constraint_set, rho):
     augmented_term = 0
     constraint_keys = constraint_set['constraints']
     loss = constraint_set['loss']
-    active_mask = constraint_set['active_mask']
+    #active_mask = constraint_set['active_mask']
 
     objective = loss_functions(y, learnable_probabilities, loss)
 
@@ -83,7 +85,8 @@ def objective_function(y, learnable_probabilities, constraint_set, rho):
         constraint = np.zeros(bounds.shape)
 
         for i, current_a in enumerate(a_matrix):
-            constraint[i] = np.sum((active_mask[i]*current_a) * y + (constant[i]*active_mask[i]), axis=0)
+            # constraint[i] = np.sum((active_mask[i]*current_a) * y + (constant[i]*active_mask[i]), axis=0)
+            constraint[i] = np.sum(current_a * y + constant[i], axis=0)
 
         constraint = constraint - bounds
 
@@ -94,7 +97,8 @@ def objective_function(y, learnable_probabilities, constraint_set, rho):
     return objective + gamma_constraint - augmented_term
 
 
-def bound_loss(y, a_matrix, active_mask, constant, bounds):
+#def bound_loss(y, a_matrix, active_mask, constant, bounds):
+def bound_loss(y, a_matrix, constant, bounds):
     """
     Computes the gradient of lagrangian inequality penalty parameters
 
@@ -113,8 +117,8 @@ def bound_loss(y, a_matrix, active_mask, constant, bounds):
     n, k = y.shape
 
     for i, current_a in enumerate(a_matrix):
-        constraint[i] = np.sum((active_mask[i]*current_a) * y + (constant[i]*active_mask[i]), axis=0)
-
+        #constraint[i] = np.sum((active_mask[i]*current_a) * y + (constant[i]*active_mask[i]), axis=0)
+        constraint[i] = np.sum(current_a * y + constant[i], axis=0)
     return constraint - bounds
 
 
@@ -139,7 +143,7 @@ def y_gradient(learnable_probabilities, constraint_set, rho, y, quadratic=False)
     upper_bound_term = 0
     constraint_keys = constraint_set['constraints']
     loss = constraint_set['loss']
-    active_mask = constraint_set['active_mask']
+    #active_mask = constraint_set['active_mask']
 
     obj_grad = 1 - learnable_probabilities \
                     if loss == 'multiclass' else 1 - 2*learnable_probabilities
@@ -154,7 +158,8 @@ def y_gradient(learnable_probabilities, constraint_set, rho, y, quadratic=False)
         gamma = current_constraint['gamma']
 
         for i, current_a in enumerate(a_matrix):
-            constraint = a_matrix[i] * active_mask[i]
+            #constraint = a_matrix[i] * active_mask[i]
+            constraint = a_matrix[i]
             upper_bound_term += gamma[i] * constraint
             augmented_term += bound_loss[i].clip(min=0) * constraint
 
@@ -167,14 +172,17 @@ def run_constraints(label, predicted_probs, rho, constraint_set, iters=300, enab
     constraint_keys = constraint_set['constraints']
     weak_signals = constraint_set['weak_signals']
     num_weak_signal = constraint_set['num_weak_signals']
-    true_bounds = constraint_set['true_bounds'] # boolean value
+    # true_bounds = constraint_set['true_bounds'] # boolean value
+    # true_bounds = False
+    true_bounds = True
     loss = constraint_set['loss']
-    active_mask = constraint_set['active_mask']
+    #active_mask = constraint_set['active_mask']
+   
     grad_sum = 0
     y = label.copy()
     n,k = y.shape
 
-    weak_signals = weak_signals * active_mask
+    #weak_signals = weak_signals * active_mask
 
     # get the min weak_signal vector
     min_vector = np.min(weak_signals[:num_weak_signal, :, :], axis=0)
@@ -188,21 +196,57 @@ def run_constraints(label, predicted_probs, rho, constraint_set, iters=300, enab
         viol_text = ''
 
         for key in constraint_keys:
+
             current_constraint = constraint_set[key]
+
+            # print(constraint_keys)
+            # print(current_constraint)
+            # exit()
+
             a_matrix = current_constraint['A']
             bounds = current_constraint['b']
             constant = current_constraint['c']
             gamma = current_constraint['gamma']
 
+            # print(a_matrix.shape)
+            # exit()
+
             # get bound loss for constraint
-            full_loss = bound_loss(y, a_matrix, active_mask, constant, bounds)
+            #full_loss = bound_loss(y, a_matrix, active_mask, constant, bounds)
+            full_loss = bound_loss(y, a_matrix, constant, bounds)
+            if iter == 0 or iter == (iters - 1):
+                print("full loss")
+                print(full_loss)
             gamma_grad = full_loss
+            
+            if iter == 0 or iter == (iters - 1):
+                print("Gamma pre ")
+                print(gamma)
             if optim == 'max':
+                if iter == 0 or iter == (iters - 1):
+                    print("max")
                 gamma = gamma - rho * gamma_grad
+
+                if iter == 0 or iter == (iters - 1):
+                    print("Gamma pre clip")
+                    print(gamma)
                 gamma = gamma.clip(max=0)
+                if iter == 0 or iter == (iters - 1):
+                    print("Gamma postclip ")
+                    print(gamma)
             else:
+                if iter == 0 or iter == (iters - 1):
+                    print("min")
                 gamma = gamma + rho * gamma_grad
+                if iter == 0 or iter == (iters - 1):
+                    print("Gamma pre clip")
+                    print(gamma)
                 gamma = gamma.clip(min=0)
+                if iter == 0 or iter == (iters - 1):
+                    print("Gamma postclip ")
+                    print(gamma)
+
+           
 
             # update constraint values
             constraint_set[key]['gamma'] = gamma
@@ -217,18 +261,36 @@ def run_constraints(label, predicted_probs, rho, constraint_set, iters=300, enab
 
         y_grad = y_gradient(predicted_probs, constraint_set, rho, y, quadratic=True)
         grad_sum += y_grad**2
+
+        if iter == 0 or iter == (iters - 1):
+            print("y grad and grad sum and y")
+            print(y_grad)
+            print(grad_sum)
+            print(y)
+
         if optim == 'max':
             y = y + y_grad / np.sqrt(grad_sum + 1e-8)
         else:
             y = y - y_grad / np.sqrt(grad_sum + 1e-8)
 
+        if iter == 0 or iter == (iters - 1):
+            print("y post calc update")
+            print(y)
+
+        # Commenting out just to see y values
         y = np.clip(y, a_min=min_vector, a_max=max_vector)  if not true_bounds \
                                 else (y if loss == 'multiclass' else np.clip(y, a_min=0, a_max=1))
         y = projection_simplex(y, axis=1) if loss == 'multiclass' else y
 
+        if iter == 0 or iter == (iters - 1):
+            print("y post clip code")
+            print(y)
+
         constraint_set['violation'] = [viol_text, constraint_viol]
-        if enable_print:
-            print(print_builder % tuple(print_constraints))
+        # if enable_print:
+        #     print(print_builder % tuple(print_constraints))
+
+    print(np.count_nonzero(y<.5))
 
     return y, constraint_set
 
@@ -236,7 +298,7 @@ def run_constraints(label, predicted_probs, rho, constraint_set, iters=300, enab
 
 def train_stochgall(data_info, constraint_set, max_epoch=20):
     """
-    Trains the cnn model for image classification
+    Trains the cnn model for image classification NOPE NOT ANYMORE
 
     :param labels: True labels for the data, only used for debugging
     :type labels: ndarray
@@ -251,16 +313,30 @@ def train_stochgall(data_info, constraint_set, max_epoch=20):
     data = data_info['train_data']
     labels = data_info['train_labels']
     test_data, test_labels = data_info['test_data'], data_info['test_labels']
+
+
+    # why image
+    """
     img_rows, img_cols = data_info['img_rows'], data_info['img_cols']
     channels = data_info['channels']
+    """
+
     num_weak_signal = data_info['num_weak_signals']
     constraint_keys = constraint_set['constraints']
     weak_signals = constraint_set['weak_signals']
+
+    # print(weak_signals)
+    # print(weak_signals.shape)
+    # exit()
+
+    # What is loss and optim
     loss = constraint_set['loss']
-    optim = constraint_set['optim']
+    #optim = constraint_set['optim']
 
     results = dict()
     m, n, k = weak_signals.shape
+
+    ## THIS IS FOR COMPARING ACCURACY LATER 
     if k==1:
        labels = labels.reshape(n,k)
 
@@ -279,11 +355,22 @@ def train_stochgall(data_info, constraint_set, max_epoch=20):
     rho = 0.1
     batch_size = 32
 
+
+    print("Initial running")
     # This is to prevent the learning algo from wasting effort fitting a model to arbitrary y values.
     y, constraint_set = run_constraints(y, learnable_probabilities, rho, constraint_set, optim='max')
 
     # Train Stoch-gall
-    model = convnet_model(img_rows, img_cols, channels, loss)
+    #model = covnet_model(img_rows, img_cols, channels, loss)
+
+    #MLP model here         IS THIS THE CORRECT FORM
+    # print(k)
+    # print(data.shape)
+    # print(n)
+    # print(m)
+    model = mlp_model(data.shape[1], k)
+    # exit()
+
     print("Running adversarial label learning..")
     grad_sum = 0
     epoch = 0
@@ -305,10 +392,24 @@ def train_stochgall(data_info, constraint_set, max_epoch=20):
                 model.train_on_batch(data[batch], y[batch])
             learnable_probabilities = model.predict(data)
 
+        print("learnable probs ")
+        print(learnable_probabilities)
+        # exit()
+
         if epoch % 2 == 0:
             y, constraint_set = run_constraints(y, learnable_probabilities, rho, constraint_set, iters=10, enable_print=False)
             print_builder += constraint_set['violation'][0]
             print_constraints.extend(constraint_set['violation'][1])
+
+            # exit()
+
+
+            
+
+        # if ((y==old_y).all()):
+        #     print("same")
+        #     print(y)
+        #     exit()
 
         # calculate change in y
         # change_y = np.linalg.norm(y - old_y)
@@ -327,6 +428,7 @@ def train_stochgall(data_info, constraint_set, max_epoch=20):
         print(print_builder % tuple(print_constraints))
 
     print("")
+    # print(y) For some reason, everything in 1
 
     label_accuracy = accuracy_score(labels, y)
 
@@ -336,6 +438,8 @@ def train_stochgall(data_info, constraint_set, max_epoch=20):
     # calculate test results
     y_pred = model.predict(test_data)
     test_accuracy = accuracy_score(test_labels, y_pred)
+
+    print('label acc: %f' %(label_accuracy))
 
     print('Stoch-gall train_acc: %f, test_accu: %f' %(train_accuracy, test_accuracy))
 
@@ -347,7 +451,11 @@ def train_stochgall(data_info, constraint_set, max_epoch=20):
     del model
     gc.collect()
 
-    print("Saving to file...")
-    filename = 'results/new_results/stoch-gall_results.json'
-    writeToFile(results, filename)
+    # print("Saving to file...")
+    # filename = 'results/new_results/stoch-gall_results.json'
+    # writeToFile(results, filename)
+
+    #need to return something
+    exit()
+    return results
 
