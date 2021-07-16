@@ -650,6 +650,8 @@ class CLL(BaseClassifier):
             self.logger = Logger("logs/CLL/" + log_name)      # this can be modified to include date and time in file name
         else:
             sys.exit("Not of string type")
+
+        # Might nee weights for predict proba
         
 
         self.model = None
@@ -701,6 +703,28 @@ class CLL(BaseClassifier):
             sys.exit("No Data fit")
 
         probabilities = self.model.predict(X)
+
+        return probabilities
+    
+
+    def predict_proba(self, X):
+        """
+        Computes probability estimates for given class
+
+        Parameters
+        ----------
+        X : ndarray of shape (n_features, n_examples)
+            Examples to be assigned a probability (binary)
+
+
+        Returns
+        -------
+        probas : ndarray of shape (n_examples,)
+        """
+        if self.model is None:
+            sys.exit("No Data fit")
+
+        probabilities = self.model.predict_proba(X.T)
 
         return probabilities
 
