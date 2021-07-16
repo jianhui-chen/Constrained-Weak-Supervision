@@ -2,6 +2,7 @@ import numpy as np
 
 from data_readers import read_text_data
 from models import ALL, MultiALL, CLL
+from utilities import set_up_constraint
 
 
 
@@ -71,13 +72,19 @@ def run_experiments(dataset):
 
     # set up variables
 
-    # set up error bounds
-    # weak_errors = np.ones((m, k)) * 0.01
-    weak_errors = np.zeros((m, k)) + 0.3
+    # set up error bounds.... different for every algorithm
+    binary_all_weak_errors = np.zeros((m, k)) + 0.3
+
+    multi_all_weak_errors = 0
+
+    weak_errors = np.ones((m, k)) * 0.01
+    cll_weak_errors = set_up_constraint(weak_signals, weak_errors)
+
+    error_set = [binary_all_weak_errors, multi_all_weak_errors, cll_weak_errors]
 
 
     # set up algorithms
-    experiment_names = ["Binary-Lavel ALL", "Multi-Label ALL", "CLL"]
+    experiment_names = ["Binary-Label ALL", "Multi-Label ALL", "CLL"]
     binary_all = ALL()
     multi_all = MultiALL()
     Constrained_Labeling = CLL()
@@ -90,7 +97,12 @@ def run_experiments(dataset):
     for model_np, model in enumerate(models):
         print("\nWorking with", experiment_names[model_np])
 
-        # debugging
+
+        # skip multi all and CLL for now
+        if model_np == 1:
+            continue 
+
+        # # debugging
         # print("\n\nvairbales: ")
         # print("\ntrain_data: ", train_data)
         # print("train_data shape: ", train_data.shape)
@@ -100,8 +112,7 @@ def run_experiments(dataset):
         # print("weak_signals type: ", type(weak_signals),"\n\n")
         # exit()
 
-        model.fit(train_data, weak_signals, weak_errors)
-        break
+        model.fit(train_data, weak_signals, error_set[model_np])
 
     # print results
     print_results()
