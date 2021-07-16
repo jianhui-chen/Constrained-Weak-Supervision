@@ -104,6 +104,19 @@ class BaseClassifier(ABC):
         probas : ndarray of shape (n_examples,)
 
         """
+
+        
+
+        # print("\npredict_proba")
+        # print("\n: ", X)
+        # print("X shape: ", X.shape)
+        # print("X type: ", type(X),"\n\n")
+        # print("\nself.weights: ", self.weights)
+        # print("self.weights shape: ", self.weights.shape)
+        # print("self.weights type: ", type(self.weights),"\n\n")
+        # exit()
+
+
         if self.weights is None:
             sys.exit("No Data fit")
         
@@ -111,9 +124,18 @@ class BaseClassifier(ABC):
             y = self.weights.dot(X)
         except:
             y = X.dot(self.weights)
+        
+        # print("\n: ", y)
+        # print("Y shape: ", y.shape)
+        # print("Y type: ", type(y),"\n\n")
+        
+
 
         # first line of logistic from orig code, squishes y values
-        probas = 1 / (1 + np.exp(-y))    
+        probas = 1 / (1 + np.exp(-y))  
+
+        # print("leAVING")
+  
         
         return probas.ravel()
 
@@ -238,10 +260,19 @@ class ALL(BaseClassifier):
   
         """
 
+        # print("\n\nhello: ")
+        # print("\nx: ", X)
+        # print("x shape: ", X.shape)
+        # print("x type: ", type(X),"\n\n")
+        # print("\nself.weights: ", self.weights)
+        # print("self.weights shape: ", self.weights.shape)
+        # print("self.weights type: ", type(self.weights),"\n\n")
+
+        # FIX LATTER
         try:
-            y = self.weights.dot(X)
+            y = self.weights.T.dot(X)
         except:
-            y = X.dot(self.weights)
+            y = X.dot(self.weights.T)
         
 
         # replacing logistic func for now
@@ -293,15 +324,15 @@ class ALL(BaseClassifier):
         """
         _, n = weak_signals_probas.shape
 
-        # Debugging
-        thing = 1 - weak_signals_probas
-        print("\n\n gamma vairbales: ")
-        print("\nweak_signals_probas: ", thing)
-        print("weak_signals_probas shape: ", thing.shape)
-        print("weak_signals_probas type: ", type(thing),"\n\n")
-        print("\ny: ", y)
-        print("y shape: ", y.shape)
-        print("y type: ", type(y),"\n\n")
+        # # Debugging
+        # thing = 1 - weak_signals_probas
+        # print("\n\n gamma vairbales: ")
+        # print("\nweak_signals_probas: ", thing)
+        # print("weak_signals_probas shape: ", thing.shape)
+        # print("weak_signals_probas type: ", type(thing),"\n\n")
+        # print("\ny: ", y)
+        # print("y shape: ", y.shape)
+        # print("y type: ", type(y),"\n\n")
         # exit()
 
         weak_term = np.dot(1 - weak_signals_probas, y) + \
@@ -323,7 +354,7 @@ class ALL(BaseClassifier):
         Gradient of y
         """
 
-        print("\nHere!")
+        # print("\nHere!")
 
 
         n = learnable_probabilities.size
@@ -339,12 +370,12 @@ class ALL(BaseClassifier):
         ineq_constraint = ineq_constraint.clip(min=0)
         ineq_augmented_term = rho * np.dot(ineq_constraint.T, ls_term)
 
-        print("\n: ", weak_signals_error_bounds)
-        print("weak_signals_error_bounds shape: ", weak_signals_error_bounds.shape)
-        print("weak_signals_error_bounds type: ", type(weak_signals_error_bounds),"\n\n")
-        print("\nineq_constraint: ", ineq_constraint)
-        print("ineq_constraint shape: ", ineq_constraint.shape)
-        print("ineq_constraint type: ", type(ineq_constraint),"\n\n")
+        # print("\n: ", weak_signals_error_bounds)
+        # print("weak_signals_error_bounds shape: ", weak_signals_error_bounds.shape)
+        # print("weak_signals_error_bounds type: ", type(weak_signals_error_bounds),"\n\n")
+        # print("\nineq_constraint: ", ineq_constraint)
+        # print("ineq_constraint shape: ", ineq_constraint.shape)
+        # print("ineq_constraint type: ", type(ineq_constraint),"\n\n")
 
         # print("\nlearnable_term: ", learnable_term)
         # print("learnable_term shape: ", learnable_term.shape)
@@ -454,21 +485,58 @@ class ALL(BaseClassifier):
             # print("dl_dp type: ", type(dl_dp),"\n\n")
             # exit()
 
+            # n, m = dp_dw.shape 
+            # result = np.zeros([n,m])
+            # for i, example in enumerate(dp_dw):
+            #     result[i] = example * dl_dp[i]
+            
+
+            # print("\ndot: ", result)
+            # print("dot shape: ", result.shape)
+
+            # thing = dp_dw.T.dot(dl_dp)
+
+
+            # print("\ndot: ", thing)
+            # print("dot shape: ", thing.shape)
+
+
+            # exit()
+
+            # weights_gradient.append(result)
+
             # FIX THIS LATTER
-            n, m = dp_dw.shape 
-            result = np.zeros([n,m])
-            for i, example in enumerate(dp_dw):
-                result[i] = example * dl_dp[i]
-            weights_gradient.append(result)
+            weights_gradient.append(dp_dw.T.dot(dl_dp))
+
 
 
 
             # weights_gradient.append(dp_dw.dot(dl_dp))
 
+            # print("\nself.weights: ", self.weights)
+            # print("self.weights shape: ", self.weights.shape)
+            # print("self.weights type: ", type(self.weights),"\n\n")
+            # print("\nweights_gradient: ", weights_gradient)
+            # print("weights_gradient type: ", type(weights_gradient),"\n\n")
+            # print("\nlr: ", lr)
+            # print("lr type: ", type(lr),"\n\n")
+
+            
+
+
             # update weights of the learnable functions
             self.weights = self.weights - lr * np.array(weights_gradient)
             conv_weights = np.linalg.norm(self.weights - old_weights)
             conv_y = np.linalg.norm(y - old_y)
+
+
+            # print("\nself.weights: ", self.weights)
+            # print("self.weights shape: ", self.weights.shape)
+            # print("self.weights type: ", type(self.weights),"\n\n")
+
+            # exit()
+
+         
 
             # print("\n\n gamma vairbales: ")
             # print("\nweak_signals_probas: ", thing)
@@ -503,9 +571,20 @@ class ALL(BaseClassifier):
 
 
 
-            learnable_probas = self.predict_proba(X)
+            learnable_probas = self.predict_proba(X.T)
+
+            # # check that inequality constraints are satisfied
+            # print("\nlearnable_probas: ", learnable_probas)
+            # print("learnable_probas shape: ", learnable_probas.shape)
+            # print("learnable_probas type: ", type(learnable_probas),"\n\n")
+            # print("\nX: ", X)
+            # print("X shape: ", X.shape)
+            # print("X type: ", type(X),"\n\n")
+            # exit()
 
             t += 1
+
+
         return self
 
     def fit(self, X, weak_signals_probas, weak_signals_error_bounds):
