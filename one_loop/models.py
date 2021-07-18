@@ -211,6 +211,7 @@ class ALL(BaseClassifier):
 
         weak_term = np.dot(1 - weak_signals_probas, y) + \
                     np.dot(weak_signals_probas, 1 - y)
+
         ineq_constraint = (weak_term / n) - weak_signals_error_bounds
         
         gamma_term = np.dot(gamma.T, ineq_constraint)
@@ -272,6 +273,7 @@ class ALL(BaseClassifier):
 
         weak_term = np.dot(1 - weak_signals_probas, y) + \
                     np.dot(weak_signals_probas, 1 - y)
+
         ineq_constraint = (weak_term / n) - weak_signals_error_bounds
 
         return ineq_constraint
@@ -346,6 +348,9 @@ class ALL(BaseClassifier):
         t = 0
         converged = False
         while not converged and t < self.max_iter:
+
+            # print("\n\nt:", t)
+
             rate = 1 / (1 + t)
 
             # update y
@@ -479,6 +484,15 @@ class ALL(BaseClassifier):
         lr = 0.0001
 
         learnable_probas = self.predict_proba(X)
+
+        # Get rid of abstaining signals 
+        # active_signal = weak_signals_probas >= 0
+
+        # weak_signals_probas = weak_signals_probas * active_signal
+        # constraint_set['weak_signals'] = weak_signals_probas[:num_weak_signals, :, :] * active_signals[:num_weak_signals, :, :]
+
+
+
 
         if self.logger is None:
             return self._optimize(X, weak_signals_probas, 

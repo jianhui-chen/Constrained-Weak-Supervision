@@ -75,17 +75,16 @@ def run_experiments(dataset):
     test_accuracy             = []
 
     # set up error bounds.... different for every algorithm
-    binary_all_weak_errors = np.zeros((m, k)) + 0.3
-    multi_all_weak_errors = 0
+    # binary_all_weak_errors = np.zeros((m, k)) + 0.3
     weak_errors = np.ones((m, k)) * 0.01
     cll_weak_errors = set_up_constraint(weak_signals, weak_errors)
 
-    error_set = [binary_all_weak_errors, multi_all_weak_errors, cll_weak_errors]
+    error_set = [weak_errors, weak_errors, cll_weak_errors]
 
 
     # set up algorithms
     experiment_names = ["Binary-Label ALL", "Multi-Label ALL", "CLL"]
-    binary_all = ALL(log_name="Binary-Label ALL")
+    binary_all = ALL(max_iter=5000, log_name="Binary-Label ALL")
     multi_all = MultiALL()
     Constrained_Labeling = CLL(log_name="CLL")
 
@@ -100,7 +99,7 @@ def run_experiments(dataset):
 
 
         # skip multi all and CLL for now
-        if model_np == 1:
+        if model_np == 1 or model_np == 0:
             continue 
 
         # # debugging
@@ -136,7 +135,7 @@ def run_experiments(dataset):
         # exit()
 
 
-        """Predict_proba will give the only probability of 1. """
+        """Predict_proba"""
         train_probas = model.predict_proba(train_data.T)
         train_acc = model.get_accuracy(train_labels, train_probas)
 
