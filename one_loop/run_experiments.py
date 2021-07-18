@@ -85,9 +85,9 @@ def run_experiments(dataset):
 
     # set up algorithms
     experiment_names = ["Binary-Label ALL", "Multi-Label ALL", "CLL"]
-    binary_all = ALL()
+    binary_all = ALL(log_name="Binary-Label ALL")
     multi_all = MultiALL()
-    Constrained_Labeling = CLL()
+    Constrained_Labeling = CLL(log_name="CLL")
 
     models = [binary_all, multi_all, Constrained_Labeling]
 
@@ -100,7 +100,7 @@ def run_experiments(dataset):
 
 
         # skip multi all and CLL for now
-        if model_np == 1 or model_np == 2:
+        if model_np == 1:
             continue 
 
         # # debugging

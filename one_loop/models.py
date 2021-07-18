@@ -175,6 +175,8 @@ class ALL(BaseClassifier):
                                  str(weak_signals_proba.shape[0]) + 
                                  "_weak_signals/")      # this can be modified to include date and time in file name
             """
+
+            self.logger = Logger("logs/results/" + log_name)      # this can be modified to include date and time in file name
         else:
             sys.exit("Not of string type")
 
@@ -647,7 +649,7 @@ class CLL(BaseClassifier):
         if log_name is None:
             self.logger = None
         elif type(log_name) is str:
-            self.logger = Logger("logs/CLL/" + log_name)      # this can be modified to include date and time in file name
+            self.logger = Logger("logs/results/" + log_name)      # this can be modified to include date and time in file name
         else:
             sys.exit("Not of string type")
 
