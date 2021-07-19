@@ -151,6 +151,8 @@ def load_fashion_mnist():
 
         labels_path = os.path.join(path, '%s-labels-idx1-ubyte.gz' % kind)
         images_path = os.path.join(path, '%s-images-idx3-ubyte.gz' % kind)
+        # labels_path = os.path.join(path, '%s-labels-idx1-ubyte' % kind)
+        # images_path = os.path.join(path, '%s-images-idx3-ubyte' % kind)
 
         with gzip.open(labels_path, 'rb') as lbpath:
             labels = np.frombuffer(lbpath.read(), dtype=np.uint8, offset=8)
@@ -164,8 +166,10 @@ def load_fashion_mnist():
     categories = ["t-shirt", "trouser", "pullover", "dress", "coat", "sandal", "shirt",
               "sneaker", "bag", "ankle boot"]
 
-    data['train_data'] = load_data('../../datasets/fashion-mnist', kind='train')
-    data['test_data'] = load_data('../../datasets/fashion-mnist', kind='t10k')
+    # data['train_data'] = load_data('../../datasets/fashion-mnist', kind='train')
+    # data['test_data'] = load_data('../../datasets/fashion-mnist', kind='t10k')
+    data['train_data'] = load_data('../datasets/fashion-mnist', kind='train')
+    data['test_data'] = load_data('../datasets/fashion-mnist', kind='t10k')
     data['img_rows'] = 28
     data['img_cols'] = 28
     data['channels'] = 1

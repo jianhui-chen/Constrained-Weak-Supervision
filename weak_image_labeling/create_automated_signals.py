@@ -18,7 +18,8 @@ Change this to load whatever data we use
 # data = load_cifar_10()
 # data = load_svhn()
 print("loading data...")
-data = load_handgestures()
+data = load_fashion_mnist()
+#data = load_handgestures()
 print("finished loading data..")
 
 images, labels = data['train_data']
