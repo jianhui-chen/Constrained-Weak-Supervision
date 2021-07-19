@@ -451,6 +451,12 @@ def train_stochgall(data_info, constraint_set, max_epoch=20):
     del model
     gc.collect()
 
+    # Testing something for images
+    # Flipped acc
+    print('Flipped Stoch-gall train_acc: %f, test_accu: %f' %(1 - train_accuracy, 1 - test_accuracy))
+
+    
+
     # print("Saving to file...")
     # filename = 'results/new_results/stoch-gall_results.json'
     # writeToFile(results, filename)
