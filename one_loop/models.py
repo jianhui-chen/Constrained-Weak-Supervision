@@ -1,4 +1,5 @@
 import sys
+import random
 import numpy as np
 
 from sklearn.linear_model import LogisticRegression
@@ -9,8 +10,8 @@ from tensorflow.python.keras.layers import Dropout, Dense
 from scipy.optimize import minimize
 
 from log import Logger
-from setup_model import set_up_constraint
-from train_stochgall import *
+from setup_model import set_up_constraint, mlp_model
+from train_stochgall import run_constraints
 
 
 """
@@ -62,7 +63,8 @@ class BaseClassifier(ABC):
         predicted_labels = np.zeros(predicted_probas.size)
 
         # could also implement by rounding
-        predicted_labels[predicted_probas > 0.5] =1    
+        predicted_labels[predicted_probas > 0.5] =1  
+          
         return predicted_labels
     
     def get_accuracy(self, true_labels, predicted_probas):
@@ -544,11 +546,16 @@ class MultiALL(BaseClassifier):
         if self.model is None:
             sys.exit("no model")
 
-        return self.model.predict(X)
+        # print("\nhello: ", X)
+        # print("shape: ", X.shape,"\n\n")
+
+        to_return = self.model.predict(X.T)
+        
+        return to_return.flatten()
 
     
 
-    def fit(self, X, weak_signals_probas, weak_signals_error_bounds, weak_signals_precision, active_signals):
+    def fit(self, X, weak_signals_probas, weak_signals_error_bounds):
         """
         Fits MultiAll model
 
@@ -579,6 +586,17 @@ class MultiALL(BaseClassifier):
         # original variables
         constraint_keys = ["error"]
         num_weak_signals = weak_signals_probas.shape[0]
+
+
+
+        " to make up for active_signals"
+        active_signals = weak_signals_probas >= 0
+        # active_signals = weak_signals_probas[:num_weak_signals, :] >= 0
+
+        " to make up for weak_signals_precision, need to make optional or fix later"
+        # FIX LATTER
+        # n, m = weak_signals_error_bounds.shape
+        weak_signals_precision = np.zeros(weak_signals_error_bounds.shape)
 
         constraint_set = set_up_constraint(weak_signals_probas[:num_weak_signals, :, :],
                                            weak_signals_precision[:num_weak_signals, :],

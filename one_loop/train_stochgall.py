@@ -214,37 +214,37 @@ def run_constraints(label, predicted_probs, rho, constraint_set, iters=300, enab
             # get bound loss for constraint
             #full_loss = bound_loss(y, a_matrix, active_mask, constant, bounds)
             full_loss = bound_loss(y, a_matrix, constant, bounds)
-            if iter == 0 or iter == (iters - 1):
-                print("full loss")
-                print(full_loss)
+            # if iter == 0 or iter == (iters - 1):
+            #     print("full loss")
+            #     print(full_loss)
             gamma_grad = full_loss
             
-            if iter == 0 or iter == (iters - 1):
-                print("Gamma pre ")
-                print(gamma)
+            # if iter == 0 or iter == (iters - 1):
+            #     print("Gamma pre ")
+            #     print(gamma)
             if optim == 'max':
-                if iter == 0 or iter == (iters - 1):
-                    print("max")
+                # if iter == 0 or iter == (iters - 1):
+                #     print("max")
                 gamma = gamma - rho * gamma_grad
 
-                if iter == 0 or iter == (iters - 1):
-                    print("Gamma pre clip")
-                    print(gamma)
+                # if iter == 0 or iter == (iters - 1):
+                #     print("Gamma pre clip")
+                #     print(gamma)
                 gamma = gamma.clip(max=0)
-                if iter == 0 or iter == (iters - 1):
-                    print("Gamma postclip ")
-                    print(gamma)
+                # if iter == 0 or iter == (iters - 1):
+                #     print("Gamma postclip ")
+                #     print(gamma)
             else:
-                if iter == 0 or iter == (iters - 1):
-                    print("min")
+                # if iter == 0 or iter == (iters - 1):
+                #     print("min")
                 gamma = gamma + rho * gamma_grad
-                if iter == 0 or iter == (iters - 1):
-                    print("Gamma pre clip")
-                    print(gamma)
+                # if iter == 0 or iter == (iters - 1):
+                #     print("Gamma pre clip")
+                #     print(gamma)
                 gamma = gamma.clip(min=0)
-                if iter == 0 or iter == (iters - 1):
-                    print("Gamma postclip ")
-                    print(gamma)
+                # if iter == 0 or iter == (iters - 1):
+                #     print("Gamma postclip ")
+                #     print(gamma)
 
            
 
@@ -262,35 +262,35 @@ def run_constraints(label, predicted_probs, rho, constraint_set, iters=300, enab
         y_grad = y_gradient(predicted_probs, constraint_set, rho, y, quadratic=True)
         grad_sum += y_grad**2
 
-        if iter == 0 or iter == (iters - 1):
-            print("y grad and grad sum and y")
-            print(y_grad)
-            print(grad_sum)
-            print(y)
+        # if iter == 0 or iter == (iters - 1):
+        #     print("y grad and grad sum and y")
+        #     print(y_grad)
+        #     print(grad_sum)
+        #     print(y)
 
         if optim == 'max':
             y = y + y_grad / np.sqrt(grad_sum + 1e-8)
         else:
             y = y - y_grad / np.sqrt(grad_sum + 1e-8)
 
-        if iter == 0 or iter == (iters - 1):
-            print("y post calc update")
-            print(y)
+        # if iter == 0 or iter == (iters - 1):
+        #     print("y post calc update")
+        #     print(y)
 
         # Commenting out just to see y values
         y = np.clip(y, a_min=min_vector, a_max=max_vector)  if not true_bounds \
                                 else (y if loss == 'multiclass' else np.clip(y, a_min=0, a_max=1))
         y = projection_simplex(y, axis=1) if loss == 'multiclass' else y
 
-        if iter == 0 or iter == (iters - 1):
-            print("y post clip code")
-            print(y)
+        # if iter == 0 or iter == (iters - 1):
+            # print("y post clip code")
+            # print(y)
 
         constraint_set['violation'] = [viol_text, constraint_viol]
         # if enable_print:
         #     print(print_builder % tuple(print_constraints))
 
-    print(np.count_nonzero(y<.5))
+    # print(np.count_nonzero(y<.5))
 
     return y, constraint_set
 
@@ -356,7 +356,7 @@ def train_stochgall(data_info, constraint_set, max_epoch=20):
     batch_size = 32
 
 
-    print("Initial running")
+    # print("Initial running")
     # This is to prevent the learning algo from wasting effort fitting a model to arbitrary y values.
     y, constraint_set = run_constraints(y, learnable_probabilities, rho, constraint_set, optim='max')
 
@@ -371,7 +371,7 @@ def train_stochgall(data_info, constraint_set, max_epoch=20):
     model = mlp_model(data.shape[1], k)
     # exit()
 
-    print("Running adversarial label learning..")
+    # print("Running adversarial label learning..")
     grad_sum = 0
     epoch = 0
     while epoch < max_epoch:
@@ -392,8 +392,8 @@ def train_stochgall(data_info, constraint_set, max_epoch=20):
                 model.train_on_batch(data[batch], y[batch])
             learnable_probabilities = model.predict(data)
 
-        print("learnable probs ")
-        print(learnable_probabilities)
+        # print("learnable probs ")
+        # print(learnable_probabilities)
         # exit()
 
         if epoch % 2 == 0:
@@ -425,9 +425,9 @@ def train_stochgall(data_info, constraint_set, max_epoch=20):
         epoch += 1
 
         # print_builder += "delta_y: %.4f, obj: %.4f, lagr: %.4f "
-        print(print_builder % tuple(print_constraints))
+    #     print(print_builder % tuple(print_constraints))
 
-    print("")
+    # print("")
     # print(y) For some reason, everything in 1
 
     label_accuracy = accuracy_score(labels, y)
@@ -439,9 +439,9 @@ def train_stochgall(data_info, constraint_set, max_epoch=20):
     y_pred = model.predict(test_data)
     test_accuracy = accuracy_score(test_labels, y_pred)
 
-    print('label acc: %f' %(label_accuracy))
+    # print('label acc: %f' %(label_accuracy))
 
-    print('Stoch-gall train_acc: %f, test_accu: %f' %(train_accuracy, test_accuracy))
+    # print('Stoch-gall train_acc: %f, test_accu: %f' %(train_accuracy, test_accuracy))
 
     results['label_accuracy'] = label_accuracy
     results["test_accuracy"] = test_accuracy

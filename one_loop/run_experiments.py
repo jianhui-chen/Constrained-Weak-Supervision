@@ -97,42 +97,11 @@ def run_experiments(dataset):
     for model_np, model in enumerate(models):
         print("\n\nWorking with", experiment_names[model_np])
 
-
-        # skip multi all and CLL for now
-        if model_np == 1 or model_np == 0:
-            continue 
-
-        # # debugging
-        # print("\n\nvairbales: ")
-        # print("\ntrain_data: ", train_data)
-        # print("train_data shape: ", train_data.shape)
-        # print("train_data type: ", type(train_data),"\n\n")
-        # print("\nweak_signals: ", weak_signals)
-        # print("weak_signals shape: ", weak_signals.shape)
-        # print("weak_signals type: ", type(weak_signals),"\n\n")
-        # exit()
-
-        # print("\n\ntrain_labels", train_data)
-        # print("train_labels", train_data.shape)
-        # print("train_labels", type(train_data), "\n\n")
-
+        # # skip 
+        # if model_np == 2 or model_np == 0:
+        #     continue 
 
         model.fit(train_data, weak_signals, error_set[model_np])
-
-
-
-        # print("\n\nmodel.weights", model.weights)
-        # print("model.weights", model.weights.shape)
-        # print("model.weights", type(model.weights), "\n\n")
-        # print("\n\ntrain_labels", train_data)
-        # print("train_labels", train_data.shape)
-        # print("train_labels", type(train_data), "\n\n")
-        # # print("\n\nrain_probas", train_probas)
-        # # print("train_probas", train_probas.shape)
-        # # print("train_probas", type(train_probas), "\n\n")
-        # print("\n\n")
-
-        # exit()
 
 
         """Predict_proba"""
@@ -142,10 +111,9 @@ def run_experiments(dataset):
         test_probas = model.predict_proba(test_data.T)
         test_acc = model.get_accuracy(test_labels, test_probas)
 
-        print("\n\n RESULTS USING predict_proba:")
-        print("train Accuracy is: ", train_acc)
-        print("Test Accuracy is: ", test_acc)
-
+        print("\n\nRESULTS USING predict_proba:")
+        print("    Train Accuracy is: ", train_acc)
+        print("    Test Accuracy is: ", test_acc)
 
         train_accuracy.append(train_acc)
         test_accuracy.append(test_acc)
