@@ -2,8 +2,12 @@ import sys
 import numpy as np
 
 from sklearn.linear_model import LogisticRegression
+from tensorflow.python.keras.models import Sequential
+from tensorflow.python.keras.layers import Dropout, Dense
+
 from BaseClassifier import BaseClassifier
 from log import Logger
+
 
 """
     Includes LabelEstimator and CLL
