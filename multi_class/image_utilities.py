@@ -48,7 +48,12 @@ def get_supervision_data(dataset, weak_signals='manual', prec=0.1, err=0.1, true
     train_labels = to_categorical(train_labels, num_classes)
     # calculate true bounds for the human signals
     human_error_rates, human_precisions = get_validation_bounds(train_labels, human_weak_labels)
-    n,k = train_labels.shape
+    n,k = train_labels.shape            # inconsistent with other uses of k
+    # print(n, k)
+    # print(human_weak_labels.shape)
+    # print(data_set.keys())
+    # print(num_classes)
+    # exit()
     rand_labels = np.random.rand(n,k)
 
     data = ''
@@ -71,19 +76,32 @@ def get_supervision_data(dataset, weak_signals='manual', prec=0.1, err=0.1, true
                 if 'model' in modelname:
                     if modelname == 'convnet_model':
                         model = convnet_model(img_rows, img_cols, channels)
+                    elif modelname == 'mlp_model': # added this
+                        model = mlp_model(train_data.shape[1], k)
                     else:
                         model = build_model((None,img_rows, img_cols, channels))
                     initial_weights = model.get_weights()
-                    reshaped_data = labeled_data.reshape(labeled_data.shape[0],
-                                                         img_rows, img_cols, channels)
-                    model.fit(reshaped_data,
+                    # reshaped_data = labeled_data.reshape(labeled_data.shape[0],
+                    #                                      img_rows, img_cols, channels)
+                    
+                    # print(labeled_data.shape)
+                    # print(reshaped_data.shape)
+                    # print(labeled_onehot_labels.shape)
+                    # exit()
+                    # model.fit(reshaped_data,
+                    #           labeled_onehot_labels,
+                    #           batch_size=32,
+                    #           epochs=200,
+                    #           verbose=1)
+                    model.fit(labeled_data,
                               labeled_onehot_labels,
                               batch_size=32,
                               epochs=200,
                               verbose=1)
-                    reshaped_data = train_data.reshape(train_data.shape[0], img_rows,
-                                                       img_cols, channels)
-                    predicted_labels = model.predict(reshaped_data)
+                    # reshaped_data = train_data.reshape(train_data.shape[0], img_rows,
+                    #                                    img_cols, channels)
+                    # predicted_labels = model.predict(reshaped_data)
+                    predicted_labels = model.predict(train_data)
                     accuracy = accuracy_score(train_labels, predicted_labels)
                     model.set_weights(initial_weights)
                 else:
@@ -95,7 +113,7 @@ def get_supervision_data(dataset, weak_signals='manual', prec=0.1, err=0.1, true
 
                 output['predicted_labels'] = predicted_labels
                 output['accuracy'] = accuracy
-                np.save(filename, output)
+                # np.save(filename, output)
 
             weak_probabilities.append(predicted_labels)
             print("%s has accuracy of %f" % (modelname, accuracy))
@@ -118,8 +136,8 @@ def get_supervision_data(dataset, weak_signals='manual', prec=0.1, err=0.1, true
 
     # reshape the rest of the data
     test_labels = to_categorical(test_labels, num_classes)
-    train_data = train_data.reshape(train_data.shape[0], img_rows, img_cols, channels)
-    test_data = test_data.reshape(test_data.shape[0], img_rows, img_cols, channels)
+    # train_data = train_data.reshape(train_data.shape[0], img_rows, img_cols, channels)
+    # test_data = test_data.reshape(test_data.shape[0], img_rows, img_cols, channels)
 
     human_model_names = ['human_labels_' + str(i + 1) for i in range(num_weak_signals)]
     model_names.extend(human_model_names)

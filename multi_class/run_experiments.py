@@ -25,7 +25,7 @@ def run_experiment(data_set, savename):
 
     # set all the variables
     constraint_keys = ["error"]
-    loss = 'multilabel'
+    # loss = 'multilabel'
     batch_size = 32
 
     data = get_supervision_data(data_set, weak_signals='pseudolabel', true_bounds=False)
@@ -44,11 +44,15 @@ def run_experiment(data_set, savename):
     data_info = dict()
     data_info['train_data'], data_info['train_labels'] = data['train_data']
 
+    # print(train_data.shape)
+    # exit()
+
     # # only for stoch-gall experiment
-    # data_info['test_data'], data_info['test_labels'] = data['test_data']
+    data_info['test_data'], data_info['test_labels'] = data['test_data']
     # data_info['img_rows'], data_info['img_cols'] = img_rows, img_cols
     # data_info['channels'] = channels
-    # loss = 'multiclass'
+    loss = 'multiclass'
+    # loss = 'multilabel'
 
     print("train_data", train_data.shape)
     print("test_data", test_data.shape)
@@ -99,6 +103,7 @@ def run_experiment(data_set, savename):
         new_constraint_set['constraints'] = constraint_keys
         new_constraint_set['weak_signals'] = weak_signal_probabilities[:num_weak_signals, :, :] * active_signals[:num_weak_signals, :, :]
         new_constraint_set['num_weak_signals'] = num_weak_signals
+        new_constraint_set['loss'] = loss
 
         print("Running tests...")
         y = train_stochgall(data_info, new_constraint_set)
@@ -107,6 +112,8 @@ def run_experiment(data_set, savename):
         results = {}
         label_accuracy = accuracy_score(train_labels, y)
         print(label_accuracy)
+
+        exit()
         print("Running constrained label learning...")
         model = mlp_model(img_rows, img_cols, channels)
         model.fit(train_data, np.round(y), batch_size=batch_size, epochs=20, verbose=1)
@@ -204,8 +211,8 @@ def run_text_experiment(data_set, savename):
     weak_model = data['weak_model']
     weak_signal_probabilities = weak_model['weak_signals']
     active_signals = weak_model['active_mask']
-    print(active_signals)
-    exit()
+    # print(active_signals)
+    # exit()
 
     model_names = data['model_names']
     train_data, train_labels = data['train_data']
@@ -242,6 +249,10 @@ def run_text_experiment(data_set, savename):
     mv_weak_labels = majority_vote_signal(weak_signal_probabilities, num_weak_signals)
     n,k = mv_weak_labels.shape
     data_info['num_weak_signals'] = num_weak_signals
+
+    # print(n, k)
+    # print(num_weak_signals)
+    # exit()
 
     # mmce_crowd_labels, transformed_labels = prepare_mmce(weak_signal_probabilities, train_labels)
     # mmce_labels, mmce_error_rate = MinimaxEntropy_crowd_model(mmce_crowd_labels, transformed_labels)
@@ -510,12 +521,12 @@ def get_results(snorkel=False):
         # run_snorkel_experiment('../datasets/yelp/','yelp/')
         pass
     else:
-        run_text_experiment(read_text_data('../datasets/imdb/'),'imbd')
+        # run_text_experiment(read_text_data('../datasets/imdb/'),'imbd')
         #run_text_experiment(read_text_data('../datasets/yelp/'),'yelp')
-        run_text_experiment(read_text_data('../datasets/sst-2/'), 'sst-2')
+        #run_text_experiment(read_text_data('../datasets/sst-2/'), 'sst-2')
         #run_text_experiment(read_text_data('../datasets/trec-6/'),'trec-6')
         #run_experiment(load_svhn(),'svhn')
-        #run_experiment(load_fashion_mnist(),'fmnist')
+        run_experiment(load_fashion_mnist(),'fmnist')
 
         # run_text_experiment(synthetic_experiment(),'synthetic-independent')
         pass
