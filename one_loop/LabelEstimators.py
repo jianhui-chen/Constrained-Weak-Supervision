@@ -11,7 +11,7 @@ from log import Logger
 
 """
     Includes LabelEstimator and CLL
-    CLL should inherit from LabelEstimator
+    CLL should inherit from LabelEstimator – needs to be fixed
 """
 
 class LabelEstimator(BaseClassifier):   # Might want to change the name of Base Classifier?
