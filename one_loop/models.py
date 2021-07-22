@@ -384,7 +384,7 @@ class ALL(BaseClassifier):
         active_signal = weak_signals_probas >= 0
         for i in weak_signals_probas:
             if not np.all(weak_signals_probas[i]):
-                print("Binary ALL Can't handel Abstaining Signals, please use MultiALL instead" )
+                print("\nNOTE: Binary ALL Can't handel Abstaining Signals, please use MultiALL instead" )
                 return self
 
         # weak_signals_probas = weak_signals_probas * active_signal

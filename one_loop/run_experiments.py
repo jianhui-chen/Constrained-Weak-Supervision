@@ -99,14 +99,13 @@ def run_experiments(dataset):
 
     # Loop through each algorithm
     for model_np, model in enumerate(models):
-        print("\n\nWorking with", experiment_names[model_np])
+        print("\n\nWORKING  WITH:", experiment_names[model_np])
 
         # # skip 
         # if model_np == 2 or model_np == 0:
         #     continue 
 
         model.fit(train_data, weak_signals, error_set[model_np])
-
 
         """Predict_proba"""
         train_probas = model.predict_proba(train_data)
@@ -115,7 +114,7 @@ def run_experiments(dataset):
         test_probas = model.predict_proba(test_data)
         test_acc = model.get_accuracy(test_labels, test_probas)
 
-        print("\n\nRESULTS USING predict_proba:")
+        print("\nresults using predict_proba:")
         print("    Train Accuracy is: ", train_acc)
         print("    Test Accuracy is: ", test_acc)
 
@@ -127,17 +126,20 @@ def run_experiments(dataset):
 
 
 
+if __name__ == '__main__':
 
+    print("\n\n        ~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~")
+    print("        | WELCOME TO OUR EXPIRIMENTS  |")
+    print("        ~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~")
 
-# # Expiriments:
-# # ------------
+    # # Expiriments:
+    # # ------------
 
-print("\n\n# # # # # # # # # # # #")
-print("#  sst-2  experiment  #")
-print("# # # # # # # # # # # #\n")
-run_experiments(read_text_data('../datasets/sst-2/'))
+    dataset_names = ['sst-2', 'imdb' ]
 
-# print("\n\n# # # # # # # # # # #")
-# print("#  imdb experiment  #")
-# print("# # # # # # # # # # #\n")
-# run_experiments(read_text_data('../datasets/imdb/'))
+    for name in dataset_names: 
+
+        print("\n\n\n# # # # # # # # # # # #")
+        print("#  ", name, "experiment  #")
+        print("# # # # # # # # # # # #")
+        run_experiments(read_text_data('../datasets/' + name + '/'))
