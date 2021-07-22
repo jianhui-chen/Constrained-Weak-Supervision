@@ -79,8 +79,7 @@ class BaseClassifier(ABC):
         probas : ndarray of shape (n_examples,)
 
         """
-
-
+        
         if self.weights is None:
             sys.exit("No Data fit")
         
@@ -89,10 +88,8 @@ class BaseClassifier(ABC):
         except:
             y = X.dot(self.weights)
 
-    
         # first line of logistic from orig code, squishes y values
-        probas = 1 / (1 + np.exp(-y))  
-  
+        probas = 1 / (1 + np.exp(-y))    
         
         return probas.ravel()
 

@@ -137,26 +137,25 @@ class ALL(BaseClassifier):
   
         """
 
+        # # FIX LATTER
+        # try:
+        #     y = self.weights * X
+        # except:
+        #     y = X * self.weights
+
         # FIX LATTER
         try:
-            y = self.weights.T.dot(X)
+            y = self.weights.dot(X)
         except:
-            y = X.dot(self.weights.T)
+            y = X.dot(self.weights)
         
 
         # replacing logistic func for now
         y_squish = 1 / (1 + np.exp(-y))
         grad = y_squish * (1 - y_squish)
 
-        # FIX THIS LATTER
-        n, m = X.shape 
-        new_grad = np.zeros([n,m])
-        for i, example in enumerate(X):
-            new_grad[i] = example * grad[i]
-        grad = new_grad
-
-        # # old code for reference
-        # grad = X * grad
+        # # FIX THIS LATTER
+        grad = X * grad
 
         
         return grad
@@ -253,8 +252,6 @@ class ALL(BaseClassifier):
         converged = False
         while not converged and t < self.max_iter:
 
-            # print("\n\nt:", t)
-
             rate = 1 / (1 + t)
 
             # update y
@@ -262,7 +259,7 @@ class ALL(BaseClassifier):
             y_grad = self._y_gradient(y, weak_signals_probas, 
                                       weak_signals_error_bounds, 
                                       learnable_probas, rho, gamma)
-            
+                        
 
             y = y + rate * y_grad
 
@@ -279,6 +276,7 @@ class ALL(BaseClassifier):
             gamma = gamma - rho * gamma_grad
             gamma = gamma.clip(max=0)
 
+
             weights_gradient = []
 
             # compute gradient of probabilities wrt weights
@@ -286,14 +284,25 @@ class ALL(BaseClassifier):
             # update weights
             old_weights = self.weights.copy()
 
+
             # FIX THIS LATTER
-            weights_gradient.append(dp_dw.T.dot(dl_dp))
+            weights_gradient = dp_dw.T.dot(dl_dp)
+
+            # print("\n\nHere:")
+            # # print("\n\nweights_gradient:", weights_gradient)
+            # print("weights_gradient shape:",weights_gradient.shape)
+            # print("self.weights shape:",self.weights.shape)
+            # print("self.weights shape:", (self.weights * weights_gradient[:, None]).shape )
             
 
+
             # update weights of the learnable functions
-            self.weights = self.weights - lr * np.array(weights_gradient)
+            self.weights = self.weights - lr * weights_gradient[:, None]
+
+            
             conv_weights = np.linalg.norm(self.weights - old_weights)
             conv_y = np.linalg.norm(y - old_y)
+
         
             # check that inequality constraints are satisfied
             ineq_constraint = self._gamma_gradient(y, weak_signals_probas, 
@@ -303,6 +312,8 @@ class ALL(BaseClassifier):
             converged = np.isclose(0, conv_y, atol=1e-6) and \
                         np.isclose(0, ineq_infeas, atol=1e-6) and \
                         np.isclose(0, conv_weights, atol=1e-5)
+
+
 
             if t % 1000 == 0:
                 lagrangian_obj = self._objective_function(y, weak_signals_probas, weak_signals_error_bounds, learnable_probas, rho, gamma) # might be slow
@@ -315,13 +326,16 @@ class ALL(BaseClassifier):
                     self.logger.log_scalar("lagrangian", lagrangian_obj, t)
                     self.logger.log_scalar("Change in y", conv_y, t)
                     self.logger.log_scalar("Change in Weights", conv_weights, t)
-
-                    # So small, does not even register????
                     self.logger.log_scalar("Ineq Infeas", ineq_infeas, t)
 
 
 
-            learnable_probas = self.predict_proba(X.T)
+            learnable_probas = self.predict_proba(X)
+
+
+            # print("here", learnable_probas.shape)
+            # print("\n\n")
+            # exit()
 
             t += 1
 
@@ -359,21 +373,16 @@ class ALL(BaseClassifier):
             m, n, k = weak_signals_probas.shape
 
             assert k == 1, "Can't handel multi class datasets"
-
             weak_signals_probas = weak_signals_probas.reshape(m, n)
         
+        # reshap weak_signals_error_bounds into singular one
         if len(weak_signals_error_bounds.shape) == 2:
 
             m, n = weak_signals_error_bounds.shape
-
             weak_signals_error_bounds = weak_signals_error_bounds.reshape(m)
 
 
-
-
-
-
-        self.weights = np.zeros(X.shape[1]) # this should be length of n_features 
+        self.weights = np.zeros([X.shape[1], 1]) # this should be length of n_features 
    
         self.train_data = X
         n_examples = X.shape[0]
@@ -389,13 +398,15 @@ class ALL(BaseClassifier):
 
         learnable_probas = self.predict_proba(X)
 
-        # Get rid of abstaining signals 
+
+        # Check for abstaining signals 
         # active_signal = weak_signals_probas >= 0
+        # for i in weak_signals_probas:
+        #     if weak_signals_probas[i] == -1:
+        #         print("found -1" )
 
         # weak_signals_probas = weak_signals_probas * active_signal
         # constraint_set['weak_signals'] = weak_signals_probas[:num_weak_signals, :, :] * active_signals[:num_weak_signals, :, :]
-
-
 
 
         if self.logger is None:
@@ -448,10 +459,7 @@ class MultiALL(BaseClassifier):
         if self.model is None:
             sys.exit("no model")
 
-        # print("\nhello: ", X)
-        # print("shape: ", X.shape,"\n\n")
-
-        to_return = self.model.predict(X.T)
+        to_return = self.model.predict(X)
         
         return to_return.flatten()
 
