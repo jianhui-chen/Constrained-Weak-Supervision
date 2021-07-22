@@ -137,27 +137,15 @@ class ALL(BaseClassifier):
   
         """
 
-        # # FIX LATTER
-        # try:
-        #     y = self.weights * X
-        # except:
-        #     y = X * self.weights
-
-        # FIX LATTER
-        try:
-            y = self.weights.dot(X)
-        except:
-            y = X.dot(self.weights)
         
-
+        y = X.dot(self.weights)
+        
         # replacing logistic func for now
         y_squish = 1 / (1 + np.exp(-y))
         grad = y_squish * (1 - y_squish)
 
-        # # FIX THIS LATTER
         grad = X * grad
 
-        
         return grad
 
 
@@ -285,19 +273,12 @@ class ALL(BaseClassifier):
             old_weights = self.weights.copy()
 
 
-            # FIX THIS LATTER
+          
             weights_gradient = dp_dw.T.dot(dl_dp)
-
-            # print("\n\nHere:")
-            # # print("\n\nweights_gradient:", weights_gradient)
-            # print("weights_gradient shape:",weights_gradient.shape)
-            # print("self.weights shape:",self.weights.shape)
-            # print("self.weights shape:", (self.weights * weights_gradient[:, None]).shape )
-            
 
 
             # update weights of the learnable functions
-            self.weights = self.weights - lr * weights_gradient[:, None]
+            self.weights = self.weights - lr * np.array(weights_gradient)[:, None]
 
             
             conv_weights = np.linalg.norm(self.weights - old_weights)
@@ -503,7 +484,7 @@ class MultiALL(BaseClassifier):
         active_signals = weak_signals_probas >= 0
         # active_signals = weak_signals_probas[:num_weak_signals, :] >= 0
 
-        " to make up for weak_signals_precision, need to make optional or fix later"
+        " to make up for weak_signals_precision, need to make optional or fix later "
         # FIX LATTER
         # n, m = weak_signals_error_bounds.shape
         weak_signals_precision = np.zeros(weak_signals_error_bounds.shape)
