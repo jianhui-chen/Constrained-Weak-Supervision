@@ -74,6 +74,33 @@ def run_experiments(dataset):
     weak_signals = dataset['weak_signals']
     m, n, k = weak_signals.shape
 
+    
+    
+    
+    # print("\n\ntesting variables:")
+    # print("\n weak sig: ", weak_signals)
+    # print("shape: ", weak_signals.shape)
+    # print("type: ", type(weak_signals))
+
+    # exit()
+    # print("\n train_data: ", train_features)
+    # print("shape: ", train_features.shape)
+    # print("type: ", type(train_features))
+
+    # print("\n train_labels: ", train_labels)
+    # print("shape: ", train_labels.shape)
+    # print("type: ", type(train_labels))
+
+    # print("\n test_data: ", test_features)
+    # print("shape: ", test_features.shape)
+    # print("type: ", type(test_features))
+
+    # print("\n test_labels: ", test_labels)
+    # print("shape: ", test_labels.shape)
+    # print("type: ", type(test_labels))
+
+
+
     # set up variables
     train_accuracy            = []
     test_accuracy             = []
@@ -132,12 +159,11 @@ if __name__ == '__main__':
     print("        | WELCOME TO OUR EXPIRIMENTS  |")
     print("        ~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~")
 
-    # # Expiriments:
-    # # ------------
+    # Expiriments:
+    dataset_names = ['obs']
+    dataset_names = ['sst-2', 'imdb', 'obs']
 
-    dataset_names = ['sst-2', 'imdb' ]
-
-    for name in dataset_names: 
+    for name in dataset_names:
 
         print("\n\n\n# # # # # # # # # # # #")
         print("#  ", name, "experiment  #")
