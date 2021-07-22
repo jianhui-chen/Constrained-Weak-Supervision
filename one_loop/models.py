@@ -381,10 +381,11 @@ class ALL(BaseClassifier):
 
 
         # Check for abstaining signals 
-        # active_signal = weak_signals_probas >= 0
-        # for i in weak_signals_probas:
-        #     if weak_signals_probas[i] == -1:
-        #         print("found -1" )
+        active_signal = weak_signals_probas >= 0
+        for i in weak_signals_probas:
+            if not np.all(weak_signals_probas[i]):
+                print("Binary ALL Can't handel Abstaining Signals, please use MultiALL instead" )
+                return self
 
         # weak_signals_probas = weak_signals_probas * active_signal
         # constraint_set['weak_signals'] = weak_signals_probas[:num_weak_signals, :, :] * active_signals[:num_weak_signals, :, :]
@@ -400,8 +401,6 @@ class ALL(BaseClassifier):
                                       weak_signals_error_bounds, 
                                       learnable_probas, y, rho, gamma, 
                                       n_examples, lr)
-            
-        # return self
 
 
 
