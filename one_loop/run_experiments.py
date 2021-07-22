@@ -109,10 +109,10 @@ def run_experiments(dataset):
 
 
         """Predict_proba"""
-        train_probas = model.predict_proba(train_data.T)
+        train_probas = model.predict_proba(train_data)
         train_acc = model.get_accuracy(train_labels, train_probas)
 
-        test_probas = model.predict_proba(test_data.T)
+        test_probas = model.predict_proba(test_data)
         test_acc = model.get_accuracy(test_labels, test_probas)
 
         print("\n\nRESULTS USING predict_proba:")

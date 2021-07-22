@@ -236,7 +236,7 @@ class CLL(BaseClassifier):
         if self.model is None:
             sys.exit("No Data fit")
 
-        probabilities = self.model.predict_proba(X.T)
+        probabilities = self.model.predict_proba(X)
 
         return probabilities
 
