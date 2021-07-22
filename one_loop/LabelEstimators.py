@@ -426,11 +426,12 @@ class CLL(BaseClassifier):
             self.model.fit(X, labels, batch_size=32, epochs=20, verbose=1)
         else:
             self.model = train_model
-            try:
-                self.model.fit(X.T, labels)
-            except:
-                print("The mean of the baseline labels is %f" %np.mean(labels))
-                sys.exit(1)
+
+        try:
+            self.model.fit(X.T, labels)
+        except:
+            print("The mean of the baseline labels is %f" %np.mean(labels))
+            sys.exit(1)
 
         return self
 

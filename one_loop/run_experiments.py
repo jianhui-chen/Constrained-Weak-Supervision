@@ -4,6 +4,10 @@ from data_readers import read_text_data
 from models import ALL, MultiALL, CLL
 from utilities import set_up_constraint
 
+# Import models for testing
+from models import ALL, MultiAll
+from LabelEstimators import LabelEstimator, CLL
+from GEModel import GECriterion 
 
 
 """
