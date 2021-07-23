@@ -38,7 +38,8 @@ def read_weak_signals(categories, path, num_weak_signals):
     noisy_data = {}
     num_classes = 10  # change this if more than 10 classes
 
-    file_path = 'weak_image_labeling/weak_signals/'
+    # file_path = 'weak_image_labeling/weak_signals/'
+    file_path = '../weak_image_labeling/weak_signals/'
     weak_signals = [[] for _ in range(num_weak_signals)]
     snorkel_signals = [[] for _ in range(num_classes)]
     error_rates = [[] for _ in range(num_weak_signals)]
@@ -231,7 +232,8 @@ def set_up_constraint(weak_probabilities, precision, error_bounds):
 
 def getNewModel():
     # yield 'build_model()'
-    yield 'convnet_model()'
+    # yield 'convnet_model()'
+    yield 'mlp_model()'
     # yield LogisticRegression(max_iter=1000, solver='lbfgs')
 
 

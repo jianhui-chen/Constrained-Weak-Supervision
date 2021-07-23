@@ -3,6 +3,9 @@ import numpy as np
 from data_readers import read_text_data
 #from models import ALL, MultiALL, CLL
 from utilities import set_up_constraint
+# from data_utilities import load_fashion_mnist # Don't do *, error
+from image_utilities import get_supervision_data
+from load_image_data import *
 
 # Import models for testing
 from models import ALL, MultiALL
@@ -69,6 +72,7 @@ def run_experiments(dataset):
     # test_data = data['test_data'][0].T
     # test_labels = data['test_data'][1]
 
+    # print(dataset.keys())
     train_data, train_labels = dataset['train']
     test_data, test_labels = dataset['test']
     weak_signals = dataset['weak_signals']
@@ -107,7 +111,11 @@ def run_experiments(dataset):
 
     # set up error bounds.... different for every algorithm
     # binary_all_weak_errors = np.zeros((m, k)) + 0.3
-    weak_errors = np.ones((m, k)) * 0.01
+
+    try:
+        weak_errors = dataset['weak_errors']
+    except:
+        weak_errors = np.ones((m, k)) * 0.01
     cll_weak_errors = set_up_constraint(weak_signals, weak_errors)
 
     error_set = [weak_errors, weak_errors, cll_weak_errors]
@@ -120,7 +128,7 @@ def run_experiments(dataset):
     Constrained_Labeling = CLL(log_name="CLL")
 
     models = [binary_all, multi_all, Constrained_Labeling]
-
+    # models = [multi_all, Constrained_Labeling]
 
     # loop for number of weak signals????
 
@@ -130,7 +138,9 @@ def run_experiments(dataset):
 
         # # skip 
         # if model_np == 2 or model_np == 0:
-        #     continue 
+        if model_np == 0 or model_np==1:
+            continue 
+
 
         model.fit(train_data, weak_signals, error_set[model_np])
 
@@ -160,12 +170,16 @@ if __name__ == '__main__':
     print("        ~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~")
 
     # Expiriments:
-    dataset_names = ['obs']
-    dataset_names = ['sst-2', 'imdb', 'obs']
+    # dataset_names = ['obs']
+    # dataset_names = ['sst-2', 'imdb', 'obs']
 
-    for name in dataset_names:
+    # text data
+    # for name in dataset_names:
 
-        print("\n\n\n# # # # # # # # # # # #")
-        print("#  ", name, "experiment  #")
-        print("# # # # # # # # # # # #")
-        run_experiments(read_text_data('../datasets/' + name + '/'))
+    #     print("\n\n\n# # # # # # # # # # # #")
+    #     print("#  ", name, "experiment  #")
+    #     print("# # # # # # # # # # # #")
+    #     run_experiments(read_text_data('../datasets/' + name + '/'))
+
+    # Image data
+    run_experiments(load_image_data())

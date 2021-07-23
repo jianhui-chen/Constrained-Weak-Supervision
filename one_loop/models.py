@@ -386,11 +386,11 @@ class ALL(BaseClassifier):
 
             # print(type(i))
             # print(i)
-            print(weak_signals_probas.shape)
+            # print(weak_signals_probas.shape)
 
-            print(weak_signals_probas[i].shape)
+            # print(weak_signals_probas[i].shape)
 
-            exit()
+            # exit()
             if not np.all(weak_signals_probas[i]):
                 print("\nNOTE: Binary ALL Can't handel Abstaining Signals, please use MultiALL instead" )
                 return self
