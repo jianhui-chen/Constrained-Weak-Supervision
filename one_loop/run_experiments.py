@@ -170,7 +170,7 @@ if __name__ == '__main__':
     print("        ~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~")
 
     # Expiriments:
-    # dataset_names = ['cardio', 'breast-cancer']
+    # dataset_names = ['obs', 'cardio', 'breast-cancer']
     dataset_names = ['sst-2', 'imdb', 'obs', 'cardio', 'breast-cancer']
 
     #     print("\n\n\n# # # # # # # # # # # #")

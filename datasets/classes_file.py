@@ -49,11 +49,9 @@ class Data:
 
         return data
     
-    def __init__(self, name, views, datapath, savepath, load_data):
-        self.n = name
+    def __init__(self, views, datapath, load_data):
         self.v = views
         self.dp = datapath
-        self.sp = savepath
         self.data = self.__load_and_process_data(datapath, load_data)
     
 
