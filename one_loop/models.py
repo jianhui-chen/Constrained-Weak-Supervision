@@ -371,8 +371,6 @@ class ALL(BaseClassifier):
         # initializing algo vars
         y = 0.5 * np.ones(n_examples)
         gamma = np.zeros(weak_signals_probas.shape[0])
-
-        gamma = np.zeros(weak_signals_probas.shape[0])
         one_vec = np.ones(n_examples)
         rho = 2.5
         lr = 0.0001
@@ -381,24 +379,13 @@ class ALL(BaseClassifier):
 
 
         # Check for abstaining signals 
-        active_signal = weak_signals_probas >= 0
-        for i in weak_signals_probas:
-
-            # print(type(i))
-            # print(i)
-            # print(weak_signals_probas.shape)
-
-            # print(weak_signals_probas[i].shape)
-
-            # exit()
-            if not np.all(weak_signals_probas[i]):
+        active_signals = weak_signals_probas >= 0
+        for signal in active_signals:
+            if not np.all(signal):
                 print("\nNOTE: Binary ALL Can't handel Abstaining Signals, please use MultiALL instead" )
                 return self
 
-        # weak_signals_probas = weak_signals_probas * active_signal
-        # constraint_set['weak_signals'] = weak_signals_probas[:num_weak_signals, :, :] * active_signals[:num_weak_signals, :, :]
-
-
+      
         if self.logger is None:
             return self._optimize(X, weak_signals_probas, 
                                   weak_signals_error_bounds, learnable_probas, 

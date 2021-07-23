@@ -171,10 +171,7 @@ if __name__ == '__main__':
 
     # Expiriments:
     # dataset_names = ['obs']
-    # dataset_names = ['sst-2', 'imdb', 'obs']
-
-    # text data
-    # for name in dataset_names:
+    dataset_names = ['sst-2', 'imdb', 'obs']
 
     #     print("\n\n\n# # # # # # # # # # # #")
     #     print("#  ", name, "experiment  #")
