@@ -474,7 +474,66 @@ def OBS_generator():
     # save the weak_signals
     np.save(datapath+'weak_signals.npy',multiple_weak_signals[2]['probabilities'].T)
 
+def Cardio_generator():
+    """
+        breaks down data from OBS dataset
+    """
 
+    cardio_data = Data("Cardio", [1, 10, 18], 'cardio/cardio.csv', 'results/json/cardio.json', cardio_load_and_process_data)
+    # w_data_dicts = get_w_data_dicts(obs_data, 1, 3)
+    # adversarial_acc_dicts, w_acc_dicts = run_experiment(obs_data, w_data_dicts)
+    multiple_weak_signals = get_multiple_weak_signals(cardio_data, 1, 3, 'ALL/')
+
+    data = cardio_data.data
+    train_data, train_labels = data['train_data']
+    train_data = train_data.T
+    test_data = data['test_data'][0]
+    test_labels = data['test_data'][1]
+
+    datapath = './cardio/'
+
+
+    # save imdb data
+    np.save(datapath+'data_features.npy', train_data.T)
+    np.save(datapath+'test_features.npy', test_data)
+
+    # save imdb labels
+    np.save(datapath+'data_labels.npy', train_labels)
+    np.save(datapath+'test_labels.npy', test_labels)
+
+    # save the weak_signals
+    np.save(datapath+'weak_signals.npy',multiple_weak_signals[2]['probabilities'].T)
+
+
+def Cancer_generator():
+    """
+        breaks down data from OBS dataset
+    """
+
+    bc_data = Data("Breast Cancer", [0, 10, 20], 'breast-cancer/wdbc.data', 'results/json/breast_cancer.json', breast_cancer_load_and_process_data)
+
+    # w_data_dicts = get_w_data_dicts(obs_data, 1, 3)
+    # adversarial_acc_dicts, w_acc_dicts = run_experiment(obs_data, w_data_dicts)
+    multiple_weak_signals = get_multiple_weak_signals(bc_data, 1, 3, 'ALL/')
+
+    data = bc_data.data
+    train_data, train_labels = data['train_data']
+    train_data = train_data.T
+    test_data = data['test_data'][0]
+    test_labels = data['test_data'][1]
+
+    datapath = './breast-cancer/'
+
+    # save imdb data
+    np.save(datapath+'data_features.npy', train_data.T)
+    np.save(datapath+'test_features.npy', test_data)
+
+    # save imdb labels
+    np.save(datapath+'data_labels.npy', train_labels)
+    np.save(datapath+'test_labels.npy', test_labels)
+
+    # save the weak_signals
+    np.save(datapath+'weak_signals.npy',multiple_weak_signals[2]['probabilities'].T)
 
 
 # print("\n\n working on SST_2 \n\n" )
@@ -483,11 +542,11 @@ def OBS_generator():
 # print("\n\n working on IMDB \n\n" )
 # IMDB_generator()
 
-print("\n\n working on OBS \n\n" )
-OBS_generator()
+# print("\n\n working on OBS \n\n" )
+# OBS_generator()
 
-# print("\n\n working on Cardio \n\n" )
-# Cardio_generator()
+print("\n\n working on Cardio \n\n" )
+Cardio_generator()
 
-# print("\n\n working on Cancer \n\n" )
-# Cancer_generator()
+print("\n\n working on Cancer \n\n" )
+Cancer_generator()
