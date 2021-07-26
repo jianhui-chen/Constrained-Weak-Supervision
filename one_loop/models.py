@@ -437,7 +437,7 @@ class MultiALL(BaseClassifier):
         to_return = self.model.predict(X)
         
         return to_return.flatten()
-
+        # return to_return
     
 
     def fit(self, X, weak_signals_probas, weak_signals_error_bounds):

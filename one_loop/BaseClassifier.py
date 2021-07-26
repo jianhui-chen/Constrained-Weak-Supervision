@@ -59,7 +59,7 @@ class BaseClassifier(ABC):
             Value between 0 to 1.00
 
         """
-        score = accuracy_score(true_labels, self.predict(predicted_probas))
+        score = accuracy_score(true_labels.flatten(), self.predict(predicted_probas))
         return score
 
  
