@@ -137,8 +137,8 @@ def run_experiments(dataset):
         print("\n\nWORKING  WITH:", experiment_names[model_np])
 
         # # skip 
-        # if model_np == 2 or model_np == 0:
-        if model_np == 0 or model_np==1:
+        if model_np == 2 or model_np == 0:
+        # if model_np == 0 or model_np==1:
             continue 
 
 
@@ -146,6 +146,9 @@ def run_experiments(dataset):
 
         """Predict_proba"""
         train_probas = model.predict_proba(train_data)
+        # print(train_probas)
+        # print("predict proba ", train_probas.shape)
+        # print(train_labels.shape)
         train_acc = model.get_accuracy(train_labels, train_probas)
 
         test_probas = model.predict_proba(test_data)
