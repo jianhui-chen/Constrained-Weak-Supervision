@@ -2,6 +2,7 @@ import numpy as np
 import matplotlib.pyplot as plt
 import tensorflow as tf
 
+from datetime import datetime
 
 from data_readers import read_text_data
 from utilities import set_up_constraint
@@ -38,7 +39,7 @@ from PIL import Image
 """
 
 
-def log_results(values, acc_logger, set_name, title):
+def log_results(values, acc_logger, plot_path, title):
     """ 
         prints out results from the experiment
 
@@ -51,10 +52,10 @@ def log_results(values, acc_logger, set_name, title):
             current logger object that will be used to write out to 
             tensor board
 
-        set_name: string 
-            name of the current dataset for logging purposes 
+        plot_path: str 
+            path to where matplotlib png will be stored
 
-        title: string 
+        title: str 
             name of current graph to be used as a tittle 
 
         Returns
@@ -80,15 +81,15 @@ def log_results(values, acc_logger, set_name, title):
     plt.ylim([min_value - 0.1, max_value + 0.1])
 
     # Save plot, then load into tensorboard
-    plt.savefig("./logs/" + set_name + "/plot.png", format='png')
+    plt.savefig(plot_path + "/plot.png", format='png')
     with acc_logger.writer.as_default():
-        image = tf.io.read_file("./logs/" + set_name + "/plot.png")
+        image = tf.io.read_file(plot_path + "/plot.png")
         image = tf.image.decode_png(image, channels=4)
         summary_op = tf.summary.image(title, [image], step=0)
         acc_logger.writer.flush()
 
 
-def run_experiments(dataset, set_name):
+def run_experiments(dataset, set_name, date):
     """ 
         sets up and runs expeirments on various algorithm
 
@@ -97,6 +98,12 @@ def run_experiments(dataset, set_name):
         dataset : dictionary of ndarrays
             contains training set, testing set, and weak signals 
             of read in data
+        
+        set_name : str
+            current name of dataset for logging purposes 
+
+        date : str
+            current date and time in format Y_m_d-I:M:S_p
 
         Returns
         -------
@@ -109,8 +116,10 @@ def run_experiments(dataset, set_name):
     m, n, k = weak_signals.shape
 
     # set up variables
-    train_accuracy            = []
-    test_accuracy             = []
+    train_accuracy = []
+    test_accuracy = []
+    log_name = date + "/" + set_name
+
 
     # set up error bounds.... different for every algorithm
     try:
@@ -124,9 +133,9 @@ def run_experiments(dataset, set_name):
 
     # set up algorithms
     experiment_names = ["Binary-Label ALL", "Multi-Label ALL", "CLL"]
-    binary_all = ALL(max_iter=10000, log_name=set_name+"/BinaryALL")
+    binary_all = ALL(max_iter=10000, log_name=log_name+"/BinaryALL")
     multi_all = MultiALL()
-    Constrained_Labeling = CLL(log_name=set_name+"/CLL")
+    Constrained_Labeling = CLL(log_name=log_name+"/CLL")
 
     models = [binary_all, multi_all, Constrained_Labeling]
 
@@ -157,9 +166,10 @@ def run_experiments(dataset, set_name):
 
 
     print('\n\nLogging results\n\n')
-    acc_logger = Logger("logs/" + set_name + "/accuracies")
-    log_results(train_accuracy, acc_logger, set_name, 'Accuracy on training data')
-    log_results(test_accuracy, acc_logger, set_name, 'Accuracy on testing data')
+    acc_logger = Logger("logs/" + log_name + "/accuracies")
+    plot_path =  "./logs/" + log_name
+    log_results(train_accuracy, acc_logger, plot_path, 'Accuracy on training data')
+    log_results(test_accuracy, acc_logger, plot_path, 'Accuracy on testing data')
 
 
 
@@ -171,15 +181,18 @@ if __name__ == '__main__':
     print("        | WELCOME TO OUR EXPIRIMENTS  |")
     print("        ~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~")
 
+
     # text Expiriments:
     dataset_names = ['sst-2', 'imdb', 'obs', 'cardio', 'breast-cancer']
     # dataset_names = ['obs', 'cardio', 'breast-cancer']
+
+    date = datetime.now().strftime("%Y_%m_%d-%I:%M:%S_%p")
 
     for name in dataset_names:
         print("\n\n\n# # # # # # # # # # # #")
         print("#  ", name, "experiment  #")
         print("# # # # # # # # # # # #")
-        run_experiments(read_text_data('../datasets/' + name + '/'), name)
+        run_experiments(read_text_data('../datasets/' + name + '/'), name, date)
 
     # # Image Expiriments
     # run_experiments(load_image_data())
