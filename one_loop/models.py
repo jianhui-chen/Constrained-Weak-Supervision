@@ -80,7 +80,7 @@ class ALL(BaseClassifier):
                                  "_weak_signals/")      # this can be modified to include date and time in file name
             """
 
-            self.logger = Logger("logs/results/" + log_name)      # this can be modified to include date and time in file name
+            self.logger = Logger("logs/" + log_name)      # this can be modified to include date and time in file name
         else:
             sys.exit("Not of string type")
 
@@ -535,35 +535,6 @@ class MultiALL(BaseClassifier):
             epoch += 1
 
         return self
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-# # # # # # # # # # # #
-# Compartitive modesl #
-# # # # # # # # # # # #
-
-
-
-
 
 
         
