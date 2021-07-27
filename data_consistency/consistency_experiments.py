@@ -108,9 +108,9 @@ def run_experiment(dataset, savename, datatype='data', true_bound=False):
     if true_bound:
         weak_errors = get_error_bounds(train_labels, weak_signals)
         weak_errors = np.asarray(weak_errors)
-    print("hello")
+
     nn_data = consistency_data(dataset, datatype)
-    print("bye")
+
 
     # Define the variables
     constraints = set_up_constraint(weak_signals, weak_errors)
@@ -121,31 +121,36 @@ def run_experiment(dataset, savename, datatype='data', true_bound=False):
     # model = simple_nn(nn_data.shape[1], k)
 
     # print("\n\nnn_data:", nn_data)
-    # print("nn_data type:", type(nn_data))
+    # print("nn_data shape:", nn_data.shape[1])
+
+    # print("\n\nnn_data:", nn_data)
+    # print("nn_data shape:", nn_data.shape[1])
+
+    # print("\n\nnn_data:", train_data)
+    # print("nn_data shape:", train_data.shape[1])
     # exit()
 
-    for _ in range(num_trials):
-        model = simple_nn(nn_data.shape[1], k)
-        pred_y = train_dcws(model, nn_data, mv_labels, a_matrix, b)
-        pred_y = pred_y.numpy()
-        label_accuracy = accuracy_score(train_labels, pred_y)
-        print("Label accuracy: ", label_accuracy)
-        # consistency_accuracy.append(label_accuracy)
+    # for _ in range(num_trials):
+    model = simple_nn(nn_data.shape[1], k)
+    pred_y = train_dcws(model, nn_data, mv_labels, a_matrix, b)
+    pred_y = pred_y.numpy()
+    label_accuracy = accuracy_score(train_labels, pred_y)
+    print("Label accuracy: ", label_accuracy)
+    # consistency_accuracy.append(label_accuracy)
 
-        model = mlp_model(nn_data.shape[1], k)
-        model.fit(nn_data, pred_y, batch_size=batch_size, epochs=20, verbose=1)
-        test_predictions = model.predict(test_data)
-        test_score = accuracy_score(test_labels, test_predictions)
-        print("Test accuracy: ", test_score)
-        print("\n\n")
-        # consistency_test.append(test_score)
+    model = mlp_model(nn_data.shape[1], k)
+    model.fit(nn_data, pred_y, batch_size=batch_size, epochs=20, verbose=1)
+    test_predictions = model.predict(test_data)
+    test_score = accuracy_score(test_labels, test_predictions)
+    print("Test accuracy: ", test_score)
+    print("\n\n")
+    # consistency_test.append(test_score)
 
-        K.clear_session()
-        del model
-        gc.collect()
+    K.clear_session()
+    del model
+    gc.collect()
 
-    exit()
-
+    return
     # #################################################################
     # for regular experiments
 
@@ -330,7 +335,9 @@ if __name__ == '__main__':
     # run_2D_experiment(synthetic_2D(1250, 3, form='sep'))
 
     # run_experiment(synthetic_data(20000, 10), 'synthetic')
-    # run_experiment(read_text_data('../../datasets/imbd/'), 'imbd')
+
+    print("imbd\n\n")
+    run_experiment(read_text_data('../datasets/imdb/'), 'imdb')
 
     print("SST\n\n")
     # run_experiment(read_text_data('../datasets/yelp/'),'yelp')

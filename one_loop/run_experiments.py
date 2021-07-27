@@ -66,13 +66,12 @@ def log_results(values, acc_logger, plot_path, title):
     fig = plt.figure()
     ax = fig.add_subplot(111)
     ax.set_title(title)
-    method_names = ['BinaryALL', 'MultiALL','CLL']
+    method_names = ['BinaryALL', 'MultiALL','CLL', 'DataConsis']
 
     # add labels on graph 
     for i, v in enumerate(values):
         ax.text(i - 0.25, v + 0.01, str(round(v, 5)), color='seagreen', fontweight='bold')
-    # ax.bar(methods, values, color=['skyblue', 'saddlebrown', 'olivedrab', 'plum'])
-    ax.bar(method_names, values, color=['skyblue', 'saddlebrown', 'olivedrab'])
+    ax.bar(method_names, values, color=['skyblue', 'saddlebrown', 'olivedrab', 'plum'])
 
 
     # set y demensions of plots
@@ -132,7 +131,7 @@ def run_experiments(dataset, set_name, date):
 
 
     # set up algorithms
-    experiment_names = ["Binary-Label ALL", "Multi-Label ALL", "CLL"]
+    experiment_names = ["Binary-Label ALL", "Multi-Label ALL", "CLL", "Data Consistancy"]
     binary_all = ALL(max_iter=10000, log_name=log_name+"/BinaryALL")
     multi_all = MultiALL()
     Constrained_Labeling = CLL(log_name=log_name+"/CLL")
@@ -182,7 +181,7 @@ def run_experiments(dataset, set_name, date):
 if __name__ == '__main__':
 
     print("\n\n        ~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~")
-    print("        | WELCOME TO OUR EXPIRIMENTS  |")
+    print("        | WELCOME TO OUR EXPERIMENTS  |")
     print("        ~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~")
 
 

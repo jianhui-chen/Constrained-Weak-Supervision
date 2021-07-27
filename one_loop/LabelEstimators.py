@@ -642,6 +642,85 @@ class DataConsistency(BaseClassifier):
         model.add(layers.Dropout(0.2))
         model.add(layers.Dense(output, activation=actv))
         return model
+
+    
+    # def _consistency_data(dataset, form='data', encoding_dim=32, no_clusters=10):
+    #     """ Select form of data consistency"""
+
+    #     train_data, train_labels = dataset['train']
+    #     test_data, test_labels = dataset['test']
+
+    #     # print("\n\ntrain_data:", train_data)
+    #     # print("train_data type:", type(train_data))
+
+
+    #     # print("\n\nreturn:", tf.cast(train_data, dtype=tf.float32))
+    #     # print("return type:", type(tf.cast(train_data, dtype=tf.float32)))
+    #     # exit()
+
+    #     if form == 'data':
+    #         return tf.cast(train_data, dtype=tf.float32)
+
+    #     # if form == 'data_cluster':
+    #     #     return batch_clustering(train_data, no_clusters)
+
+    #     # embedding_model = build_autoencoder(train_data.shape[1],
+    #     #         encoding_dim=encoding_dim, lr=1e-3)
+    #     # embedding = train_autoender(embedding_model, train_data, test_data,
+    #     #         epochs=30, batch_size=32)
+    #     # embedding = embedding.encoder(train_data)
+
+    #     # # print("\n\nembedding:", embedding)
+    #     # # print("embedding type:", type(embedding))
+    #     # # exit()
+
+    #     # if form == 'embedding_cluster':
+    #     #     return batch_clustering(embedding, no_clusters)
+    #     # return tf.cast(embedding, dtype=tf.float32)
+    
+    def _majority_vote_signal(self, weak_signals):
+        """ Calculate majority vote labels for the weak_signals"""
+
+        baseline_weak_labels = np.rint(weak_signals)
+        mv_weak_labels = np.ones(baseline_weak_labels.shape)
+        mv_weak_labels[baseline_weak_labels == -1] = 0
+        mv_weak_labels[baseline_weak_labels == 0] = -1
+        mv_weak_labels = np.sign(np.sum(mv_weak_labels, axis=0))
+        break_ties = np.random.randint(2, size=int(np.sum(mv_weak_labels == 0)))
+        mv_weak_labels[mv_weak_labels == 0] = break_ties
+        mv_weak_labels[mv_weak_labels == -1] = 0
+        return mv_weak_labels
+
+    
+    def _mlp_model(self, dimension, output):
+        """ 
+            Builds Simple MLP model
+
+            Parameters
+            ----------
+            :param dimension: amount of input
+            :type  dimension: int
+            :param output: amount of final states
+            :type  output: int
+
+            Returns
+            -------
+            :returns: Simple MLP 
+            :return type: Sequential tensor model
+        """
+
+        model = Sequential()
+        model.add(Dense(512, activation='relu', input_shape=(dimension,)))
+        model.add(Dense(256, activation='relu'))
+        model.add(Dropout(0.2))
+        model.add(Dense(64, activation='relu'))
+        model.add(Dense(output, activation='sigmoid'))
+
+        model.compile(loss='binary_crossentropy',
+                    optimizer='adagrad', metrics=['accuracy'])
+
+        return model
+
         
 
 
@@ -665,17 +744,24 @@ class DataConsistency(BaseClassifier):
         :rtype: ndarray
         """
 
-        model = self.simple_nn(nn_data.shape[1], k)
+        # set up variables
+        m, n, k = weak_signals_probas.shape
+        nn_data = tf.cast(X, dtype=tf.float32)
+        model = self._simple_nn(nn_data.shape[1], k)
+        a_matrix = weak_signals_error_bounds['A']
+        bound_loss = weak_signals_error_bounds['b']
+        mv_labels = self._majority_vote_signal(weak_signals_probas)
 
         
 
         # Estimates labels
-        labels = self._estimate_labels(weak_signals_probas, weak_signals_error_bounds)
+        labels = self._estimate_labels(model, nn_data, mv_labels, a_matrix, bound_loss)
+        # labels = self._estimate_labels(weak_signals_probas, weak_signals_error_bounds)
 
         # Fit based on labels generated above
         if train_model is None:
             m, n, k = weak_signals_probas.shape
-            self.model = self._mlp_model(X.shape[1], k)
+            self.model = self._mlp_model(nn_data.shape[1], k)
             self.model.fit(X, labels, batch_size=32, epochs=20, verbose=1)
         else:
             self.model = train_model
