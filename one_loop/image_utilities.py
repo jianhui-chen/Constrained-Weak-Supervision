@@ -13,12 +13,11 @@ from setup_model import *
 from sklearn.linear_model import LogisticRegression
 
 
-def get_supervision_data(dataset, weak_signals='manual', prec=0.1, err=0.1, true_bounds=False):
+def get_image_supervision_data(dataset, weak_signals='manual', prec=0.1, err=0.1, true_bounds=False):
 
     data_set = dataset.copy()
     num_classes = data_set['num_classes']
-    img_rows, img_cols = data_set['img_rows'], data_set['img_cols']
-    channels = data_set['channels']
+
     categories, path = data_set['categories'], data_set['path']
     train_data, train_labels = data_set['train_data']
     test_data, test_labels = data_set['test_data']
@@ -81,26 +80,13 @@ def get_supervision_data(dataset, weak_signals='manual', prec=0.1, err=0.1, true
                     else:
                         model = build_model((None,img_rows, img_cols, channels))
                     initial_weights = model.get_weights()
-                    # reshaped_data = labeled_data.reshape(labeled_data.shape[0],
-                    #                                      img_rows, img_cols, channels)
                     
-                    # print(labeled_data.shape)
-                    # print(reshaped_data.shape)
-                    # print(labeled_onehot_labels.shape)
-                    # exit()
-                    # model.fit(reshaped_data,
-                    #           labeled_onehot_labels,
-                    #           batch_size=32,
-                    #           epochs=200,
-                    #           verbose=1)
                     model.fit(labeled_data,
                               labeled_onehot_labels,
                               batch_size=32,
                               epochs=200,
                               verbose=1)
-                    # reshaped_data = train_data.reshape(train_data.shape[0], img_rows,
-                    #                                    img_cols, channels)
-                    # predicted_labels = model.predict(reshaped_data)
+           
                     predicted_labels = model.predict(train_data)
                     accuracy = accuracy_score(train_labels, predicted_labels)
                     model.set_weights(initial_weights)
@@ -136,8 +122,6 @@ def get_supervision_data(dataset, weak_signals='manual', prec=0.1, err=0.1, true
 
     # reshape the rest of the data
     test_labels = to_categorical(test_labels, num_classes)
-    # train_data = train_data.reshape(train_data.shape[0], img_rows, img_cols, channels)
-    # test_data = test_data.reshape(test_data.shape[0], img_rows, img_cols, channels)
 
     human_model_names = ['human_labels_' + str(i + 1) for i in range(num_weak_signals)]
     model_names.extend(human_model_names)
@@ -163,8 +147,6 @@ def get_supervision_data(dataset, weak_signals='manual', prec=0.1, err=0.1, true
     weak_data['num_unlabeled'] = num_unlabeled
 
     data = dict()
-    data['img_rows'], data['img_cols'] = img_rows, img_cols
-    data['channels'] = channels
     data['model_names'] = model_names
     data['random_labels'] = rand_labels
     data['weak_model'] = weak_data

@@ -7,12 +7,13 @@ from datetime import datetime
 from data_readers import read_text_data
 from utilities import set_up_constraint
 # from data_utilities import load_fashion_mnist # Don't do *, error
-from image_utilities import get_supervision_data
+from image_utilities import get_image_supervision_data
 from load_image_data import load_image_data
 from log import Logger 
 
 # Import models for testing
-from models import ALL, MultiALL
+from old_ALL import old_ALL
+from ALL_model import ALL
 from LabelEstimators import LabelEstimator, CLL
 from GEModel import GECriterion 
 from PIL import Image
@@ -133,8 +134,8 @@ def run_experiments(dataset, set_name, date):
 
     # set up algorithms
     experiment_names = ["Binary-Label ALL", "Multi-Label ALL", "CLL"]
-    binary_all = ALL(max_iter=10000, log_name=log_name+"/BinaryALL")
-    multi_all = MultiALL()
+    binary_all = old_ALL(max_iter=10000, log_name=log_name+"/BinaryALL")
+    multi_all = ALL()
     Constrained_Labeling = CLL(log_name=log_name+"/CLL")
 
     models = [binary_all, multi_all, Constrained_Labeling]
@@ -144,8 +145,9 @@ def run_experiments(dataset, set_name, date):
         print("\n\nWORKING WITH:", experiment_names[model_np])
 
         # # skip 
-        if model_np == 2 or model_np == 0:
+        # if model_np == 2 or model_np == 0:
         # if model_np == 0 or model_np==1:
+        if model_np == 2 :
             continue 
 
 
@@ -153,9 +155,7 @@ def run_experiments(dataset, set_name, date):
 
         """Predict_proba"""
         train_probas = model.predict_proba(train_data)
-        # print(train_probas)
-        # print("predict proba ", train_probas.shape)
-        # print(train_labels.shape)
+  
         train_acc = model.get_accuracy(train_labels, train_probas)
 
         test_probas = model.predict_proba(test_data)
@@ -169,11 +169,11 @@ def run_experiments(dataset, set_name, date):
         test_accuracy.append(test_acc)
 
 
-    print('\n\nLogging results\n\n')
-    acc_logger = Logger("logs/" + log_name + "/accuracies")
-    plot_path =  "./logs/" + log_name
-    log_results(train_accuracy, acc_logger, plot_path, 'Accuracy on training data')
-    log_results(test_accuracy, acc_logger, plot_path, 'Accuracy on testing data')
+    # print('\n\nLogging results\n\n')
+    # acc_logger = Logger("logs/" + log_name + "/accuracies")
+    # plot_path =  "./logs/" + log_name
+    # log_results(train_accuracy, acc_logger, plot_path, 'Accuracy on training data')
+    # log_results(test_accuracy, acc_logger, plot_path, 'Accuracy on testing data')
 
 
 
@@ -187,8 +187,8 @@ if __name__ == '__main__':
 
 
     # text Expiriments:
-    dataset_names = ['sst-2', 'imdb', 'obs', 'cardio', 'breast-cancer']
-    # dataset_names = ['obs', 'cardio', 'breast-cancer']
+    # dataset_names = ['sst-2', 'imdb', 'obs', 'cardio', 'breast-cancer']
+    dataset_names = ['obs', 'cardio', 'breast-cancer']
 
     date = datetime.now().strftime("%Y_%m_%d-%I:%M:%S_%p")
 
