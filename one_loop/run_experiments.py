@@ -134,13 +134,13 @@ def run_experiments(dataset, set_name, date):
 
     matrix_weak_errors = set_up_constraint(weak_signals, np.zeros(weak_errors.shape), weak_errors)['error']
 
-    error_set = [weak_errors, weak_errors, matrix_weak_errors, matrix_weak_errors]
+    error_set = [weak_errors, multi_all_weak_errors, matrix_weak_errors, matrix_weak_errors]
 
 
 
     # set up algorithms
     experiment_names = ["Binary-Label ALL", "Multi-Label ALL", "CLL", "Data Consistancy"]
-    binary_all = ALL(max_iter=10000, log_name=log_name+"/BinaryALL")
+    binary_all = old_ALL(max_iter=10000, log_name=log_name+"/BinaryALL")
     multi_all = ALL()
     Constrained_Labeling = CLL(log_name=log_name+"/CLL")
     Data_Consitancy = DataConsistency(log_name=log_name+"/Const")
