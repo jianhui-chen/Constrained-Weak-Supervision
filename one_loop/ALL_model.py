@@ -12,18 +12,13 @@ from tensorflow.python.keras.layers import Dropout, Dense
 from scipy.optimize import minimize
 
 from log import Logger
-from setup_model import set_up_constraint, mlp_model
-from train_stochgall import run_constraints
+from setup_model import mlp_model
+from constraints import set_up_constraint
+from train_stochgall import optimize
 from text_utilities import get_text_supervision_data
 
 
 """
-
-
-Also contains ALL, LabelEstimator, and GECriterion
-
-All code takes in data as (n_features, n_examples), which is BAD and should
-be changed, along with the weak signals.
 
 
 To work on:
@@ -34,20 +29,6 @@ To work on:
     Add more algos.
 
 """
-
-
-
-
-
-
-
-
-# # # # # # # # # # # #
-#      Our models     # 
-# # # # # # # # # # # #
-
-
-
 
 
 
@@ -62,7 +43,7 @@ class ALL(BaseClassifier):
     Parameters
     ----------
     max_iter : int, default=300
-        For run_constraints
+        For optimize
 
     log_name : Can be added, need to deal with some issues with imports
 
@@ -159,7 +140,7 @@ class ALL(BaseClassifier):
         batch_size = 32
 
         # This is to prevent the learning algo from wasting effort fitting a model to arbitrary y values.
-        y, constraint_set = run_constraints(y, learnable_probabilities, rho, constraint_set, optim='max')
+        y, constraint_set = optimize(y, learnable_probabilities, rho, constraint_set, optim='max')
 
         self.model = mlp_model(X.shape[1], k)
 
@@ -179,7 +160,7 @@ class ALL(BaseClassifier):
                 learnable_probabilities = self.model.predict(X)
             
             if epoch % 2 == 0:
-                y, constraint_set = run_constraints(y, learnable_probabilities, rho, constraint_set, iters=10, enable_print=False)
+                y, constraint_set = optimize(y, learnable_probabilities, rho, constraint_set, iters=10, enable_print=False)
             
             epoch += 1
 

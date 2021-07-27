@@ -5,7 +5,8 @@ import tensorflow as tf
 from datetime import datetime
 
 from data_readers import read_text_data
-from utilities import set_up_constraint
+# from utilities import set_up_constraint
+from constraints import set_up_constraint
 # from data_utilities import load_fashion_mnist # Don't do *, error
 from image_utilities import get_image_supervision_data
 from load_image_data import load_image_data
@@ -123,13 +124,14 @@ def run_experiments(dataset, set_name, date):
 
 
     # set up error bounds.... different for every algorithm
+    weak_errors = np.ones((m, k)) * 0.01
     try:
-        weak_errors = dataset['weak_errors']
+        multi_all_weak_errors = dataset['weak_errors']
     except:
-        weak_errors = np.ones((m, k)) * 0.01
-    cll_weak_errors = set_up_constraint(weak_signals, weak_errors)
+        multi_all_weak_errors = weak_errors
+    cll_weak_errors = set_up_constraint(weak_signals, np.zeros(weak_errors.shape), weak_errors)['error']
 
-    error_set = [weak_errors, weak_errors, cll_weak_errors]
+    error_set = [weak_errors, multi_all_weak_errors, cll_weak_errors]
 
 
     # set up algorithms
@@ -147,8 +149,10 @@ def run_experiments(dataset, set_name, date):
         # # skip 
         # if model_np == 2 or model_np == 0:
         # if model_np == 0 or model_np==1:
-        if model_np == 2 :
-            continue 
+        if model_np == 0 :
+            if set_name == 'sst-2' or set_name == 'imdb':
+                print(" Skipping binary ALL with multiclass data ")
+                continue 
 
 
         model.fit(train_data, weak_signals, error_set[model_np])
@@ -169,11 +173,11 @@ def run_experiments(dataset, set_name, date):
         test_accuracy.append(test_acc)
 
 
-    # print('\n\nLogging results\n\n')
-    # acc_logger = Logger("logs/" + log_name + "/accuracies")
-    # plot_path =  "./logs/" + log_name
-    # log_results(train_accuracy, acc_logger, plot_path, 'Accuracy on training data')
-    # log_results(test_accuracy, acc_logger, plot_path, 'Accuracy on testing data')
+    print('\n\nLogging results\n\n')
+    acc_logger = Logger("logs/" + log_name + "/accuracies")
+    plot_path =  "./logs/" + log_name
+    log_results(train_accuracy, acc_logger, plot_path, 'Accuracy on training data')
+    log_results(test_accuracy, acc_logger, plot_path, 'Accuracy on testing data')
 
 
 
