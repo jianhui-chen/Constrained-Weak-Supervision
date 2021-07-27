@@ -13,8 +13,8 @@ from log import Logger
 
 # Import models for testing
 from models import ALL, MultiALL
-from LabelEstimators import LabelEstimator, CLL
-from GEModel import GECriterion 
+from LabelEstimators import CLL, DataConsistency
+# from GEModel import GECriterion 
 from PIL import Image
 
 
@@ -126,9 +126,9 @@ def run_experiments(dataset, set_name, date):
         weak_errors = dataset['weak_errors']
     except:
         weak_errors = np.ones((m, k)) * 0.01
-    cll_weak_errors = set_up_constraint(weak_signals, weak_errors)
+    matrix_weak_errors = set_up_constraint(weak_signals, weak_errors)
 
-    error_set = [weak_errors, weak_errors, cll_weak_errors]
+    error_set = [weak_errors, weak_errors, matrix_weak_errors, matrix_weak_errors]
 
 
     # set up algorithms
@@ -136,16 +136,16 @@ def run_experiments(dataset, set_name, date):
     binary_all = ALL(max_iter=10000, log_name=log_name+"/BinaryALL")
     multi_all = MultiALL()
     Constrained_Labeling = CLL(log_name=log_name+"/CLL")
+    Data_Consitancy = DataConsistency(log_name=log_name+"/Const")
 
-    models = [binary_all, multi_all, Constrained_Labeling]
+    models = [binary_all, multi_all, Constrained_Labeling, Data_Consitancy]
 
     # Loop through each algorithm
     for model_np, model in enumerate(models):
         print("\n\nWORKING WITH:", experiment_names[model_np])
 
         # # skip 
-        if model_np == 2 or model_np == 0:
-        # if model_np == 0 or model_np==1:
+        if model_np == 2 or model_np == 1 or model_np == 0:
             continue 
 
 
@@ -170,10 +170,10 @@ def run_experiments(dataset, set_name, date):
 
 
     print('\n\nLogging results\n\n')
-    acc_logger = Logger("logs/" + log_name + "/accuracies")
-    plot_path =  "./logs/" + log_name
-    log_results(train_accuracy, acc_logger, plot_path, 'Accuracy on training data')
-    log_results(test_accuracy, acc_logger, plot_path, 'Accuracy on testing data')
+    # acc_logger = Logger("logs/" + log_name + "/accuracies")
+    # plot_path =  "./logs/" + log_name
+    # log_results(train_accuracy, acc_logger, plot_path, 'Accuracy on training data')
+    # log_results(test_accuracy, acc_logger, plot_path, 'Accuracy on testing data')
 
 
 
@@ -188,8 +188,6 @@ if __name__ == '__main__':
 
     # text Expiriments:
     dataset_names = ['sst-2', 'imdb', 'obs', 'cardio', 'breast-cancer']
-    # dataset_names = ['obs', 'cardio', 'breast-cancer']
-
     date = datetime.now().strftime("%Y_%m_%d-%I:%M:%S_%p")
 
     for name in dataset_names:

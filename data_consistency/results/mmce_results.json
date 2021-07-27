@@ -32,4 +32,8 @@
     "label_accuracy":0.612,
     "test_score":0.69025,
     "experiment":"dependent_experiment"
+}{
+    "label_accuracy":0.7466875,
+    "test_score":0.824,
+    "experiment":"synthetic"
 }
