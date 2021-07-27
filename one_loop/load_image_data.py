@@ -6,7 +6,7 @@ import numpy as np
 from tensorflow.python.keras.datasets import cifar10
 import scipy.io as sio
 
-from image_utilities import get_supervision_data
+from image_utilities import get_image_supervision_data
 
 
 def load_fashion_mnist():
@@ -51,7 +51,7 @@ def load_fashion_mnist():
 def load_image_data():
     orig_data = load_fashion_mnist()
 
-    new_data = get_supervision_data(orig_data, weak_signals='pseudolabel', true_bounds=False)
+    new_data = get_image_supervision_data(orig_data, weak_signals='pseudolabel', true_bounds=False)
 
     image_data = dict()
     image_data['train'] = new_data['train_data']

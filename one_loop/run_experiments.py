@@ -5,16 +5,21 @@ import tensorflow as tf
 from datetime import datetime
 
 from data_readers import read_text_data
-from utilities import set_up_constraint
+# from utilities import set_up_constraint
+from constraints import set_up_constraint
 # from data_utilities import load_fashion_mnist # Don't do *, error
-from image_utilities import get_supervision_data
+from image_utilities import get_image_supervision_data
 from load_image_data import load_image_data
 from log import Logger 
 
 # Import models for testing
-from models import ALL, MultiALL
-from LabelEstimators import CLL, DataConsistency
+# from models import ALL, MultiALL
+# from LabelEstimators import CLL, DataConsistency
 # from GEModel import GECriterion 
+from old_ALL import old_ALL
+from ALL_model import ALL
+from LabelEstimators import CLL, DataConsistency
+from GEModel import GECriterion 
 from PIL import Image
 
 
@@ -121,19 +126,22 @@ def run_experiments(dataset, set_name, date):
 
 
     # set up error bounds.... different for every algorithm
+    weak_errors = np.ones((m, k)) * 0.01
     try:
-        weak_errors = dataset['weak_errors']
+        multi_all_weak_errors = dataset['weak_errors']
     except:
-        weak_errors = np.ones((m, k)) * 0.01
-    matrix_weak_errors = set_up_constraint(weak_signals, weak_errors)
+        multi_all_weak_errors = weak_errors
+
+    matrix_weak_errors = set_up_constraint(weak_signals, np.zeros(weak_errors.shape), weak_errors)['error']
 
     error_set = [weak_errors, weak_errors, matrix_weak_errors, matrix_weak_errors]
+
 
 
     # set up algorithms
     experiment_names = ["Binary-Label ALL", "Multi-Label ALL", "CLL", "Data Consistancy"]
     binary_all = ALL(max_iter=10000, log_name=log_name+"/BinaryALL")
-    multi_all = MultiALL()
+    multi_all = ALL()
     Constrained_Labeling = CLL(log_name=log_name+"/CLL")
     Data_Consitancy = DataConsistency(log_name=log_name+"/Const")
 
@@ -143,13 +151,20 @@ def run_experiments(dataset, set_name, date):
     for model_np, model in enumerate(models):
         print("\n\nWORKING WITH:", experiment_names[model_np])
 
+        # # skip 
+        # if model_np == 2 or model_np == 0:
+        # if model_np == 0 or model_np==1:
+        if model_np == 0 :
+            if set_name == 'sst-2' or set_name == 'imdb':
+                print(" Skipping binary ALL with multiclass data ")
+                continue 
+
+
         model.fit(train_data, weak_signals, error_set[model_np])
 
         """Predict_proba"""
         train_probas = model.predict_proba(train_data)
-        # print(train_probas)
-        # print("predict proba ", train_probas.shape)
-        # print(train_labels.shape)
+  
         train_acc = model.get_accuracy(train_labels, train_probas)
 
         test_probas = model.predict_proba(test_data)
