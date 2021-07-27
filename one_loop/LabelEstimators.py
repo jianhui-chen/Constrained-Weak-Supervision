@@ -69,9 +69,61 @@ class LabelEstimator(BaseClassifier):   # Might want to change the name of Base 
         if self.model is None:
             sys.exit("No Data fit")
 
-        probabilities = self.model.predict_proba(X.T)[:,1]
+        probabilities = self.model.predict_proba(X)
 
         return probabilities
+    
+    def predict(self, X):
+        """
+        Computes probability estimates for given class
+
+        Parameters
+        ----------
+        X : ndarray of shape (n_features, n_examples)
+            Examples to be assigned a probability (binary)
+
+
+        Returns
+        -------
+        probas : ndarray of shape (n_examples,)
+        """
+        if self.model is None:
+            sys.exit("No Data fit")
+
+        probabilities = self.model.predict(X)
+
+        return probabilities
+
+    
+    def get_accuracy(self, true_labels, predicted_probas): 
+        """
+        Calculate accuracy of the model 
+
+        Parameters
+        ----------
+        :param true_labels: true labels of data set
+        :type  true_labels: ndarray
+        :param predicted_probas: Estimated labels that where trained on 
+        :type  predicted_probas: ndarray
+
+        Returns
+        -------
+        :return: percent accuary of Estimated labels given the true labels
+        :rtype: float
+        """
+        try:
+            n, k = true_labels.shape
+            if k > 1:
+                assert true_labels.shape == predicted_probas.shape
+                return np.mean(np.equal(np.argmax(true_labels, axis=-1),
+                                        np.argmax(predicted_probas, axis=-1)))
+        except:
+            if len(true_labels.shape) == 1:
+                y_pred = np.round(predicted_probas.ravel())
+    
+        assert true_labels.shape == y_pred.shape
+        return np.mean(np.equal(true_labels, np.round(y_pred)))
+    
 
 
     def _estimate_labels(self, weak_signals_probas, weak_signals_error_bounds):
@@ -129,6 +181,36 @@ class LabelEstimator(BaseClassifier):   # Might want to change the name of Base 
             sys.exit(1)
         return self
 
+    def _mlp_model(self, dimension, output):
+        """ 
+            Builds Simple MLP model
+
+            Parameters
+            ----------
+            :param dimension: amount of input
+            :type  dimension: int
+            :param output: amount of final states
+            :type  output: int
+
+            Returns
+            -------
+            :returns: Simple MLP 
+            :return type: Sequential tensor model
+        """
+
+        model = Sequential()
+        model.add(Dense(512, activation='relu', input_shape=(dimension,)))
+        model.add(Dense(256, activation='relu'))
+        model.add(Dropout(0.2))
+        model.add(Dense(64, activation='relu'))
+        model.add(Dense(output, activation='sigmoid'))
+
+        model.compile(loss='binary_crossentropy',
+                    optimizer='adagrad', metrics=['accuracy'])
+
+        return model
+
+
 
 """
 
@@ -138,7 +220,7 @@ class LabelEstimator(BaseClassifier):   # Might want to change the name of Base 
 
 """
 
-class CLL(BaseClassifier):
+class CLL(LabelEstimator):
     """
     Constrained label learning Classifier
 
@@ -173,77 +255,77 @@ class CLL(BaseClassifier):
 
         self.model = None
 
-    def get_accuracy(self, true_labels, predicted_probas): 
-        """
-        Calculate accuracy of the model 
+    # def get_accuracy(self, true_labels, predicted_probas): 
+    #     """
+    #     Calculate accuracy of the model 
 
-        Parameters
-        ----------
-        :param true_labels: true labels of data set
-        :type  true_labels: ndarray
-        :param predicted_probas: Estimated labels that where trained on 
-        :type  predicted_probas: ndarray
+    #     Parameters
+    #     ----------
+    #     :param true_labels: true labels of data set
+    #     :type  true_labels: ndarray
+    #     :param predicted_probas: Estimated labels that where trained on 
+    #     :type  predicted_probas: ndarray
 
-        Returns
-        -------
-        :return: percent accuary of Estimated labels given the true labels
-        :rtype: float
-        """
-        try:
-            n, k = true_labels.shape
-            if k > 1:
-                assert true_labels.shape == predicted_probas.shape
-                return np.mean(np.equal(np.argmax(true_labels, axis=-1),
-                                        np.argmax(predicted_probas, axis=-1)))
-        except:
-            if len(true_labels.shape) == 1:
-                y_pred = np.round(predicted_probas.ravel())
+    #     Returns
+    #     -------
+    #     :return: percent accuary of Estimated labels given the true labels
+    #     :rtype: float
+    #     """
+    #     try:
+    #         n, k = true_labels.shape
+    #         if k > 1:
+    #             assert true_labels.shape == predicted_probas.shape
+    #             return np.mean(np.equal(np.argmax(true_labels, axis=-1),
+    #                                     np.argmax(predicted_probas, axis=-1)))
+    #     except:
+    #         if len(true_labels.shape) == 1:
+    #             y_pred = np.round(predicted_probas.ravel())
     
-        assert true_labels.shape == y_pred.shape
-        return np.mean(np.equal(true_labels, np.round(y_pred)))
+    #     assert true_labels.shape == y_pred.shape
+    #     return np.mean(np.equal(true_labels, np.round(y_pred)))
 
-    def predict(self, X):
-        """
-        Computes probability estimates for given class
+    # # def predict(self, X):
+    #     """
+    #     Computes probability estimates for given class
 
-        Parameters
-        ----------
-        X : ndarray of shape (n_features, n_examples)
-            Examples to be assigned a probability (binary)
+    #     Parameters
+    #     ----------
+    #     X : ndarray of shape (n_features, n_examples)
+    #         Examples to be assigned a probability (binary)
 
 
-        Returns
-        -------
-        probas : ndarray of shape (n_examples,)
-        """
-        if self.model is None:
-            sys.exit("No Data fit")
+    #     Returns
+    #     -------
+    #     probas : ndarray of shape (n_examples,)
+    #     """
+    #     if self.model is None:
+    #         sys.exit("No Data fit")
 
-        probabilities = self.model.predict(X)
+    #     probabilities = self.model.predict(X)
 
-        return probabilities
+    #     return probabilities
     
 
-    def predict_proba(self, X):
-        """
-        Computes probability estimates for given class
+    # def predict_proba(self, X):
+    #     """
+    #     Computes probability estimates for given class
 
-        Parameters
-        ----------
-        X : ndarray of shape (n_features, n_examples)
-            Examples to be assigned a probability (binary)
+    #     Parameters
+    #     ----------
+    #     X : ndarray of shape (n_features, n_examples)
+    #         Examples to be assigned a probability (binary)
 
 
-        Returns
-        -------
-        probas : ndarray of shape (n_examples,)
-        """
-        if self.model is None:
-            sys.exit("No Data fit")
+    #     Returns
+    #     -------
+    #     probas : ndarray of shape (n_examples,)
+    #     """
+    #     if self.model is None:
+    #         sys.exit("No Data fit")
 
-        probabilities = self.model.predict_proba(X)
+    #     probabilities = self.model.predict_proba(X)
 
-        return probabilities
+    #     return probabilities
 
 
     def _bound_loss(self, y, a_matrix, bounds):
@@ -441,7 +523,7 @@ class CLL(BaseClassifier):
 
 
 
-class DataConsistency(BaseClassifier):
+class DataConsistency(LabelEstimator):
     # FIX THIS
     """
     Data Consistency learning Classifier
@@ -477,77 +559,77 @@ class DataConsistency(BaseClassifier):
 
         self.model = None
 
-    def get_accuracy(self, true_labels, predicted_probas): 
-        """
-        Calculate accuracy of the model 
+    # def get_accuracy(self, true_labels, predicted_probas): 
+    #     """
+    #     Calculate accuracy of the model 
 
-        Parameters
-        ----------
-        :param true_labels: true labels of data set
-        :type  true_labels: ndarray
-        :param predicted_probas: Estimated labels that where trained on 
-        :type  predicted_probas: ndarray
+    #     Parameters
+    #     ----------
+    #     :param true_labels: true labels of data set
+    #     :type  true_labels: ndarray
+    #     :param predicted_probas: Estimated labels that where trained on 
+    #     :type  predicted_probas: ndarray
 
-        Returns
-        -------
-        :return: percent accuary of Estimated labels given the true labels
-        :rtype: float
-        """
-        try:
-            n, k = true_labels.shape
-            if k > 1:
-                assert true_labels.shape == predicted_probas.shape
-                return np.mean(np.equal(np.argmax(true_labels, axis=-1),
-                                        np.argmax(predicted_probas, axis=-1)))
-        except:
-            if len(true_labels.shape) == 1:
-                y_pred = np.round(predicted_probas.ravel())
+    #     Returns
+    #     -------
+    #     :return: percent accuary of Estimated labels given the true labels
+    #     :rtype: float
+    #     """
+    #     try:
+    #         n, k = true_labels.shape
+    #         if k > 1:
+    #             assert true_labels.shape == predicted_probas.shape
+    #             return np.mean(np.equal(np.argmax(true_labels, axis=-1),
+    #                                     np.argmax(predicted_probas, axis=-1)))
+    #     except:
+    #         if len(true_labels.shape) == 1:
+    #             y_pred = np.round(predicted_probas.ravel())
     
-        assert true_labels.shape == y_pred.shape
-        return np.mean(np.equal(true_labels, np.round(y_pred)))
+    #     assert true_labels.shape == y_pred.shape
+    #     return np.mean(np.equal(true_labels, np.round(y_pred)))
 
-    def predict(self, X):
-        """
-        Computes probability estimates for given class
+    # def predict(self, X):
+    #     """
+    #     Computes probability estimates for given class
 
-        Parameters
-        ----------
-        X : ndarray of shape (n_features, n_examples)
-            Examples to be assigned a probability (binary)
+    #     Parameters
+    #     ----------
+    #     X : ndarray of shape (n_features, n_examples)
+    #         Examples to be assigned a probability (binary)
 
 
-        Returns
-        -------
-        probas : ndarray of shape (n_examples,)
-        """
-        if self.model is None:
-            sys.exit("No Data fit")
+    #     Returns
+    #     -------
+    #     probas : ndarray of shape (n_examples,)
+    #     """
+    #     if self.model is None:
+    #         sys.exit("No Data fit")
 
-        probabilities = self.model.predict(X)
+    #     probabilities = self.model.predict(X)
 
-        return probabilities
+    #     return probabilities
     
 
-    def predict_proba(self, X):
-        """
-        Computes probability estimates for given class
+    # def predict_proba(self, X):
+    #     """
+    #     Computes probability estimates for given class
 
-        Parameters
-        ----------
-        X : ndarray of shape (n_features, n_examples)
-            Examples to be assigned a probability (binary)
+    #     Parameters
+    #     ----------
+    #     X : ndarray of shape (n_features, n_examples)
+    #         Examples to be assigned a probability (binary)
 
 
-        Returns
-        -------
-        probas : ndarray of shape (n_examples,)
-        """
-        if self.model is None:
-            sys.exit("No Data fit")
+    #     Returns
+    #     -------
+    #     probas : ndarray of shape (n_examples,)
+    #     """
+    #     if self.model is None:
+    #         sys.exit("No Data fit")
 
-        probabilities = self.model.predict_proba(X)
+    #     probabilities = self.model.predict_proba(X)
 
-        return probabilities
+    #     return probabilities
 
     # def _batch_clustering(self, data, no_clusters, batch_size=50):
     #     cluster = MiniBatchKMeans(init='k-means++', n_clusters=no_clusters, batch_size=batch_size,
@@ -556,8 +638,6 @@ class DataConsistency(BaseClassifier):
     #     cluster_labels = cluster.labels_
     #     return tf.one_hot(cluster_labels, no_clusters)
 
-
-    # @tf.function
     def _consistency_loss(self, model, X, mv_labels, a_matrix, b, slack, gamma, C):
         # Lagragian loss function
 
@@ -642,41 +722,6 @@ class DataConsistency(BaseClassifier):
         model.add(layers.Dropout(0.2))
         model.add(layers.Dense(output, activation=actv))
         return model
-
-    
-    # def _consistency_data(dataset, form='data', encoding_dim=32, no_clusters=10):
-    #     """ Select form of data consistency"""
-
-    #     train_data, train_labels = dataset['train']
-    #     test_data, test_labels = dataset['test']
-
-    #     # print("\n\ntrain_data:", train_data)
-    #     # print("train_data type:", type(train_data))
-
-
-    #     # print("\n\nreturn:", tf.cast(train_data, dtype=tf.float32))
-    #     # print("return type:", type(tf.cast(train_data, dtype=tf.float32)))
-    #     # exit()
-
-    #     if form == 'data':
-    #         return tf.cast(train_data, dtype=tf.float32)
-
-    #     # if form == 'data_cluster':
-    #     #     return batch_clustering(train_data, no_clusters)
-
-    #     # embedding_model = build_autoencoder(train_data.shape[1],
-    #     #         encoding_dim=encoding_dim, lr=1e-3)
-    #     # embedding = train_autoender(embedding_model, train_data, test_data,
-    #     #         epochs=30, batch_size=32)
-    #     # embedding = embedding.encoder(train_data)
-
-    #     # # print("\n\nembedding:", embedding)
-    #     # # print("embedding type:", type(embedding))
-    #     # # exit()
-
-    #     # if form == 'embedding_cluster':
-    #     #     return batch_clustering(embedding, no_clusters)
-    #     # return tf.cast(embedding, dtype=tf.float32)
     
     def _majority_vote_signal(self, weak_signals):
         """ Calculate majority vote labels for the weak_signals"""
@@ -690,37 +735,6 @@ class DataConsistency(BaseClassifier):
         mv_weak_labels[mv_weak_labels == 0] = break_ties
         mv_weak_labels[mv_weak_labels == -1] = 0
         return mv_weak_labels
-
-    
-    def _mlp_model(self, dimension, output):
-        """ 
-            Builds Simple MLP model
-
-            Parameters
-            ----------
-            :param dimension: amount of input
-            :type  dimension: int
-            :param output: amount of final states
-            :type  output: int
-
-            Returns
-            -------
-            :returns: Simple MLP 
-            :return type: Sequential tensor model
-        """
-
-        model = Sequential()
-        model.add(Dense(512, activation='relu', input_shape=(dimension,)))
-        model.add(Dense(256, activation='relu'))
-        model.add(Dropout(0.2))
-        model.add(Dense(64, activation='relu'))
-        model.add(Dense(output, activation='sigmoid'))
-
-        model.compile(loss='binary_crossentropy',
-                    optimizer='adagrad', metrics=['accuracy'])
-
-        return model
-
         
 
 

@@ -143,11 +143,6 @@ def run_experiments(dataset, set_name, date):
     for model_np, model in enumerate(models):
         print("\n\nWORKING WITH:", experiment_names[model_np])
 
-        # # skip 
-        if model_np == 2 or model_np == 1 or model_np == 0:
-            continue 
-
-
         model.fit(train_data, weak_signals, error_set[model_np])
 
         """Predict_proba"""
@@ -169,10 +164,10 @@ def run_experiments(dataset, set_name, date):
 
 
     print('\n\nLogging results\n\n')
-    # acc_logger = Logger("logs/" + log_name + "/accuracies")
-    # plot_path =  "./logs/" + log_name
-    # log_results(train_accuracy, acc_logger, plot_path, 'Accuracy on training data')
-    # log_results(test_accuracy, acc_logger, plot_path, 'Accuracy on testing data')
+    acc_logger = Logger("logs/" + log_name + "/accuracies")
+    plot_path =  "./logs/" + log_name
+    log_results(train_accuracy, acc_logger, plot_path, 'Accuracy on training data')
+    log_results(test_accuracy, acc_logger, plot_path, 'Accuracy on testing data')
 
 
 
@@ -186,7 +181,9 @@ if __name__ == '__main__':
 
 
     # text Expiriments:
-    dataset_names = ['sst-2', 'imdb', 'obs', 'cardio', 'breast-cancer']
+    # dataset_names = ['sst-2', 'imdb', 'obs', 'cardio', 'breast-cancer']
+    dataset_names = ['obs', 'cardio', 'breast-cancer']
+
     date = datetime.now().strftime("%Y_%m_%d-%I:%M:%S_%p")
 
     for name in dataset_names:
