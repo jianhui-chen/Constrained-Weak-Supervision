@@ -71,12 +71,20 @@ def log_results(values, acc_logger, plot_path, title):
     fig = plt.figure()
     ax = fig.add_subplot(111)
     ax.set_title(title)
-    method_names = ['BinaryALL', 'MultiALL','CLL', 'DataConsis']
+
+    # Check if it is a multi class example or one with abstaining signals
+    # so there will be no Binary ALL present 
+    if len(values) == 4:
+        method_names = ['BinaryALL', 'MultiALL','CLL', 'DataConsis']
+        bar_colors = ['skyblue', 'saddlebrown', 'olivedrab', 'plum']
+    else:
+        method_names = ['MultiALL','CLL', 'DataConsis']
+        bar_colors = ['skyblue', 'saddlebrown', 'olivedrab']
 
     # add labels on graph 
     for i, v in enumerate(values):
         ax.text(i - 0.25, v + 0.01, str(round(v, 5)), color='seagreen', fontweight='bold')
-    ax.bar(method_names, values, color=['skyblue', 'saddlebrown', 'olivedrab', 'plum'])
+    ax.bar(method_names, values, color=bar_colors)
 
 
     # set y demensions of plots
@@ -151,13 +159,13 @@ def run_experiments(dataset, set_name, date):
     for model_np, model in enumerate(models):
         print("\n\nWORKING WITH:", experiment_names[model_np])
 
-        # # skip 
+        # skip binary all on multi label or abstaining signal set
         # if model_np == 2 or model_np == 0:
         # if model_np == 0 or model_np==1:
-        # if model_np == 0 :
-        #     if set_name == 'sst-2' or set_name == 'imdb':
-        #         print(" Skipping binary ALL with multiclass data ")
-        #         continue 
+        if model_np == 0 :
+            if set_name == 'sst-2' or set_name == 'imdb' or set_name == 'image':
+                print(" Skipping binary ALL with multiclass data ")
+                continue 
 
 
         model.fit(train_data, weak_signals, error_set[model_np])
@@ -207,5 +215,5 @@ if __name__ == '__main__':
         print("# # # # # # # # # # # #")
         run_experiments(read_text_data('../datasets/' + name + '/'), name, date)
 
-    # Image Expiriments
+    # # Image Expiriments
     # run_experiments(load_image_data(), 'image', date)
