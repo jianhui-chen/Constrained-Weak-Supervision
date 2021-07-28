@@ -39,7 +39,7 @@ def read_weak_signals(categories, path, num_weak_signals):
     num_classes = 10  # change this if more than 10 classes
 
     # file_path = 'weak_image_labeling/weak_signals/'
-    file_path = '../weak_image_labeling/weak_signals/'
+    file_path = '../datasets/image_data_weak_signals/'
     weak_signals = [[] for _ in range(num_weak_signals)]
     snorkel_signals = [[] for _ in range(num_classes)]
     error_rates = [[] for _ in range(num_weak_signals)]

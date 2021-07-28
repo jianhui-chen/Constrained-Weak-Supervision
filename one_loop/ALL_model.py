@@ -14,7 +14,7 @@ from scipy.optimize import minimize
 from log import Logger
 from setup_model import mlp_model
 from constraints import set_up_constraint
-from train_stochgall import optimize
+from _optimize_stochgall import optimize
 from text_utilities import get_text_supervision_data
 
 

@@ -155,7 +155,7 @@ def run_experiments(dataset, set_name, date):
         # if model_np == 2 or model_np == 0:
         # if model_np == 0 or model_np==1:
         if model_np == 0 :
-            if set_name == 'sst-2' or set_name == 'imdb':
+            if set_name == 'sst-2' or set_name == 'imdb' or set_name == 'fashion':
                 print(" Skipping binary ALL with multiclass data ")
                 continue 
 
@@ -201,11 +201,11 @@ if __name__ == '__main__':
 
     date = datetime.now().strftime("%Y_%m_%d-%I:%M:%S_%p")
 
-    for name in dataset_names:
-        print("\n\n\n# # # # # # # # # # # #")
-        print("#  ", name, "experiment  #")
-        print("# # # # # # # # # # # #")
-        run_experiments(read_text_data('../datasets/' + name + '/'), name, date)
+    # for name in dataset_names:
+    #     print("\n\n\n# # # # # # # # # # # #")
+    #     print("#  ", name, "experiment  #")
+    #     print("# # # # # # # # # # # #")
+    #     run_experiments(read_text_data('../datasets/' + name + '/'), name, date)
 
     # # Image Expiriments
-    # run_experiments(load_image_data())
+    run_experiments(load_image_data(), 'fashion', date)
