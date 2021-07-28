@@ -40,7 +40,7 @@ from PIL import Image
         1. Binary only All
         2. Multi ALL
         3. CLL     
-        4. Maybe Data Consitency??????
+        4. Data Consitency
 """
 
 
@@ -154,10 +154,10 @@ def run_experiments(dataset, set_name, date):
         # # skip 
         # if model_np == 2 or model_np == 0:
         # if model_np == 0 or model_np==1:
-        if model_np == 0 :
-            if set_name == 'sst-2' or set_name == 'imdb':
-                print(" Skipping binary ALL with multiclass data ")
-                continue 
+        # if model_np == 0 :
+        #     if set_name == 'sst-2' or set_name == 'imdb':
+        #         print(" Skipping binary ALL with multiclass data ")
+        #         continue 
 
 
         model.fit(train_data, weak_signals, error_set[model_np])
@@ -196,8 +196,8 @@ if __name__ == '__main__':
 
 
     # text Expiriments:
-    # dataset_names = ['sst-2', 'imdb', 'obs', 'cardio', 'breast-cancer']
-    dataset_names = ['obs', 'cardio', 'breast-cancer']
+    dataset_names = ['sst-2', 'imdb', 'obs', 'cardio', 'breast-cancer']
+    # dataset_names = ['obs', 'cardio', 'breast-cancer']
 
     date = datetime.now().strftime("%Y_%m_%d-%I:%M:%S_%p")
 
@@ -207,5 +207,5 @@ if __name__ == '__main__':
         print("# # # # # # # # # # # #")
         run_experiments(read_text_data('../datasets/' + name + '/'), name, date)
 
-    # # Image Expiriments
-    # run_experiments(load_image_data())
+    # Image Expiriments
+    # run_experiments(load_image_data(), 'image', date)

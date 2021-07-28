@@ -246,86 +246,11 @@ class CLL(LabelEstimator):
         if log_name is None:
             self.logger = None
         elif type(log_name) is str:
-            self.logger = Logger("logs/" + log_name)      # this can be modified to include date and time in file name
+            self.logger = Logger("logs/" + log_name) 
         else:
-            sys.exit("Not of string type")
-
-        # Might nee weights for predict proba
-        
+            sys.exit("Not of string type")        
 
         self.model = None
-
-    # def get_accuracy(self, true_labels, predicted_probas): 
-    #     """
-    #     Calculate accuracy of the model 
-
-    #     Parameters
-    #     ----------
-    #     :param true_labels: true labels of data set
-    #     :type  true_labels: ndarray
-    #     :param predicted_probas: Estimated labels that where trained on 
-    #     :type  predicted_probas: ndarray
-
-    #     Returns
-    #     -------
-    #     :return: percent accuary of Estimated labels given the true labels
-    #     :rtype: float
-    #     """
-    #     try:
-    #         n, k = true_labels.shape
-    #         if k > 1:
-    #             assert true_labels.shape == predicted_probas.shape
-    #             return np.mean(np.equal(np.argmax(true_labels, axis=-1),
-    #                                     np.argmax(predicted_probas, axis=-1)))
-    #     except:
-    #         if len(true_labels.shape) == 1:
-    #             y_pred = np.round(predicted_probas.ravel())
-    
-    #     assert true_labels.shape == y_pred.shape
-    #     return np.mean(np.equal(true_labels, np.round(y_pred)))
-
-    # # def predict(self, X):
-    #     """
-    #     Computes probability estimates for given class
-
-    #     Parameters
-    #     ----------
-    #     X : ndarray of shape (n_features, n_examples)
-    #         Examples to be assigned a probability (binary)
-
-
-    #     Returns
-    #     -------
-    #     probas : ndarray of shape (n_examples,)
-    #     """
-    #     if self.model is None:
-    #         sys.exit("No Data fit")
-
-    #     probabilities = self.model.predict(X)
-
-    #     return probabilities
-    
-
-    # def predict_proba(self, X):
-    #     """
-    #     Computes probability estimates for given class
-
-    #     Parameters
-    #     ----------
-    #     X : ndarray of shape (n_features, n_examples)
-    #         Examples to be assigned a probability (binary)
-
-
-    #     Returns
-    #     -------
-    #     probas : ndarray of shape (n_examples,)
-    #     """
-    #     if self.model is None:
-    #         sys.exit("No Data fit")
-
-    #     probabilities = self.model.predict_proba(X)
-
-    #     return probabilities
 
 
     def _bound_loss(self, y, a_matrix, bounds):
@@ -524,136 +449,84 @@ class CLL(LabelEstimator):
 
 
 class DataConsistency(LabelEstimator):
-    # FIX THIS
     """
     Data Consistency learning Classifier
 
-    This class implements CLL training on a set of data
+    This class implements Data Consistency training on a set of data
 
     Parameters
     ----------
     max_iter : int, default=300
         Maximum number of iterations taken for solvers to converge.
 
-    num_trials : int, default=3
-        number of time's labels are estimated before the mean is taken
+    max_stagnation : int, default=100
+        number of interations without improvement estimate labels can
+        go without stopping
     
     log_name : string, default=None
         Specifies directory name for a logger object.
     """
 
-    def __init__(self, max_iter=300, num_trials=3, log_name=None,):
+    def __init__(self, max_iter=1000, max_stagnation=100, log_name=None,):
 
-        self.max_iter = max_iter
-        self.num_trials = num_trials
+        self.max_iter = max_iter # max number of iterations to train model
+        self.max_stagnation = max_stagnation  # number of epochs without improvement to tolerate
 
         if log_name is None:
             self.logger = None
         elif type(log_name) is str:
-            self.logger = Logger("logs/" + log_name)      # this can be modified to include date and time in file name
+            self.logger = Logger("logs/" + log_name)
         else:
-            sys.exit("Not of string type")
-
-        # Might nee weights for predict proba
-        
+            sys.exit("Not of string type")        
 
         self.model = None
 
-    # def get_accuracy(self, true_labels, predicted_probas): 
-    #     """
-    #     Calculate accuracy of the model 
 
-    #     Parameters
-    #     ----------
-    #     :param true_labels: true labels of data set
-    #     :type  true_labels: ndarray
-    #     :param predicted_probas: Estimated labels that where trained on 
-    #     :type  predicted_probas: ndarray
+    def _consistency_loss(self, model, X, mv_labels, a_matrix, bounds, slack, gamma, C):
 
-    #     Returns
-    #     -------
-    #     :return: percent accuary of Estimated labels given the true labels
-    #     :rtype: float
-    #     """
-    #     try:
-    #         n, k = true_labels.shape
-    #         if k > 1:
-    #             assert true_labels.shape == predicted_probas.shape
-    #             return np.mean(np.equal(np.argmax(true_labels, axis=-1),
-    #                                     np.argmax(predicted_probas, axis=-1)))
-    #     except:
-    #         if len(true_labels.shape) == 1:
-    #             y_pred = np.round(predicted_probas.ravel())
-    
-    #     assert true_labels.shape == y_pred.shape
-    #     return np.mean(np.equal(true_labels, np.round(y_pred)))
+        """
+        Lagragian loss function
 
-    # def predict(self, X):
-    #     """
-    #     Computes probability estimates for given class
+        Parameters
+        ----------
+        model: Sequential model
+         
+        X: tensor of shape (num_examples, num_features)
+            training data
+         
+        mv_labels: ndarray of shape (num_examples, num_class)
+         
+        a_matrix: ndarray of shape (num_weak_signals, num_examples,  num_class)
+        
+        bounds: ndarray of shape (num_weak_signals,  num_class)
 
-    #     Parameters
-    #     ----------
-    #     X : ndarray of shape (n_features, n_examples)
-    #         Examples to be assigned a probability (binary)
+        slack: tensor of shape (num_weak_signals, num_class)
 
+        gamma: tensor of shape (num_weak_signals, num_class)
+            gamma 
+        
+        C: tf.Tensor(10.0, shape=(), dtype=float32)
+            tensor constant
 
-    #     Returns
-    #     -------
-    #     probas : ndarray of shape (n_examples,)
-    #     """
-    #     if self.model is None:
-    #         sys.exit("No Data fit")
+        Returns
+        -------
+        lagragian_objective:
 
-    #     probabilities = self.model.predict(X)
-
-    #     return probabilities
-    
-
-    # def predict_proba(self, X):
-    #     """
-    #     Computes probability estimates for given class
-
-    #     Parameters
-    #     ----------
-    #     X : ndarray of shape (n_features, n_examples)
-    #         Examples to be assigned a probability (binary)
-
-
-    #     Returns
-    #     -------
-    #     probas : ndarray of shape (n_examples,)
-    #     """
-    #     if self.model is None:
-    #         sys.exit("No Data fit")
-
-    #     probabilities = self.model.predict_proba(X)
-
-    #     return probabilities
-
-    # def _batch_clustering(self, data, no_clusters, batch_size=50):
-    #     cluster = MiniBatchKMeans(init='k-means++', n_clusters=no_clusters, batch_size=batch_size,
-    #                             n_init=10, max_no_improvement=10, verbose=0)
-    #     cluster.fit(data)
-    #     cluster_labels = cluster.labels_
-    #     return tf.one_hot(cluster_labels, no_clusters)
-
-    def _consistency_loss(self, model, X, mv_labels, a_matrix, b, slack, gamma, C):
-        # Lagragian loss function
+        constraint_violation:
+        
+        """
 
         m, n, k = a_matrix.shape
         lagragian_objective = tf.zeros(k)
         constraint_violation = tf.zeros(k)
         i = 0
         Y = model(X, training=True)
-        # mv_labels = tf.ones((n, k), dtype=tf.float32) * 0.5 #### uniform
-        # regularization
 
         primal = tf.divide(tf.nn.l2_loss(Y - mv_labels), n)
         primal = tf.add(primal, tf.multiply(C, tf.reduce_mean(slack)))
         for A in a_matrix:
             AY = tf.reduce_sum(tf.multiply(A, Y), axis=0)
-            violation = tf.add(b[i], slack[i])
+            violation = tf.add(bounds[i], slack[i])
             violation = tf.subtract(AY, violation)
             value = tf.multiply(gamma[i], violation)
             lagragian_objective = tf.add(lagragian_objective, value)
@@ -663,49 +536,73 @@ class DataConsistency(LabelEstimator):
         return lagragian_objective, constraint_violation
 
 
-    def _estimate_labels(self, model, X, mv_labels, a_matrix, b):
-        # Train DCWS algorithm
+    def _estimate_labels(self, model, X, mv_labels, a_matrix, bounds):
+        """
+        Train DCWS algorithm
 
-        train_loss_results = []
-        train_accuracy_results = []
-        optimizer = tf.keras.optimizers.Adam()
-        opt = tf.keras.optimizers.SGD()
-        iterations = 1000  # max number of iterations to train model
-        max_stagnation = 100  # number of epochs without improvement to tolerate
-        best_viol, best_iter = np.inf, iterations
+        Parameters
+        ----------
+        model: Sequential model
+         
+        X: tensor of shape (num_examples, num_features)
+            training data
+         
+        mv_labels: ndarray of shape (num_examples, num_class)
+         
+        a_matrix: ndarray of shape (num_weak_signals, num_examples,  num_class)
+        
+        bounds: ndarray of shape (num_weak_signals,  num_class)
+
+        Returns
+        -------
+        pred_y: tensor of shape (num_examples,  num_class)
+            predicted labels for data set
+        
+        """ 
+
+        # Set up variables
+        adam_optimizer = tf.keras.optimizers.Adam()
+        grad_optimizer = tf.keras.optimizers.SGD()
+        best_viol, best_iter = np.inf, self.max_iter
         early_stop = False
         C = tf.constant(10, dtype=tf.float32)
 
-        m, k = b.shape
+        # Set up tensors
+        m, k = bounds.shape
         gamma = np.random.rand(m, k)
         gamma = tf.Variable(gamma.astype(np.float32), trainable=True,
                             constraint=lambda x: tf.clip_by_value(x, 0, np.infty))
-        slack = np.zeros(b.shape, dtype="float32")
+        slack = np.zeros(bounds.shape, dtype="float32")
         slack = tf.Variable(slack, trainable=True,
                             constraint=lambda x: tf.clip_by_value(x, 0, np.infty))
         mv_labels = tf.constant(mv_labels, dtype=tf.float32)
 
-        for iters in range(iterations):
+        for iters in range(self.max_iter):
             if early_stop:
                 break
+
             with tf.GradientTape() as tape:
                 loss_value, constraint_viol = self._consistency_loss(
-                    model, X, mv_labels, a_matrix, b, slack, gamma, C)
+                    model, X, mv_labels, a_matrix, bounds, slack, gamma, C)
                 model_grad, gamma_grad, slack_grad = tape.gradient(
                     loss_value, [model.trainable_variables, gamma, slack])
 
-            optimizer.apply_gradients(zip(model_grad, model.trainable_variables))
-            opt.apply_gradients(zip([slack_grad], [slack]))
-            opt.apply_gradients(zip([-1 * gamma_grad], [gamma]))
+            adam_optimizer.apply_gradients(zip(model_grad, model.trainable_variables))
+            grad_optimizer.apply_gradients(zip([slack_grad], [slack]))
+            grad_optimizer.apply_gradients(zip([-1 * gamma_grad], [gamma]))
 
+            # check primal feasibility
             constraint_viol = tf.reduce_sum(
-                constraint_viol[constraint_viol > 0]).numpy()  # check primal feasibility
-            if iters % 50 == 0:
-                print("Iter {:03d}:, Loss: {:.3}, Violation: {:.3}".format(
-                    iters, loss_value, constraint_viol))
+                constraint_viol[constraint_viol > 0]).numpy()  
 
-            if best_iter < iters - max_stagnation and best_viol < 1e-8:
-                # nothing is improving for a while
+            #log values
+            if self.logger is not None and iters % 50 == 0:
+                with self.logger.writer.as_default():
+                    self.logger.log_scalar("Loss", loss_value, iters)
+                    self.logger.log_scalar("Violation", constraint_viol, iters)
+
+            # check if nothing is improving for a while, or save last improvment 
+            if best_iter < iters - self.max_stagnation and best_viol < 1e-8:
                 early_stop = True
             if constraint_viol < best_viol:
                 best_viol, best_iter = constraint_viol, iters
@@ -714,7 +611,9 @@ class DataConsistency(LabelEstimator):
         return pred_y
 
     def _simple_nn(self, dimension, output):
-        # Data consistent model
+        """ 
+        Data consistent model
+        """
 
         actv = 'softmax' if output > 1 else 'sigmoid'
         model = tf.keras.Sequential()
@@ -724,7 +623,9 @@ class DataConsistency(LabelEstimator):
         return model
     
     def _majority_vote_signal(self, weak_signals):
-        """ Calculate majority vote labels for the weak_signals"""
+        """ 
+        Calculate majority vote labels for the weak_signals
+        """
 
         baseline_weak_labels = np.rint(weak_signals)
         mv_weak_labels = np.ones(baseline_weak_labels.shape)
