@@ -13,9 +13,12 @@ from load_image_data import load_image_data
 from log import Logger 
 
 # Import models for testing
+# from models import ALL, MultiALL
+# from LabelEstimators import CLL, DataConsistency
+# from GEModel import GECriterion 
 from old_ALL import old_ALL
 from ALL_model import ALL
-from LabelEstimators import LabelEstimator, CLL
+from LabelEstimators import CLL, DataConsistency
 from GEModel import GECriterion 
 from PIL import Image
 
@@ -68,13 +71,12 @@ def log_results(values, acc_logger, plot_path, title):
     fig = plt.figure()
     ax = fig.add_subplot(111)
     ax.set_title(title)
-    method_names = ['BinaryALL', 'MultiALL','CLL']
+    method_names = ['BinaryALL', 'MultiALL','CLL', 'DataConsis']
 
     # add labels on graph 
     for i, v in enumerate(values):
         ax.text(i - 0.25, v + 0.01, str(round(v, 5)), color='seagreen', fontweight='bold')
-    # ax.bar(methods, values, color=['skyblue', 'saddlebrown', 'olivedrab', 'plum'])
-    ax.bar(method_names, values, color=['skyblue', 'saddlebrown', 'olivedrab'])
+    ax.bar(method_names, values, color=['skyblue', 'saddlebrown', 'olivedrab', 'plum'])
 
 
     # set y demensions of plots
@@ -129,18 +131,21 @@ def run_experiments(dataset, set_name, date):
         multi_all_weak_errors = dataset['weak_errors']
     except:
         multi_all_weak_errors = weak_errors
-    cll_weak_errors = set_up_constraint(weak_signals, np.zeros(weak_errors.shape), weak_errors)['error']
 
-    error_set = [weak_errors, multi_all_weak_errors, cll_weak_errors]
+    matrix_weak_errors = set_up_constraint(weak_signals, np.zeros(weak_errors.shape), weak_errors)['error']
+
+    error_set = [weak_errors, multi_all_weak_errors, matrix_weak_errors, matrix_weak_errors]
+
 
 
     # set up algorithms
-    experiment_names = ["Binary-Label ALL", "Multi-Label ALL", "CLL"]
+    experiment_names = ["Binary-Label ALL", "Multi-Label ALL", "CLL", "Data Consistancy"]
     binary_all = old_ALL(max_iter=10000, log_name=log_name+"/BinaryALL")
     multi_all = ALL()
     Constrained_Labeling = CLL(log_name=log_name+"/CLL")
+    Data_Consitancy = DataConsistency(log_name=log_name+"/Const")
 
-    models = [binary_all, multi_all, Constrained_Labeling]
+    models = [binary_all, multi_all, Constrained_Labeling, Data_Consitancy]
 
     # Loop through each algorithm
     for model_np, model in enumerate(models):
@@ -186,7 +191,7 @@ def run_experiments(dataset, set_name, date):
 if __name__ == '__main__':
 
     print("\n\n        ~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~")
-    print("        | WELCOME TO OUR EXPIRIMENTS  |")
+    print("        | WELCOME TO OUR EXPERIMENTS  |")
     print("        ~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~")
 
 
