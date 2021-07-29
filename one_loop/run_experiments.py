@@ -131,11 +131,11 @@ def run_experiments(dataset, set_name, date):
         test_accuracy.append(test_acc)
 
 
-    # print('\n\nLogging results\n\n')
-    # acc_logger = Logger("logs/" + log_name + "/accuracies")
-    # plot_path =  "./logs/" + log_name
-    # log_results(train_accuracy, acc_logger, plot_path, 'Accuracy on training data')
-    # log_results(test_accuracy, acc_logger, plot_path, 'Accuracy on testing data')
+    print('\n\nLogging results\n\n')
+    acc_logger = Logger("logs/" + log_name + "/accuracies")
+    plot_path =  "./logs/" + log_name
+    log_results(train_accuracy, acc_logger, plot_path, 'Accuracy on training data')
+    log_results(test_accuracy, acc_logger, plot_path, 'Accuracy on testing data')
 
 
 
@@ -159,8 +159,8 @@ if __name__ == '__main__':
         print("# # # # # # # # # # # #")
         run_experiments(read_text_data('../datasets/' + name + '/'), name, date)
 
-    # # Image Expiriments
-    # print("\n\n\n# # # # # # # # # # # #")
-    # print("#  fashion experiment #")
-    # print("# # # # # # # # # # # #")
-    # run_experiments(load_image_data(), 'fashion', date)
+    # Image Expiriments
+    print("\n\n\n# # # # # # # # # # # #")
+    print("#  fashion experiment #")
+    print("# # # # # # # # # # # #")
+    run_experiments(load_image_data(), 'fashion', date)
