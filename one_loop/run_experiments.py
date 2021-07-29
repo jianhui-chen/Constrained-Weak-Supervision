@@ -134,8 +134,9 @@ def run_experiments(dataset, set_name, date):
     except:
         multi_all_weak_errors = weak_errors
 
+    cll_setup_weak_errors = multi_all_weak_errors
     # matrix_weak_errors = set_up_constraint(weak_signals, np.zeros(weak_errors.shape), weak_errors)['error']
-    matrix_weak_errors = cll_setup(weak_signals, weak_errors)
+    matrix_weak_errors = cll_setup(weak_signals, cll_setup_weak_errors)
 
     error_set = [weak_errors, multi_all_weak_errors, matrix_weak_errors, matrix_weak_errors]
 
