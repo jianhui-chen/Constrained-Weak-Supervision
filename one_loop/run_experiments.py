@@ -5,6 +5,10 @@ import tensorflow as tf
 from datetime import datetime
 
 from data_readers import read_text_data
+# from utilities import set_up_constraint
+# from constraints import set_up_constraint
+# from data_utilities import load_fashion_mnist # Don't do *, error
+from image_utilities import get_image_supervision_data
 from load_image_data import load_image_data
 from log import Logger, log_results
 
@@ -78,6 +82,9 @@ def run_experiments(dataset, set_name, date):
         multi_all_weak_errors = weak_errors
 
     matrix_weak_errors = cll_setup(weak_signals, weak_errors)
+    cll_setup_weak_errors = multi_all_weak_errors
+    # matrix_weak_errors = set_up_constraint(weak_signals, np.zeros(weak_errors.shape), weak_errors)['error']
+    matrix_weak_errors = cll_setup(weak_signals, cll_setup_weak_errors)
 
     error_set = [weak_errors, multi_all_weak_errors, matrix_weak_errors, matrix_weak_errors]
 

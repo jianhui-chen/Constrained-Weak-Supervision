@@ -12,8 +12,9 @@ from tensorflow.python.keras.layers import Dropout, Dense
 from scipy.optimize import minimize
 
 from log import Logger
-from setup_model import mlp_model
-from constraints import set_up_constraint
+# from setup_model import mlp_model
+# from constraints import set_up_constraint
+from setup_model import set_up_constraint, mlp_model
 from _optimize_stochgall import optimize
 from text_utilities import get_text_supervision_data
 
