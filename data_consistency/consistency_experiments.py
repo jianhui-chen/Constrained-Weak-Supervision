@@ -336,12 +336,13 @@ if __name__ == '__main__':
 
     # run_experiment(synthetic_data(20000, 10), 'synthetic')
 
-    print("imbd\n\n")
-    run_experiment(read_text_data('../datasets/imdb/'), 'imdb')
+    # print("imbd\n\n")
+    # run_experiment(read_text_data('../datasets/imdb/'), 'imdb')
 
-    print("SST\n\n")
+    # print("SST\n\n")
+    # run_experiment(read_text_data('../datasets/sst-2/'), 'sst-2')
+
     # run_experiment(read_text_data('../datasets/yelp/'),'yelp')
-    run_experiment(read_text_data('../datasets/sst-2/'), 'sst-2')
     # run_experiment(load_image_signals('../../datasets/fashion-mnist'), 'fashion-mnist')
     # run_experiment(read_text_data('../../datasets/sst-2/'), 'sst-2_ablation_test', true_bound=False)
     # run_experiment(read_text_data('../../datasets/yelp/'),'yelp_ablation_test', true_bound=False)
@@ -349,6 +350,6 @@ if __name__ == '__main__':
     # run_ALL_experiments(read_text_data('../../datasets/sst-2/'), 'sst-2', true_bound=True)
     # run_ALL_experiments(read_text_data('../../datasets/imbd/'), 'imbd', true_bound=True)
     # run_ALL_experiments(read_text_data('../../datasets/yelp/'),'yelp', true_bound=True)
-    # run_ALL_experiments(load_image_signals('../../datasets/fashion-mnist'), 'fashion-mnist', true_bound=True)
+    run_ALL_experiments(load_image_signals('../datasets/fashion-mnist'), 'fashion-mnist', true_bound=True)
     # run_ALL_experiments(load_image_signals('../../datasets/svhn'), 'svhn', true_bound=True)
     # run_ALL_experiments(synthetic_data2(20000, 10), 'synthetic', true_bound=True)

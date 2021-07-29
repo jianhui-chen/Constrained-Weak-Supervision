@@ -98,7 +98,7 @@ def objective_function(y, learnable_probabilities, constraint_set, rho):
 
 
 #def bound_loss(y, a_matrix, active_mask, constant, bounds):
-def bound_loss(y, a_matrix, constant, bounds):
+def gamma_gradient(y, a_matrix, constant, bounds):
     """
     Computes the gradient of lagrangian inequality penalty parameters
 
@@ -114,7 +114,7 @@ def bound_loss(y, a_matrix, constant, bounds):
     :rtype: ndarray
     """
     constraint = np.zeros(bounds.shape)
-    n, k = y.shape
+    # n, k = y.shape
 
     for i, current_a in enumerate(a_matrix):
         #constraint[i] = np.sum((active_mask[i]*current_a) * y + (constant[i]*active_mask[i]), axis=0)
@@ -205,9 +205,9 @@ def optimize(label, predicted_probs, rho, constraint_set, iters=300, enable_prin
             gamma = current_constraint['gamma']
 
            
-            full_loss = bound_loss(y, a_matrix, constant, bounds)
+            gamma_grad = gamma_gradient(y, a_matrix, constant, bounds)
  
-            gamma_grad = full_loss
+            # gamma_grad = full_loss
             
 
             if optim == 'max':
@@ -221,9 +221,9 @@ def optimize(label, predicted_probs, rho, constraint_set, iters=300, enable_prin
 
             # update constraint values
             constraint_set[key]['gamma'] = gamma
-            constraint_set[key]['bound_loss'] = full_loss
+            constraint_set[key]['bound_loss'] = gamma_grad
 
-            violation = np.linalg.norm(full_loss.clip(min=0))
+            violation = np.linalg.norm(gamma_grad.clip(min=0))
             print_builder += key + "_viol: %.4e "
             print_constraints.append(violation)
 

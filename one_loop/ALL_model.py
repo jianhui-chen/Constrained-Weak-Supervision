@@ -109,8 +109,6 @@ class ALL(BaseClassifier):
         # If we want the calculated precision, have to use method from text_utilities
 
         " to make up for weak_signals_precision, need to make optional or fix later "
-        # FIX LATTER
-        # n, m = weak_signals_error_bounds.shape
         weak_signals_precision = np.zeros(weak_signals_error_bounds.shape)
 
         constraint_set = set_up_constraint(weak_signals_probas[:num_weak_signals, :, :],

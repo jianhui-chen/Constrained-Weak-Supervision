@@ -457,11 +457,10 @@ class DataConsistency(LabelEstimator):
     Parameters
     ----------
     max_iter : int, default=300
-        Maximum number of iterations taken for solvers to converge.
+       max number of iterations to train model
 
     max_stagnation : int, default=100
-        number of interations without improvement estimate labels can
-        go without stopping
+        number of epochs without improvement to tolerate
     
     log_name : string, default=None
         Specifies directory name for a logger object.
@@ -469,8 +468,8 @@ class DataConsistency(LabelEstimator):
 
     def __init__(self, max_iter=1000, max_stagnation=100, log_name=None,):
 
-        self.max_iter = max_iter # max number of iterations to train model
-        self.max_stagnation = max_stagnation  # number of epochs without improvement to tolerate
+        self.max_iter = max_iter 
+        self.max_stagnation = max_stagnation
 
         if log_name is None:
             self.logger = None
@@ -495,25 +494,30 @@ class DataConsistency(LabelEstimator):
             training data
          
         mv_labels: ndarray of shape (num_examples, num_class)
+            predicted labels by majority vote algorithm
          
         a_matrix: ndarray of shape (num_weak_signals, num_examples,  num_class)
+            left bounds on the data
         
         bounds: ndarray of shape (num_weak_signals,  num_class)
+            right bounds on the data
 
         slack: tensor of shape (num_weak_signals, num_class)
+            linear slack to adaptively relax the constraints
 
         gamma: tensor of shape (num_weak_signals, num_class)
-            gamma 
+            gamma constant
         
         C: tf.Tensor(10.0, shape=(), dtype=float32)
             tensor constant
 
         Returns
         -------
-        lagragian_objective:
+        lagragian_objective: a tensor float32
+            the loss value
 
-        constraint_violation:
-        
+        constraint_violation: a tensor float32 of shape (1,)
+            How much the constraints are currently being violated 
         """
 
         m, n, k = a_matrix.shape
@@ -533,6 +537,7 @@ class DataConsistency(LabelEstimator):
             constraint_violation = tf.add(constraint_violation, violation)
             i += 1
         lagragian_objective = tf.add(primal, tf.reduce_sum(lagragian_objective))
+
         return lagragian_objective, constraint_violation
 
 
@@ -548,10 +553,13 @@ class DataConsistency(LabelEstimator):
             training data
          
         mv_labels: ndarray of shape (num_examples, num_class)
+            predicted labels by majority vote algorithm
          
         a_matrix: ndarray of shape (num_weak_signals, num_examples,  num_class)
+            left bounds on the data
         
         bounds: ndarray of shape (num_weak_signals,  num_class)
+            right bounds on the data
 
         Returns
         -------
@@ -613,6 +621,21 @@ class DataConsistency(LabelEstimator):
     def _simple_nn(self, dimension, output):
         """ 
         Data consistent model
+
+        Parameters
+        ----------
+        dimension: list with two valuse [num_examples, num_features]
+            first value is number of training examples, second is 
+            number of features for each example
+
+
+        output: int
+            number of classes
+
+        Returns
+        -------
+        mv_weak_labels: ndarray of shape (num_examples, num_class)
+            fitted  Data consistancy algorithm
         """
 
         actv = 'softmax' if output > 1 else 'sigmoid'
@@ -622,12 +645,23 @@ class DataConsistency(LabelEstimator):
         model.add(layers.Dense(output, activation=actv))
         return model
     
-    def _majority_vote_signal(self, weak_signals):
+    def _majority_vote_signal(self, weak_signals_probas):
         """ 
         Calculate majority vote labels for the weak_signals
+
+        Parameters
+        ----------
+        weak_signals: ndarray of shape (num_weak, num_examples, num _class)
+            weak signal probabilites containing -1 for abstaining signals, and between 
+            0 to 1 for non-abstaining
+
+        Returns
+        -------
+        mv_weak_labels: ndarray of shape (num_examples, num_class)
+            fitted  Data consistancy algorithm
         """
 
-        baseline_weak_labels = np.rint(weak_signals)
+        baseline_weak_labels = np.rint(weak_signals_probas)
         mv_weak_labels = np.ones(baseline_weak_labels.shape)
         mv_weak_labels[baseline_weak_labels == -1] = 0
         mv_weak_labels[baseline_weak_labels == 0] = -1
@@ -645,18 +679,21 @@ class DataConsistency(LabelEstimator):
 
         Parameters
         ----------
-        :param X: current data examples to fit model with
-        :type  X: ndarray 
-        :param weak_signals_probas: weak signal probabilites containing -1, 0, 1 for each example
-        :type  weak_signals_probas: ndarray 
-        :param weak_signals_error_bounds: error constraints (a_matrix and bounds) of the weak signals. Contains both 
-                                          left (a_matrix) and right (bounds) hand matrix of the inequality 
-        :type  weak_signals_error_bounds: dictionary 
+        X: ndarray of shape (num_examples, num_features)
+            training data
+
+        weak_signals_probas: ndarray of shape (num_weak, num_examples, num _class)
+            weak signal probabilites containing -1 for abstaining signals, and between 
+            0 to 1 for non-abstaining
+
+        weak_signals_error_bounds: dictionary
+            error constraints (a_matrix and bounds) of the weak signals. Contains both 
+            left (a_matrix) and right (bounds) hand matrix of the inequality 
 
         Returns
         -------
-        :return: average of learned labels over several trials
-        :rtype: ndarray
+        self: DataConsistency class object
+            predicted labels by majority vote algorithm
         """
 
         # set up variables

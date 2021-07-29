@@ -5,17 +5,10 @@ import tensorflow as tf
 from datetime import datetime
 
 from data_readers import read_text_data
-# from utilities import set_up_constraint
-from constraints import set_up_constraint
-# from data_utilities import load_fashion_mnist # Don't do *, error
-from image_utilities import get_image_supervision_data
 from load_image_data import load_image_data
-from log import Logger 
+from log import Logger, log_results
 
-# Import models for testing
-# from models import ALL, MultiALL
-# from LabelEstimators import CLL, DataConsistency
-# from GEModel import GECriterion 
+# Import models
 from old_ALL import old_ALL
 from ALL_model import ALL
 from LabelEstimators import CLL, DataConsistency
@@ -27,81 +20,23 @@ from cll_help import cll_setup
 
 
 """
-    Plan:
-        1. get all algorithms to work one data set
-
-    
-    Datasets:
+    Binary Datasets:
         1. SST-2
         2. IMDB
         3. Cardio
         4. OBS
         5. Breast Cancer
+    
+    Multi-Class Datasets:
+        1. Fashion
+
        
     Algorithms:
-        1. Binary only All
-        2. Multi ALL
+        1. Old ALL (Binary labels only)
+        2. ALL (Multi label and Abstaining signals supported)
         3. CLL     
         4. Data Consitency
 """
-
-
-def log_results(values, acc_logger, plot_path, title):
-    """ 
-        prints out results from the experiment
-
-        Parameters
-        ----------
-        values: list of floats, size is 3 (same as current num algorithms)
-            list of accuracies (between 0 and 1) to graph
-
-        acc_logger: object of Logger class
-            current logger object that will be used to write out to 
-            tensor board
-
-        plot_path: str 
-            path to where matplotlib png will be stored
-
-        title: str 
-            name of current graph to be used as a tittle 
-
-        Returns
-        -------
-        nothing
-    """
-    # Prepare the plot
-    fig = plt.figure()
-    ax = fig.add_subplot(111)
-    ax.set_title(title)
-
-    # Check if it is a multi class example or one with abstaining signals
-    # so there will be no Binary ALL present 
-    if len(values) == 4:
-        method_names = ['BinaryALL', 'MultiALL','CLL', 'DataConsis']
-        bar_colors = ['skyblue', 'saddlebrown', 'olivedrab', 'plum']
-    else:
-        method_names = ['MultiALL','CLL', 'DataConsis']
-        bar_colors = ['skyblue', 'saddlebrown', 'olivedrab']
-
-    # add labels on graph 
-    for i, v in enumerate(values):
-        ax.text(i - 0.25, v + 0.01, str(round(v, 5)), color='seagreen', fontweight='bold')
-    ax.bar(method_names, values, color=bar_colors)
-
-
-    # set y demensions of plots
-    min_value = min(values)
-    max_value = max(values)
-    plt.ylim([min_value - 0.1, max_value + 0.1])
-
-    # Save plot, then load into tensorboard
-    plt.savefig(plot_path + "/plot.png", format='png')
-    with acc_logger.writer.as_default():
-        image = tf.io.read_file(plot_path + "/plot.png")
-        image = tf.image.decode_png(image, channels=4)
-        summary_op = tf.summary.image(title, [image], step=0)
-        acc_logger.writer.flush()
-
 
 def run_experiments(dataset, set_name, date):
     """ 
@@ -142,7 +77,6 @@ def run_experiments(dataset, set_name, date):
     except:
         multi_all_weak_errors = weak_errors
 
-    # matrix_weak_errors = set_up_constraint(weak_signals, np.zeros(weak_errors.shape), weak_errors)['error']
     matrix_weak_errors = cll_setup(weak_signals, weak_errors)
 
     error_set = [weak_errors, multi_all_weak_errors, matrix_weak_errors, matrix_weak_errors]
@@ -164,12 +98,12 @@ def run_experiments(dataset, set_name, date):
 
         # skip binary all on multi label or abstaining signal set
         # if model_np == 0 or model_np==2:
-        # if model_np == 0 :
-        #     if set_name == 'sst-2' or set_name == 'imdb' or set_name == 'fashion':
-        #         print(" Skipping binary ALL with multiclass data ")
-        #         continue 
-        if model_np != 2:
-            continue
+        if model_np == 0 :
+            if set_name == 'sst-2' or set_name == 'imdb' or set_name == 'fashion':
+                print(" Skipping binary ALL with multiclass data ")
+                continue 
+        # if model_np == 2 or model_np == 0:
+        #     continue
 
 
         model.fit(train_data, weak_signals, error_set[model_np])
@@ -208,16 +142,18 @@ if __name__ == '__main__':
 
 
     # text Expiriments:
-    # dataset_names = ['sst-2', 'imdb', 'obs', 'cardio', 'breast-cancer']
+    dataset_names = ['sst-2', 'imdb', 'obs', 'cardio', 'breast-cancer']
     # dataset_names = ['obs', 'cardio', 'breast-cancer']
 
     date = datetime.now().strftime("%Y_%m_%d-%I:%M:%S_%p")
-
-    # for name in dataset_names:
-    #     print("\n\n\n# # # # # # # # # # # #")
-    #     print("#  ", name, "experiment  #")
-    #     print("# # # # # # # # # # # #")
-    #     run_experiments(read_text_data('../datasets/' + name + '/'), name, date)
+    for name in dataset_names:
+        print("\n\n\n# # # # # # # # # # # #")
+        print("#  ", name, "experiment  #")
+        print("# # # # # # # # # # # #")
+        run_experiments(read_text_data('../datasets/' + name + '/'), name, date)
 
     # # Image Expiriments
-    run_experiments(load_image_data(), 'fashion', date)
+    # print("\n\n\n# # # # # # # # # # # #")
+    # print("#  fashion experiment #")
+    # print("# # # # # # # # # # # #")
+    # run_experiments(load_image_data(), 'fashion', date)
