@@ -9,6 +9,7 @@ from sklearn.base import clone
 from data_utilities import *
 from sklearn.model_selection import train_test_split
 from setup_model import mlp_model
+from constraints import build_constraints
 
 
 def get_text_supervision_data(dataset, supervision='manual', true_bounds=False):

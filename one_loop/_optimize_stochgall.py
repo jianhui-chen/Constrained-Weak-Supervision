@@ -239,7 +239,7 @@ def optimize(label, predicted_probs, rho, constraint_set, iters=300, enable_prin
         else:
             y = y - y_grad / np.sqrt(grad_sum + 1e-8)
 
-        # Commenting out just to see y values
+        
         y = np.clip(y, a_min=min_vector, a_max=max_vector)  if not true_bounds \
                                 else (y if loss == 'multiclass' else np.clip(y, a_min=0, a_max=1))
         y = projection_simplex(y, axis=1) if loss == 'multiclass' else y
