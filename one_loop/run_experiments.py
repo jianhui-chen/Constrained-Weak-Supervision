@@ -22,6 +22,8 @@ from LabelEstimators import CLL, DataConsistency
 from GEModel import GECriterion 
 from PIL import Image
 
+# for testing
+from cll_help import cll_setup
 
 
 """
@@ -132,7 +134,8 @@ def run_experiments(dataset, set_name, date):
     except:
         multi_all_weak_errors = weak_errors
 
-    matrix_weak_errors = set_up_constraint(weak_signals, np.zeros(weak_errors.shape), weak_errors)['error']
+    # matrix_weak_errors = set_up_constraint(weak_signals, np.zeros(weak_errors.shape), weak_errors)['error']
+    matrix_weak_errors = cll_setup(weak_signals, weak_errors)
 
     error_set = [weak_errors, multi_all_weak_errors, matrix_weak_errors, matrix_weak_errors]
 
@@ -153,11 +156,13 @@ def run_experiments(dataset, set_name, date):
 
         # # skip 
         # if model_np == 2 or model_np == 0:
-        # if model_np == 0 or model_np==1:
-        if model_np == 0 :
-            if set_name == 'sst-2' or set_name == 'imdb' or set_name == 'fashion':
-                print(" Skipping binary ALL with multiclass data ")
-                continue 
+        # if model_np == 0 or model_np==2:
+        # if model_np == 0 :
+        #     if set_name == 'sst-2' or set_name == 'imdb' or set_name == 'fashion':
+        #         print(" Skipping binary ALL with multiclass data ")
+        #         continue 
+        if model_np != 2:
+            continue
 
 
         model.fit(train_data, weak_signals, error_set[model_np])
@@ -178,11 +183,11 @@ def run_experiments(dataset, set_name, date):
         test_accuracy.append(test_acc)
 
 
-    print('\n\nLogging results\n\n')
-    acc_logger = Logger("logs/" + log_name + "/accuracies")
-    plot_path =  "./logs/" + log_name
-    log_results(train_accuracy, acc_logger, plot_path, 'Accuracy on training data')
-    log_results(test_accuracy, acc_logger, plot_path, 'Accuracy on testing data')
+    # print('\n\nLogging results\n\n')
+    # acc_logger = Logger("logs/" + log_name + "/accuracies")
+    # plot_path =  "./logs/" + log_name
+    # log_results(train_accuracy, acc_logger, plot_path, 'Accuracy on training data')
+    # log_results(test_accuracy, acc_logger, plot_path, 'Accuracy on testing data')
 
 
 
@@ -197,7 +202,7 @@ if __name__ == '__main__':
 
     # text Expiriments:
     # dataset_names = ['sst-2', 'imdb', 'obs', 'cardio', 'breast-cancer']
-    dataset_names = ['obs', 'cardio', 'breast-cancer']
+    # dataset_names = ['obs', 'cardio', 'breast-cancer']
 
     date = datetime.now().strftime("%Y_%m_%d-%I:%M:%S_%p")
 
