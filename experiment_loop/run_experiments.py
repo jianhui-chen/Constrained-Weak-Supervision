@@ -15,7 +15,10 @@ from log import Logger, log_results
 # Import models
 from old_ALL import old_ALL
 from ALL_model import ALL
-from LabelEstimators import CLL, DataConsistency
+from cll_model import CLL
+from data_consistency_model import DataConsistency
+
+DataConsistency
 from GEModel import GECriterion 
 from PIL import Image
 
@@ -34,7 +37,6 @@ from cll_help import cll_setup
     Multi-Class Datasets:
         1. Fashion
 
-       
     Algorithms:
         1. Old ALL (Binary labels only)
         2. ALL (Multi label and Abstaining signals supported)
