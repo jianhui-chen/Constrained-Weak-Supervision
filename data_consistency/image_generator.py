@@ -15,6 +15,8 @@ import scipy.io as sio
 from sklearn.utils import shuffle
 import tensorflow as tf
 from scipy import spatial
+import ssl
+
 
 
 def load_svhn():
@@ -61,7 +63,7 @@ def load_cifar_10():
 def load_fashion_mnist():
     # Returns dictionary of training and test data
     data = {}
-    datapath = '../../datasets/fashion-mnist'
+    datapath = '../datasets/fashion-mnist'
 
     def load_data(path, kind='train'):
         labels_path = os.path.join(path, '%s-labels-idx1-ubyte.gz' % kind)
@@ -200,6 +202,8 @@ def create_image_features(data, datapath, num_classes=10):
     # signal_data = create_signal_data()
 
     # pre-trained model
+    ssl._create_default_https_context = ssl._create_unverified_context
+
     model = VGG19(weights='imagenet', include_top=False,
                   input_shape=(img_size, img_size, 3), classes=10)
     train_data = get_pretrained_features(model, train_data)

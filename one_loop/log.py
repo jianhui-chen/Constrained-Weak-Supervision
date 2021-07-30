@@ -27,8 +27,7 @@ class Logger(object):
         Parameter
         ----------
         tag : basestring
-            Name of the scalar
-        value
+            Name of the scalar value
         step : int
             training iteration
         """
@@ -43,30 +42,65 @@ class Logger(object):
         """
 
 
-def log_accuracy(logger, values, title):
 
+"""
+Not Part of Class
+"""
+
+def log_results(values, acc_logger, plot_path, title):
+    """ 
+        prints out results from the experiment
+
+        Parameters
+        ----------
+        values: list of floats, size is 3 (same as current num algorithms)
+            list of accuracies (between 0 and 1) to graph
+
+        acc_logger: object of Logger class
+            current logger object that will be used to write out to 
+            tensor board
+
+        plot_path: str 
+            path to where matplotlib png will be stored
+
+        title: str 
+            name of current graph to be used as a tittle 
+
+        Returns
+        -------
+        nothing
+    """
     # Prepare the plot
     fig = plt.figure()
     ax = fig.add_subplot(111)
     ax.set_title(title)
-    methods = ['ALL w/ Constant Bounds', 'ALL w/ Computed bounds','Baseline', 'GE Crit']
+
+    # Check if it is a multi class example or one with abstaining signals
+    # so there will be no Binary ALL present 
+    if len(values) == 4:
+        method_names = ['BinaryALL', 'MultiALL','CLL', 'DataConsis']
+        bar_colors = ['skyblue', 'saddlebrown', 'olivedrab', 'plum']
+    else:
+        method_names = ['MultiALL','CLL', 'DataConsis']
+        bar_colors = ['skyblue', 'saddlebrown', 'olivedrab']
 
     # add labels on graph 
     for i, v in enumerate(values):
         ax.text(i - 0.25, v + 0.01, str(round(v, 5)), color='seagreen', fontweight='bold')
-    ax.bar(methods, values, color=['skyblue', 'saddlebrown', 'olivedrab', 'plum'])
+    ax.bar(method_names, values, color=bar_colors)
+
 
     # set y demensions of plots
     min_value = min(values)
-    plt.ylim([min_value - 0.1, 1])
+    max_value = max(values)
+    plt.ylim([min_value - 0.1, max_value + 0.1])
 
-    plt.savefig("./logs/standard/plot.png", format='png')
-
-    with logger.writer.as_default():
-        image = tf.io.read_file("./logs/standard/plot.png")
+    # Save plot, then load into tensorboard
+    plt.savefig(plot_path + "/plot.png", format='png')
+    with acc_logger.writer.as_default():
+        image = tf.io.read_file(plot_path + "/plot.png")
         image = tf.image.decode_png(image, channels=4)
         summary_op = tf.summary.image(title, [image], step=0)
-        logger.writer.flush()
-
+        acc_logger.writer.flush()
 
 

@@ -27,6 +27,14 @@ def consistency_data(dataset, form='data', encoding_dim=32, no_clusters=10):
     train_data, train_labels = dataset['train']
     test_data, test_labels = dataset['test']
 
+    # print("\n\ntrain_data:", train_data)
+    # print("train_data type:", type(train_data))
+
+
+    # print("\n\nreturn:", tf.cast(train_data, dtype=tf.float32))
+    # print("return type:", type(tf.cast(train_data, dtype=tf.float32)))
+    # exit()
+
     if form == 'data':
         return tf.cast(train_data, dtype=tf.float32)
 
@@ -38,6 +46,11 @@ def consistency_data(dataset, form='data', encoding_dim=32, no_clusters=10):
     embedding = train_autoender(embedding_model, train_data, test_data,
             epochs=30, batch_size=32)
     embedding = embedding.encoder(train_data)
+
+    # print("\n\nembedding:", embedding)
+    # print("embedding type:", type(embedding))
+    # exit()
+
     if form == 'embedding_cluster':
         return batch_clustering(embedding, no_clusters)
     return tf.cast(embedding, dtype=tf.float32)
@@ -87,15 +100,17 @@ def run_experiment(dataset, savename, datatype='data', true_bound=False):
     weak_signals = dataset['weak_signals']
     m, n, k = weak_signals.shape
     num_trials = 3
-    consistency_accuracy = []
-    consistency_test = []
-    results = {}
+    # consistency_accuracy = []
+    # consistency_test = []
+    # results = {}
     weak_errors = np.zeros((m, k))
 
     if true_bound:
         weak_errors = get_error_bounds(train_labels, weak_signals)
         weak_errors = np.asarray(weak_errors)
+
     nn_data = consistency_data(dataset, datatype)
+
 
     # Define the variables
     constraints = set_up_constraint(weak_signals, weak_errors)
@@ -103,28 +118,43 @@ def run_experiment(dataset, savename, datatype='data', true_bound=False):
 
     a_matrix = tf.constant(constraints['error']['A'], dtype=tf.float32)
     b = tf.constant(constraints['error']['b'], dtype=tf.float32)
+    # model = simple_nn(nn_data.shape[1], k)
+
+    # print("\n\nnn_data:", nn_data)
+    # print("nn_data shape:", nn_data.shape[1])
+
+    # print("\n\nnn_data:", nn_data)
+    # print("nn_data shape:", nn_data.shape[1])
+
+    # print("\n\nnn_data:", train_data)
+    # print("nn_data shape:", train_data.shape[1])
+    # exit()
+
+    # for _ in range(num_trials):
     model = simple_nn(nn_data.shape[1], k)
+    pred_y = train_dcws(model, nn_data, mv_labels, a_matrix, b)
+    pred_y = pred_y.numpy()
+    label_accuracy = accuracy_score(train_labels, pred_y)
+    print("Label accuracy: ", label_accuracy)
+    # consistency_accuracy.append(label_accuracy)
 
-    for _ in range(num_trials):
-        model = simple_nn(nn_data.shape[1], k)
-        pred_y = train_dcws(model, nn_data, mv_labels, a_matrix, b)
-        pred_y = pred_y.numpy()
-        label_accuracy = accuracy_score(train_labels, pred_y)
-        print("Label accuracy: ", label_accuracy)
-        consistency_accuracy.append(label_accuracy)
-        model = mlp_model(nn_data.shape[1], k)
-        model.fit(nn_data, pred_y, batch_size=batch_size, epochs=20, verbose=1)
-        test_predictions = model.predict(test_data)
-        test_score = accuracy_score(test_labels, test_predictions)
-        print("Test accuracy: ", test_score)
-        consistency_test.append(test_score)
+    model = mlp_model(nn_data.shape[1], k)
+    model.fit(nn_data, pred_y, batch_size=batch_size, epochs=20, verbose=1)
+    test_predictions = model.predict(test_data)
+    test_score = accuracy_score(test_labels, test_predictions)
+    print("Test accuracy: ", test_score)
+    print("\n\n")
+    # consistency_test.append(test_score)
 
-        K.clear_session()
-        del model
-        gc.collect()
+    K.clear_session()
+    del model
+    gc.collect()
 
+    return
     # #################################################################
     # for regular experiments
+
+    print("ahhah")
 
     # cll experiment
     cll_y = run_cll(constraints)
@@ -152,6 +182,8 @@ def run_experiment(dataset, savename, datatype='data', true_bound=False):
     test_predictions = model.predict(test_data)
     mmce_test_score = accuracy_score(test_labels, test_predictions)
 
+    print("hoho")
+
     mmce = {}
     filename = 'results/mmce_results.json'
     mmce['label_accuracy'] = mmce_accuracy
@@ -167,6 +199,9 @@ def run_experiment(dataset, savename, datatype='data', true_bound=False):
             epochs=30, verbose=1)
     test_predictions = model.predict(test_data)
     spv_test_score = accuracy_score(test_labels, test_predictions)
+
+    print("ababa")
+
 
     # print results
     print('SPV Test accuracy: %f' % spv_test_score)
@@ -299,10 +334,15 @@ if __name__ == '__main__':
     print("Running experiments...")
     # run_2D_experiment(synthetic_2D(1250, 3, form='sep'))
 
-    run_experiment(synthetic_data(20000, 10), 'synthetic')
-    # run_experiment(read_text_data('../../datasets/imbd/'), 'imbd')
-    # run_experiment(read_text_data('../../datasets/yelp/'),'yelp')
-    # run_experiment(read_text_data('../../datasets/sst-2/'), 'sst-2')
+    # run_experiment(synthetic_data(20000, 10), 'synthetic')
+
+    # print("imbd\n\n")
+    # run_experiment(read_text_data('../datasets/imdb/'), 'imdb')
+
+    # print("SST\n\n")
+    # run_experiment(read_text_data('../datasets/sst-2/'), 'sst-2')
+
+    # run_experiment(read_text_data('../datasets/yelp/'),'yelp')
     # run_experiment(load_image_signals('../../datasets/fashion-mnist'), 'fashion-mnist')
     # run_experiment(read_text_data('../../datasets/sst-2/'), 'sst-2_ablation_test', true_bound=False)
     # run_experiment(read_text_data('../../datasets/yelp/'),'yelp_ablation_test', true_bound=False)
@@ -310,6 +350,6 @@ if __name__ == '__main__':
     # run_ALL_experiments(read_text_data('../../datasets/sst-2/'), 'sst-2', true_bound=True)
     # run_ALL_experiments(read_text_data('../../datasets/imbd/'), 'imbd', true_bound=True)
     # run_ALL_experiments(read_text_data('../../datasets/yelp/'),'yelp', true_bound=True)
-    # run_ALL_experiments(load_image_signals('../../datasets/fashion-mnist'), 'fashion-mnist', true_bound=True)
+    run_ALL_experiments(load_image_signals('../datasets/fashion-mnist'), 'fashion-mnist', true_bound=True)
     # run_ALL_experiments(load_image_signals('../../datasets/svhn'), 'svhn', true_bound=True)
     # run_ALL_experiments(synthetic_data2(20000, 10), 'synthetic', true_bound=True)
