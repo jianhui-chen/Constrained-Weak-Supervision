@@ -5,9 +5,7 @@ import tensorflow as tf
 from datetime import datetime
 
 from data_readers import read_text_data
-# from utilities import set_up_constraint
-# from constraints import set_up_constraint
-# from data_utilities import load_fashion_mnist # Don't do *, error
+from constraints import set_up_constraint
 from image_utilities import get_image_supervision_data
 from load_image_data import load_image_data
 from log import Logger, log_results
@@ -18,9 +16,6 @@ from ALL_model import ALL
 from LabelEstimators import CLL, DataConsistency
 from GEModel import GECriterion 
 from PIL import Image
-
-# for testing
-from cll_help import cll_setup
 
 
 """
@@ -81,10 +76,9 @@ def run_experiments(dataset, set_name, date):
     except:
         multi_all_weak_errors = weak_errors
 
-    matrix_weak_errors = cll_setup(weak_signals, weak_errors)
     cll_setup_weak_errors = multi_all_weak_errors
-    # matrix_weak_errors = set_up_constraint(weak_signals, np.zeros(weak_errors.shape), weak_errors)['error']
-    matrix_weak_errors = cll_setup(weak_signals, cll_setup_weak_errors)
+    matrix_weak_errors = set_up_constraint(weak_signals, np.zeros(weak_errors.shape), cll_setup_weak_errors)['error']
+    # matrix_weak_errors = cll_setup(weak_signals, cll_setup_weak_errors)
 
     error_set = [weak_errors, multi_all_weak_errors, matrix_weak_errors, matrix_weak_errors]
 
@@ -99,6 +93,7 @@ def run_experiments(dataset, set_name, date):
 
     models = [binary_all, multi_all, Constrained_Labeling, Data_Consitancy]
 
+    all_data = True
     # Loop through each algorithm
     for model_np, model in enumerate(models):
         print("\n\nWORKING WITH:", experiment_names[model_np])
@@ -108,6 +103,7 @@ def run_experiments(dataset, set_name, date):
         if model_np == 0 :
             if set_name == 'sst-2' or set_name == 'imdb' or set_name == 'fashion':
                 print(" Skipping binary ALL with multiclass data ")
+                all_data = False
                 continue 
         # if model_np == 2 or model_np == 0:
         #     continue
@@ -129,13 +125,16 @@ def run_experiments(dataset, set_name, date):
 
         train_accuracy.append(train_acc)
         test_accuracy.append(test_acc)
+        if train_acc < 0.5 or test_acc < 0.5:
+            print("uhoh")
+            exit()
 
-
-    print('\n\nLogging results\n\n')
-    acc_logger = Logger("logs/" + log_name + "/accuracies")
-    plot_path =  "./logs/" + log_name
-    log_results(train_accuracy, acc_logger, plot_path, 'Accuracy on training data')
-    log_results(test_accuracy, acc_logger, plot_path, 'Accuracy on testing data')
+    if all_data:
+        print('\n\nLogging results\n\n')
+        acc_logger = Logger("logs/" + log_name + "/accuracies")
+        plot_path =  "./logs/" + log_name
+        log_results(train_accuracy, acc_logger, plot_path, 'Accuracy on training data')
+        log_results(test_accuracy, acc_logger, plot_path, 'Accuracy on testing data')
 
 
 
