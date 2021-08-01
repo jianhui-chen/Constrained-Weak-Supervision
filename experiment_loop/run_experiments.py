@@ -104,7 +104,7 @@ def run_experiments(dataset, set_name, date):
         # if model_np == 0 or model_np==2:
         if model_np == 0 :
             if set_name == 'sst-2' or set_name == 'imdb' or set_name == 'fashion':
-                print(" Skipping binary ALL with multiclass data ")
+                print("    Skipping binary ALL with multiclass data ")
                 all_data = False
                 continue 
         # if model_np == 2 or model_np == 0:

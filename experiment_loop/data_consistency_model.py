@@ -114,7 +114,7 @@ class DataConsistency(LabelEstimator):
             training data
          
         mv_labels: ndarray of shape (num_examples, num_class)
-            predicted labels by majority vote algorithm
+            predicted labels by majority vote algorithm using weak signals
          
         a_matrix: ndarray of shape (num_weak_signals, num_examples,  num_class)
             left bounds on the data
@@ -224,8 +224,11 @@ class DataConsistency(LabelEstimator):
 
         baseline_weak_labels = np.rint(weak_signals_probas)
         mv_weak_labels = np.ones(baseline_weak_labels.shape)
+
+        # Why is it flipping these??? 
         mv_weak_labels[baseline_weak_labels == -1] = 0
         mv_weak_labels[baseline_weak_labels == 0] = -1
+
         mv_weak_labels = np.sign(np.sum(mv_weak_labels, axis=0))
         break_ties = np.random.randint(2, size=int(np.sum(mv_weak_labels == 0)))
         mv_weak_labels[mv_weak_labels == 0] = break_ties
@@ -264,6 +267,11 @@ class DataConsistency(LabelEstimator):
         a_matrix = weak_signals_error_bounds['A']
         bound_loss = weak_signals_error_bounds['b']
         mv_labels = self._majority_vote_signal(weak_signals_probas)
+
+        # print("\n\nweak_signals_probas", weak_signals_probas.shape)
+        # print("\n\nmv_labels", mv_labels.shape)
+        # exit()
+
 
         
 
