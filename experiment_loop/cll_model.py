@@ -139,7 +139,7 @@ class CLL(LabelEstimator):
         return y
     
 
-    def _estimate_labels(self, weak_signals_probas, weak_signals_error_bounds):
+    def _estimate_labels(self, X, weak_signals_probas, weak_signals_error_bounds):
         """
         Finds estimated labels
 
@@ -196,43 +196,3 @@ class CLL(LabelEstimator):
                     optimizer='adagrad', metrics=['accuracy'])
 
         return model
-
-
-
-    def fit(self, X, weak_signals_probas, weak_signals_error_bounds, train_model=None):
-        """
-        Finds estimated labels
-
-        Parameters
-        ----------
-        :param X: current data examples to fit model with
-        :type  X: ndarray 
-        :param weak_signals_probas: weak signal probabilites containing -1, 0, 1 for each example
-        :type  weak_signals_probas: ndarray 
-        :param weak_signals_error_bounds: error constraints (a_matrix and bounds) of the weak signals. Contains both 
-                                          left (a_matrix) and right (bounds) hand matrix of the inequality 
-        :type  weak_signals_error_bounds: dictionary 
-
-        Returns
-        -------
-        :return: average of learned labels over several trials
-        :rtype: ndarray
-        """
-
-        # Estimates labels
-        labels = self._estimate_labels(weak_signals_probas, weak_signals_error_bounds)
-
-        # Fit based on labels generated above
-        if train_model is None:
-            m, n, k = weak_signals_probas.shape
-            self.model = self._mlp_model(X.shape[1], k)
-            self.model.fit(X, labels, batch_size=32, epochs=20, verbose=1)
-        else:
-            self.model = train_model
-            try:
-                self.model.fit(X.T, labels)
-            except:
-                print("The mean of the baseline labels is %f" %np.mean(labels))
-                sys.exit(1)
-
-        return self

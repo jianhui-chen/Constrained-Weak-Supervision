@@ -40,6 +40,71 @@ class DataConsistency(LabelEstimator):
             sys.exit("Not of string type")        
 
         self.model = None
+    
+    #################################################
+    # Maybe put in utilities ########################
+    #################################################
+
+    def _simple_nn(self, dimension, output):
+        """ 
+        Data consistent model
+
+        Parameters
+        ----------
+        dimension: list with two valuse [num_examples, num_features]
+            first value is number of training examples, second is 
+            number of features for each example
+
+
+        output: int
+            number of classes
+
+        Returns
+        -------
+        mv_weak_labels: ndarray of shape (num_examples, num_class)
+            fitted  Data consistancy algorithm
+        """
+
+        actv = 'softmax' if output > 1 else 'sigmoid'
+        model = tf.keras.Sequential()
+        model.add(layers.Dense(512, activation='relu', input_shape=(dimension,)))
+        model.add(layers.Dropout(0.2))
+        model.add(layers.Dense(output, activation=actv))
+        return model
+
+    
+    #################################################
+    # Maybe put in utilities ########################
+    #################################################
+    
+    def _majority_vote_signal(self, weak_signals_probas):
+        """ 
+        Calculate majority vote labels for the weak_signals
+
+        Parameters
+        ----------
+        weak_signals: ndarray of shape (num_weak, num_examples, num _class)
+            weak signal probabilites containing -1 for abstaining signals, and between 
+            0 to 1 for non-abstaining
+
+        Returns
+        -------
+        mv_weak_labels: ndarray of shape (num_examples, num_class)
+            fitted  Data consistancy algorithm
+        """
+
+        baseline_weak_labels = np.rint(weak_signals_probas)
+        mv_weak_labels = np.ones(baseline_weak_labels.shape)
+
+        # Why is it flipping these??? 
+        mv_weak_labels[baseline_weak_labels == -1] = 0
+        mv_weak_labels[baseline_weak_labels == 0] = -1
+
+        mv_weak_labels = np.sign(np.sum(mv_weak_labels, axis=0))
+        break_ties = np.random.randint(2, size=int(np.sum(mv_weak_labels == 0)))
+        mv_weak_labels[mv_weak_labels == 0] = break_ties
+        mv_weak_labels[mv_weak_labels == -1] = 0
+        return mv_weak_labels
 
 
     def _consistency_loss(self, model, X, mv_labels, a_matrix, bounds, slack, gamma, C):
@@ -102,7 +167,8 @@ class DataConsistency(LabelEstimator):
         return lagragian_objective, constraint_violation
 
 
-    def _estimate_labels(self, model, X, mv_labels, a_matrix, bounds):
+    # def _estimate_labels(self, model, X, mv_labels, a_matrix, bounds):
+    def _estimate_labels(self, X, weak_signals_probas, weak_signals_error_bounds):
         """
         Train DCWS algorithm
 
@@ -129,7 +195,15 @@ class DataConsistency(LabelEstimator):
         
         """ 
 
-        # Set up variables
+        # set up variables
+        m, n, k = weak_signals_probas.shape
+        nn_data = tf.cast(X, dtype=tf.float32)
+        model = self._simple_nn(nn_data.shape[1], k)
+        a_matrix = weak_signals_error_bounds['A']
+        bounds = weak_signals_error_bounds['b']
+        mv_labels = self._majority_vote_signal(weak_signals_probas)
+
+        # Set up more variables
         adam_optimizer = tf.keras.optimizers.Adam()
         grad_optimizer = tf.keras.optimizers.SGD()
         best_viol, best_iter = np.inf, self.max_iter
@@ -152,7 +226,7 @@ class DataConsistency(LabelEstimator):
 
             with tf.GradientTape() as tape:
                 loss_value, constraint_viol = self._consistency_loss(
-                    model, X, mv_labels, a_matrix, bounds, slack, gamma, C)
+                    model, nn_data, mv_labels, a_matrix, bounds, slack, gamma, C)
                 model_grad, gamma_grad, slack_grad = tape.gradient(
                     loss_value, [model.trainable_variables, gamma, slack])
 
@@ -176,121 +250,5 @@ class DataConsistency(LabelEstimator):
             if constraint_viol < best_viol:
                 best_viol, best_iter = constraint_viol, iters
 
-        pred_y = model(X)
+        pred_y = model(nn_data)
         return pred_y
-
-    def _simple_nn(self, dimension, output):
-        """ 
-        Data consistent model
-
-        Parameters
-        ----------
-        dimension: list with two valuse [num_examples, num_features]
-            first value is number of training examples, second is 
-            number of features for each example
-
-
-        output: int
-            number of classes
-
-        Returns
-        -------
-        mv_weak_labels: ndarray of shape (num_examples, num_class)
-            fitted  Data consistancy algorithm
-        """
-
-        actv = 'softmax' if output > 1 else 'sigmoid'
-        model = tf.keras.Sequential()
-        model.add(layers.Dense(512, activation='relu', input_shape=(dimension,)))
-        model.add(layers.Dropout(0.2))
-        model.add(layers.Dense(output, activation=actv))
-        return model
-    
-    def _majority_vote_signal(self, weak_signals_probas):
-        """ 
-        Calculate majority vote labels for the weak_signals
-
-        Parameters
-        ----------
-        weak_signals: ndarray of shape (num_weak, num_examples, num _class)
-            weak signal probabilites containing -1 for abstaining signals, and between 
-            0 to 1 for non-abstaining
-
-        Returns
-        -------
-        mv_weak_labels: ndarray of shape (num_examples, num_class)
-            fitted  Data consistancy algorithm
-        """
-
-        baseline_weak_labels = np.rint(weak_signals_probas)
-        mv_weak_labels = np.ones(baseline_weak_labels.shape)
-
-        # Why is it flipping these??? 
-        mv_weak_labels[baseline_weak_labels == -1] = 0
-        mv_weak_labels[baseline_weak_labels == 0] = -1
-
-        mv_weak_labels = np.sign(np.sum(mv_weak_labels, axis=0))
-        break_ties = np.random.randint(2, size=int(np.sum(mv_weak_labels == 0)))
-        mv_weak_labels[mv_weak_labels == 0] = break_ties
-        mv_weak_labels[mv_weak_labels == -1] = 0
-        return mv_weak_labels
-        
-
-
-    def fit(self, X, weak_signals_probas, weak_signals_error_bounds, train_model=None):
-        """
-        Finds estimated labels
-
-        Parameters
-        ----------
-        X: ndarray of shape (num_examples, num_features)
-            training data
-
-        weak_signals_probas: ndarray of shape (num_weak, num_examples, num _class)
-            weak signal probabilites containing -1 for abstaining signals, and between 
-            0 to 1 for non-abstaining
-
-        weak_signals_error_bounds: dictionary
-            error constraints (a_matrix and bounds) of the weak signals. Contains both 
-            left (a_matrix) and right (bounds) hand matrix of the inequality 
-
-        Returns
-        -------
-        self: DataConsistency class object
-            predicted labels by majority vote algorithm
-        """
-
-        # set up variables
-        m, n, k = weak_signals_probas.shape
-        nn_data = tf.cast(X, dtype=tf.float32)
-        model = self._simple_nn(nn_data.shape[1], k)
-        a_matrix = weak_signals_error_bounds['A']
-        bound_loss = weak_signals_error_bounds['b']
-        mv_labels = self._majority_vote_signal(weak_signals_probas)
-
-        # print("\n\nweak_signals_probas", weak_signals_probas.shape)
-        # print("\n\nmv_labels", mv_labels.shape)
-        # exit()
-
-
-        
-
-        # Estimates labels
-        labels = self._estimate_labels(model, nn_data, mv_labels, a_matrix, bound_loss)
-        # labels = self._estimate_labels(weak_signals_probas, weak_signals_error_bounds)
-
-        # Fit based on labels generated above
-        if train_model is None:
-            m, n, k = weak_signals_probas.shape
-            self.model = self._mlp_model(nn_data.shape[1], k)
-            self.model.fit(X, labels, batch_size=32, epochs=20, verbose=1)
-        else:
-            self.model = train_model
-            try:
-                self.model.fit(X.T, labels)
-            except:
-                print("The mean of the baseline labels is %f" %np.mean(labels))
-                sys.exit(1)
-
-        return self
-        

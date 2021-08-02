@@ -123,7 +123,7 @@ class LabelEstimator(BaseClassifier):   # Might want to change the name of Base 
     
 
 
-    def _estimate_labels(self, weak_signals_probas, weak_signals_error_bounds):
+    def _estimate_labels(self, X, weak_signals_probas, weak_signals_error_bounds):
         """
         Estimates labels by averaging weak signals
 
@@ -150,34 +150,52 @@ class LabelEstimator(BaseClassifier):   # Might want to change the name of Base 
 
 
         return labels
+    
 
-
-    def fit(self, X, weak_signals_probas, weak_signals_error_bounds, 
-            train_model=None): 
+    def fit(self, X, weak_signals_probas, weak_signals_error_bounds, train_model=None):
         """
-        Option: we can make it so the labels are generated outside of method
-            i.e. passed in as y, or change to pass in algo to generate within
-            this method
-        error_bounds param is not used, but included for consistency
+        Finds estimated labels
+
+        Parameters
+        ----------
+        X: ndarray of shape (num_examples, num_features)
+            training data
+
+        weak_signals_probas: ndarray of shape (num_weak, num_examples, num _class)
+            weak signal probabilites containing -1 for abstaining signals, and between 
+            0 to 1 for non-abstaining
+
+        weak_signals_error_bounds: dictionary
+            error constraints (a_matrix and bounds) of the weak signals. Contains both 
+            left (a_matrix) and right (bounds) hand matrix of the inequality 
+
+        Returns
+        -------
+        self: DataConsistency class object
+            predicted labels by majority vote algorithm
         """
 
         # Estimates labels
-        labels = self._estimate_labels(weak_signals_probas, weak_signals_error_bounds)
-
+        labels = self._estimate_labels(X, weak_signals_probas, weak_signals_error_bounds)
 
         # Fit based on labels generated above
         if train_model is None:
-            self.model = LogisticRegression(solver = "lbfgs", max_iter= 1000)
+            m, n, k = weak_signals_probas.shape
+            self.model = self._mlp_model(X.shape[1], k)
+            self.model.fit(X, labels, batch_size=32, epochs=20, verbose=1)
         else:
             self.model = train_model
+            try:
+                self.model.fit(X.T, labels)
+            except:
+                print("The mean of the baseline labels is %f" %np.mean(labels))
+                sys.exit(1)
 
-        try:
-            self.model.fit(X.T, labels)
-        except:
-            print("The mean of the baseline labels is %f" %np.mean(labels))
-            sys.exit(1)
         return self
 
+    #################################################
+    # Maybe put in utilities ########################
+    #################################################
     def _mlp_model(self, dimension, output):
         """ 
             Builds Simple MLP model
