@@ -139,7 +139,7 @@ class CLL(LabelEstimator):
         return y
     
 
-    def _estimate_labels(self, X, weak_signals_probas, weak_signals_error_bounds):
+    def _estimate_labels(self, weak_signals_probas, weak_signals_error_bounds, data=0):
         """
         Finds estimated labels
 

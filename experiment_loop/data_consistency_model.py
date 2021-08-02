@@ -168,7 +168,7 @@ class DataConsistency(LabelEstimator):
 
 
     # def _estimate_labels(self, model, X, mv_labels, a_matrix, bounds):
-    def _estimate_labels(self, X, weak_signals_probas, weak_signals_error_bounds):
+    def _estimate_labels(self, weak_signals_probas, weak_signals_error_bounds, data=0):
         """
         Train DCWS algorithm
 
@@ -197,7 +197,7 @@ class DataConsistency(LabelEstimator):
 
         # set up variables
         m, n, k = weak_signals_probas.shape
-        nn_data = tf.cast(X, dtype=tf.float32)
+        nn_data = tf.cast(data, dtype=tf.float32)
         model = self._simple_nn(nn_data.shape[1], k)
         a_matrix = weak_signals_error_bounds['A']
         bounds = weak_signals_error_bounds['b']

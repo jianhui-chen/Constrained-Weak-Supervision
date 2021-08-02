@@ -123,7 +123,7 @@ class LabelEstimator(BaseClassifier):   # Might want to change the name of Base 
     
 
 
-    def _estimate_labels(self, X, weak_signals_probas, weak_signals_error_bounds):
+    def _estimate_labels(self,weak_signals_probas, weak_signals_error_bounds, data=0):
         """
         Estimates labels by averaging weak signals
 
@@ -176,7 +176,7 @@ class LabelEstimator(BaseClassifier):   # Might want to change the name of Base 
         """
 
         # Estimates labels
-        labels = self._estimate_labels(X, weak_signals_probas, weak_signals_error_bounds)
+        labels = self._estimate_labels(weak_signals_probas, weak_signals_error_bounds, data=X)
 
         # Fit based on labels generated above
         if train_model is None:
