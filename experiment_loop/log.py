@@ -78,8 +78,11 @@ def log_results(values, acc_logger, plot_path, title):
     # Check if it is a multi class example or one with abstaining signals
     # so there will be no Binary ALL present 
     if len(values) == 4:
-        method_names = ['BinaryALL', 'MultiALL','CLL', 'DataConsis']
+        method_names = ['ALL', 'ALL 15,000','ALL 20,000', "ALL converg"]
         bar_colors = ['skyblue', 'saddlebrown', 'olivedrab', 'plum']
+    elif len(values) == 3:
+        method_names = ['BinaryALL', 'BinaryALL 15,000','BinaryALL 20,000']
+        bar_colors = ['skyblue', 'saddlebrown', 'olivedrab']
     else:
         method_names = ['MultiALL','CLL', 'DataConsis']
         bar_colors = ['skyblue', 'saddlebrown', 'olivedrab']
@@ -93,7 +96,10 @@ def log_results(values, acc_logger, plot_path, title):
     # set y demensions of plots
     min_value = min(values)
     max_value = max(values)
-    plt.ylim([min_value - 0.1, max_value + 0.1])
+    if max_value + 0.1 > 1:
+        plt.ylim([min_value - 0.1, 1])
+    else:
+        plt.ylim([min_value - 0.1, max_value + 0.1])
 
     # Save plot, then load into tensorboard
     plt.savefig(plot_path + "/plot.png", format='png')

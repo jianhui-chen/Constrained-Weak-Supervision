@@ -13,10 +13,9 @@ from log import Logger, log_results
 # Import models
 from old_ALL import old_ALL
 from ALL_model import ALL
+# from LabelEstimators import CLL, DataConsistency
 from cll_model import CLL
 from data_consistency_model import DataConsistency
-
-DataConsistency
 from GEModel import GECriterion 
 from PIL import Image
 
@@ -32,6 +31,7 @@ from PIL import Image
     Multi-Class Datasets:
         1. Fashion
 
+       
     Algorithms:
         1. Old ALL (Binary labels only)
         2. ALL (Multi label and Abstaining signals supported)
@@ -82,18 +82,29 @@ def run_experiments(dataset, set_name, date):
     matrix_weak_errors = set_up_constraint(weak_signals, np.zeros(weak_errors.shape), cll_setup_weak_errors)['error']
     # matrix_weak_errors = cll_setup(weak_signals, cll_setup_weak_errors)
 
-    error_set = [weak_errors, multi_all_weak_errors, matrix_weak_errors, matrix_weak_errors]
+    # error_set = [weak_errors, multi_all_weak_errors, matrix_weak_errors, matrix_weak_errors]
+
+    error_set = [weak_errors, weak_errors, weak_errors, weak_errors]
+
 
 
 
     # set up algorithms
-    experiment_names = ["Binary-Label ALL", "Multi-Label ALL", "CLL", "Data Consistancy"]
+    experiment_names = ['BinaryALL', 'BinaryALL 15,000','BinaryALL 20,000', 'BinaryALL converg']
     binary_all = old_ALL(max_iter=10000, log_name=log_name+"/BinaryALL")
-    multi_all = ALL()
-    Constrained_Labeling = CLL(log_name=log_name+"/CLL")
-    Data_Consitancy = DataConsistency(log_name=log_name+"/Const")
+    binary_all_2 = old_ALL(max_iter=15000, log_name=log_name+"/BinaryALL 15,000")
+    binary_all_3 = old_ALL(max_iter=20000, log_name=log_name+"/BinaryALL  20,000")
+    binary_all_converg = old_ALL(max_iter=100000, log_name=log_name+"/BinaryALL  till converg")
 
-    models = [binary_all, multi_all, Constrained_Labeling, Data_Consitancy]
+
+
+    models = [binary_all, binary_all_2, binary_all_3, binary_all_converg]
+
+    # multi_all = ALL()
+    # Constrained_Labeling = CLL(log_name=log_name+"/CLL")
+    # Data_Consitancy = DataConsistency(log_name=log_name+"/Const")
+
+    # models = [binary_all, multi_all, Constrained_Labeling, Data_Consitancy]
 
     all_data = True
     # Loop through each algorithm
@@ -104,7 +115,7 @@ def run_experiments(dataset, set_name, date):
         # if model_np == 0 or model_np==2:
         if model_np == 0 :
             if set_name == 'sst-2' or set_name == 'imdb' or set_name == 'fashion':
-                print("    Skipping binary ALL with multiclass data ")
+                print(" Skipping binary ALL with multiclass data ")
                 all_data = False
                 continue 
         # if model_np == 2 or model_np == 0:
@@ -150,9 +161,10 @@ if __name__ == '__main__':
 
 
     # text Expiriments:
-    dataset_names = ['sst-2', 'imdb', 'obs', 'cardio', 'breast-cancer']
-    # dataset_names = ['obs', 'cardio', 'breast-cancer']
+    # dataset_names = ['sst-2', 'imdb', 'obs', 'cardio', 'breast-cancer']
+    dataset_names = ['cardio', 'breast-cancer']
 
+    # dataset_names = ['obs', 'cardio', 'breast-cancer']
     date = datetime.now().strftime("%Y_%m_%d-%I:%M:%S_%p")
     for name in dataset_names:
         print("\n\n\n# # # # # # # # # # # #")
@@ -160,8 +172,8 @@ if __name__ == '__main__':
         print("# # # # # # # # # # # #")
         run_experiments(read_text_data('../datasets/' + name + '/'), name, date)
 
-    # Image Expiriments
-    print("\n\n\n# # # # # # # # # # # #")
-    print("#  fashion experiment #")
-    print("# # # # # # # # # # # #")
-    run_experiments(load_image_data(), 'fashion', date)
+    # # Image Expiriments
+    # print("\n\n\n# # # # # # # # # # # #")
+    # print("#  fashion experiment #")
+    # print("# # # # # # # # # # # #")
+    # run_experiments(load_image_data(), 'fashion', date)
