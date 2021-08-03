@@ -106,14 +106,14 @@ def run_experiments(dataset, set_name, date):
 
         # skip binary all on multi label or abstaining signal set
         # if model_np == 0 or model_np==2:
-        # if model_np == 0 :
-        #     if set_name == 'sst-2' or set_name == 'imdb' or set_name == 'fashion':
-        #         print("    Skipping binary ALL with multiclass data ")
-        #         all_data = False
-        #         continue 
+        if model_np == 0 :
+            if set_name == 'sst-2' or set_name == 'imdb' or set_name == 'fashion':
+                print("    Skipping binary ALL with multiclass data ")
+                all_data = False
+                continue 
         # if model_np == 2 or model_np == 0:
-        if model_np != 2:
-            continue
+        # if model_np != 2:
+        #     continue
 
 
         model.fit(train_data, weak_signals, error_set[model_np])

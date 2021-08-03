@@ -180,7 +180,7 @@ def optimize(label, predicted_probs, rho, constraint_set, iters=300, enable_prin
     num_weak_signal = constraint_set['num_weak_signals']
     # true_bounds = constraint_set['true_bounds'] # boolean value
     # true_bounds = False
-    true_bounds = True
+    # true_bounds = True
     loss = constraint_set['loss']
     #active_mask = constraint_set['active_mask']
    
@@ -246,8 +246,8 @@ def optimize(label, predicted_probs, rho, constraint_set, iters=300, enable_prin
             y = y - y_grad / np.sqrt(grad_sum + 1e-8)
 
         
-        y = np.clip(y, a_min=min_vector, a_max=max_vector)  if not true_bounds \
-                                else (y if loss == 'multiclass' else np.clip(y, a_min=0, a_max=1))
+        # y = np.clip(y, a_min=min_vector, a_max=max_vector)  if not true_bounds \
+        #                         else (y if loss == 'multiclass' else np.clip(y, a_min=0, a_max=1))
 
         # if not true_bounds:
         #     y = np.clip(y, a_min=min_vector, a_max=max_vector)
@@ -258,12 +258,12 @@ def optimize(label, predicted_probs, rho, constraint_set, iters=300, enable_prin
         #         y = np.clip(y, a_min=0, a_max=1)        # not multiclass
 
 
-        y = projection_simplex(y, axis=1) if loss == 'multiclass' else y
+        # y = projection_simplex(y, axis=1) if loss == 'multiclass' else y
 
-        # if loss == 'multiclass':
-        #     y = projection_simplex(y, axis=1)
-        # else:       #not multiclass
-        #     y = y
+        if loss == 'multiclass':
+            y = projection_simplex(y, axis=1)
+        else:       #not multiclass
+            y = np.clip(y, a_min=0, a_max=1) 
 
      
         constraint_set['violation'] = [viol_text, constraint_viol]
