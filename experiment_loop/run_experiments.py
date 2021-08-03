@@ -74,15 +74,15 @@ def run_experiments(dataset, set_name, date):
     # set up error bounds.... different for every algorithm
     weak_errors = np.ones((m, k)) * 0.01
     try:
-        multi_all_weak_errors = dataset['weak_errors']
+        matrix_weak_errors = dataset['weak_errors']
     except:
-        multi_all_weak_errors = weak_errors
+        matrix_weak_errors = weak_errors
 
-    cll_setup_weak_errors = multi_all_weak_errors
-    matrix_weak_errors = set_up_constraint(weak_signals, np.zeros(weak_errors.shape), cll_setup_weak_errors)['error']
+    # cll_setup_weak_errors = multi_all_weak_errors
+    matrix_weak_errors = set_up_constraint(weak_signals, np.zeros(weak_errors.shape), matrix_weak_errors)['error']
     # matrix_weak_errors = cll_setup(weak_signals, cll_setup_weak_errors)
 
-    error_set = [weak_errors, multi_all_weak_errors, matrix_weak_errors, matrix_weak_errors]
+    error_set = [weak_errors, matrix_weak_errors, matrix_weak_errors, matrix_weak_errors]
 
 
 
@@ -105,14 +105,14 @@ def run_experiments(dataset, set_name, date):
         print("\n\nWORKING WITH:", experiment_names[model_np])
 
         # skip binary all on multi label or abstaining signal set
-        # if model_np == 0 or model_np==2:
+        # if model_np == 0 or model_np==1:
         if model_np == 0 :
             if set_name == 'sst-2' or set_name == 'imdb' or set_name == 'fashion':
                 print("    Skipping binary ALL with multiclass data ")
                 all_data = False
                 continue 
         # if model_np == 2 or model_np == 0:
-        # if model_np != 2:
+        # if model_np != 1:
         #     continue
 
 
@@ -159,11 +159,11 @@ if __name__ == '__main__':
     # dataset_names = ['obs', 'cardio', 'breast-cancer']
 
     date = datetime.now().strftime("%Y_%m_%d-%I:%M:%S_%p")
-    # for name in dataset_names:
-    #     print("\n\n\n# # # # # # # # # # # #")
-    #     print("#  ", name, "experiment  #")
-    #     print("# # # # # # # # # # # #")
-    #     run_experiments(read_text_data('../datasets/' + name + '/'), name, date)
+    for name in dataset_names:
+        print("\n\n\n# # # # # # # # # # # #")
+        print("#  ", name, "experiment  #")
+        print("# # # # # # # # # # # #")
+        run_experiments(read_text_data('../datasets/' + name + '/'), name, date)
 
     # Image Expiriments
     print("\n\n\n# # # # # # # # # # # #")

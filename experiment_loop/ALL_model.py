@@ -86,8 +86,9 @@ class ALL(BaseClassifier):
             This may later be changed to accept just the weak signals, and these 
             probabilities will be calculated within the ALL class. 
 
-        weak_signals_error_bounds : ndarray of shape (n_weak_signals, n_classes)
-            Stores upper bounds of error rates for each weak signal.
+        weak_signals_error_bounds : dictionary
+            error constraints (a_matrix and bounds) of the weak signals. Contains both 
+            left (a_matrix) and right (bounds) hand matrix of the inequality 
 
         weak_signals_precision : ndarray of shape (n_weak_signals, n_class)
 
@@ -99,7 +100,7 @@ class ALL(BaseClassifier):
         """
 
         # original variables
-        constraint_keys = ["error"]
+        # constraint_keys = ["error"]
         num_weak_signals = weak_signals_probas.shape[0]
 
 
@@ -110,13 +111,15 @@ class ALL(BaseClassifier):
         # If we want the calculated precision, have to use method from text_utilities
 
         " to make up for weak_signals_precision, need to make optional or fix later "
-        weak_signals_precision = np.zeros(weak_signals_error_bounds.shape)
+        weak_signals_precision = np.zeros(weak_signals_probas.shape)
 
-        constraint_set = set_up_constraint(weak_signals_probas[:num_weak_signals, :, :],
-                                           weak_signals_precision[:num_weak_signals, :],
-                                           weak_signals_error_bounds[:num_weak_signals, :])
+        # constraint_set = set_up_constraint(weak_signals_probas[:num_weak_signals, :, :],
+        #                                    weak_signals_precision[:num_weak_signals, :],
+        #                                    weak_signals_error_bounds[:num_weak_signals, :])
         
-        constraint_set['constraints'] = constraint_keys
+        constraint_set = {}
+        constraint_set['error'] = weak_signals_error_bounds
+        # constraint_set['constraints'] = constraint_keys
         constraint_set['weak_signals'] = weak_signals_probas[:num_weak_signals, :, :] * active_signals[:num_weak_signals, :, :]
         constraint_set['num_weak_signals'] = num_weak_signals
         constraint_set['loss'] = self.loss

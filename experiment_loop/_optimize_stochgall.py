@@ -70,29 +70,32 @@ def objective_function(y, learnable_probabilities, constraint_set, rho):
 
     gamma_constraint = 0
     augmented_term = 0
-    constraint_keys = constraint_set['constraints']
+    # constraint_keys = constraint_set['constraints']
+    key='error'
     loss = constraint_set['loss']
     #active_mask = constraint_set['active_mask']
 
     objective = loss_functions(y, learnable_probabilities, loss)
 
-    for key in constraint_keys:
-        current_constraint = constraint_set[key]
-        a_matrix = current_constraint['A']
-        bounds = current_constraint['b']
-        constant = current_constraint['c']
-        gamma = current_constraint['gamma']
-        constraint = np.zeros(bounds.shape)
+    # for key in constraint_keys:
+    current_constraint = constraint_set[key]
+    a_matrix = current_constraint['A']
+    bounds = current_constraint['b']
+    constant = current_constraint['c']
+    gamma = current_constraint['gamma']
+    constraint = np.zeros(bounds.shape)
 
-        for i, current_a in enumerate(a_matrix):
-            # constraint[i] = np.sum((active_mask[i]*current_a) * y + (constant[i]*active_mask[i]), axis=0)
-            constraint[i] = np.sum(current_a * y + constant[i], axis=0)
+    for i, current_a in enumerate(a_matrix):
+        # constraint[i] = np.sum((active_mask[i]*current_a) * y + (constant[i]*active_mask[i]), axis=0)
+        constraint[i] = np.sum(current_a * y + constant[i], axis=0)
 
-        constraint = constraint - bounds
+    constraint = constraint - bounds
 
-        gamma_constraint += np.sum(gamma * constraint)
-        augmented_term += (rho / 2) * np.sum(
-            constraint.clip(min=0) * constraint.clip(min=0))
+    gamma_constraint += np.sum(gamma * constraint)
+    augmented_term += (rho / 2) * np.sum(
+        constraint.clip(min=0) * constraint.clip(min=0))
+    
+    # for loop ended here
 
     return objective + gamma_constraint - augmented_term
 
@@ -141,7 +144,8 @@ def y_gradient(learnable_probabilities, constraint_set, rho, y, quadratic=False)
     n, k = learnable_probabilities.shape
     augmented_term = 0
     upper_bound_term = 0
-    constraint_keys = constraint_set['constraints']
+    # constraint_keys = constraint_set['constraints']
+    key='error'
     loss = constraint_set['loss']
     #active_mask = constraint_set['active_mask']
 
@@ -157,17 +161,19 @@ def y_gradient(learnable_probabilities, constraint_set, rho, y, quadratic=False)
         obj_grad = 1 - 2 * learnable_probabilities
         obj_grad = obj_grad / (n * k)
 
-    for key in constraint_keys:
-        current_constraint = constraint_set[key]
-        a_matrix = current_constraint['A']
-        bound_loss = current_constraint['bound_loss']
-        gamma = current_constraint['gamma']
+    # for key in constraint_keys:
+    current_constraint = constraint_set[key]
+    a_matrix = current_constraint['A']
+    bound_loss = current_constraint['bound_loss']
+    gamma = current_constraint['gamma']
 
-        for i, current_a in enumerate(a_matrix):
-            #constraint = a_matrix[i] * active_mask[i]
-            constraint = a_matrix[i]
-            upper_bound_term += gamma[i] * constraint
-            augmented_term += bound_loss[i].clip(min=0) * constraint
+    for i, current_a in enumerate(a_matrix):
+        #constraint = a_matrix[i] * active_mask[i]
+        constraint = a_matrix[i]
+        upper_bound_term += gamma[i] * constraint
+        augmented_term += bound_loss[i].clip(min=0) * constraint
+    
+    # for loop ended here
 
     return obj_grad + upper_bound_term - rho * augmented_term
 
@@ -175,7 +181,8 @@ def y_gradient(learnable_probabilities, constraint_set, rho, y, quadratic=False)
 def optimize(label, predicted_probs, rho, constraint_set, iters=300, enable_print=True, optim='min'):
     # First find a feasible label with adagrad, initialization step
 
-    constraint_keys = constraint_set['constraints']
+    # constraint_keys = constraint_set['constraints']
+    key = 'error'
     weak_signals = constraint_set['weak_signals']
     num_weak_signal = constraint_set['num_weak_signals']
     # true_bounds = constraint_set['true_bounds'] # boolean value
@@ -201,40 +208,42 @@ def optimize(label, predicted_probs, rho, constraint_set, iters=300, enable_prin
         constraint_viol = []
         viol_text = ''
 
-        for key in constraint_keys:
+        # for key in constraint_keys:
 
-            current_constraint = constraint_set[key]
+        current_constraint = constraint_set[key]
 
-            a_matrix = current_constraint['A']
-            bounds = current_constraint['b']
-            constant = current_constraint['c']
-            gamma = current_constraint['gamma']
+        a_matrix = current_constraint['A']
+        bounds = current_constraint['b']
+        constant = current_constraint['c']
+        gamma = current_constraint['gamma']
 
-           
-            gamma_grad = gamma_gradient(y, a_matrix, constant, bounds)
- 
-            # gamma_grad = full_loss
-            
+        
+        gamma_grad = gamma_gradient(y, a_matrix, constant, bounds)
 
-            if optim == 'max':
-                gamma = gamma - rho * gamma_grad
-                gamma = gamma.clip(max=0)
-  
-            else:
-                gamma = gamma + rho * gamma_grad
-                gamma = gamma.clip(min=0)
-           
+        # gamma_grad = full_loss
+        
 
-            # update constraint values
-            constraint_set[key]['gamma'] = gamma
-            constraint_set[key]['bound_loss'] = gamma_grad
+        if optim == 'max':
+            gamma = gamma - rho * gamma_grad
+            gamma = gamma.clip(max=0)
 
-            violation = np.linalg.norm(gamma_grad.clip(min=0))
-            print_builder += key + "_viol: %.4e "
-            print_constraints.append(violation)
+        else:
+            gamma = gamma + rho * gamma_grad
+            gamma = gamma.clip(min=0)
+        
 
-            viol_text += key + "_viol: %.4e "
-            constraint_viol.append(violation)
+        # update constraint values
+        constraint_set[key]['gamma'] = gamma
+        constraint_set[key]['bound_loss'] = gamma_grad
+
+        # violation = np.linalg.norm(gamma_grad.clip(min=0))
+        # print_builder += key + "_viol: %.4e "
+        # print_constraints.append(violation)
+
+        # viol_text += key + "_viol: %.4e "
+        # constraint_viol.append(violation)
+
+        # this was where for loop ended
 
         y_grad = y_gradient(predicted_probs, constraint_set, rho, y, quadratic=True)
         grad_sum += y_grad**2
