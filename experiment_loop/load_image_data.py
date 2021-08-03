@@ -51,7 +51,7 @@ def load_fashion_mnist():
 def load_image_data():
     orig_data = load_fashion_mnist()
 
-    new_data = get_image_supervision_data(orig_data, weak_signals='pseudolabel', true_bounds=False)
+    new_data = get_image_supervision_data(orig_data, weak_signals='pseudolabel', true_bounds=False) # can try with manual
 
     image_data = dict()
     image_data['train'] = new_data['train_data']
