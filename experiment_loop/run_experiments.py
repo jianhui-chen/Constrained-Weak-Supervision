@@ -89,7 +89,11 @@ def run_experiments(dataset, set_name, date):
     # set up algorithms
     experiment_names = ["Binary-Label ALL", "Multi-Label ALL", "CLL", "Data Consistancy"]
     binary_all = old_ALL(max_iter=10000, log_name=log_name+"/BinaryALL")
-    multi_all = ALL()
+
+    if set_name == 'fashion':
+        multi_all = ALL(loss='multiclass')
+    else:
+        multi_all = ALL()
     Constrained_Labeling = CLL(log_name=log_name+"/CLL")
     Data_Consitancy = DataConsistency(log_name=log_name+"/Const")
 
@@ -102,13 +106,14 @@ def run_experiments(dataset, set_name, date):
 
         # skip binary all on multi label or abstaining signal set
         # if model_np == 0 or model_np==2:
-        if model_np == 0 :
-            if set_name == 'sst-2' or set_name == 'imdb' or set_name == 'fashion':
-                print("    Skipping binary ALL with multiclass data ")
-                all_data = False
-                continue 
+        # if model_np == 0 :
+        #     if set_name == 'sst-2' or set_name == 'imdb' or set_name == 'fashion':
+        #         print("    Skipping binary ALL with multiclass data ")
+        #         all_data = False
+        #         continue 
         # if model_np == 2 or model_np == 0:
-        #     continue
+        if model_np != 2:
+            continue
 
 
         model.fit(train_data, weak_signals, error_set[model_np])
@@ -154,11 +159,11 @@ if __name__ == '__main__':
     # dataset_names = ['obs', 'cardio', 'breast-cancer']
 
     date = datetime.now().strftime("%Y_%m_%d-%I:%M:%S_%p")
-    for name in dataset_names:
-        print("\n\n\n# # # # # # # # # # # #")
-        print("#  ", name, "experiment  #")
-        print("# # # # # # # # # # # #")
-        run_experiments(read_text_data('../datasets/' + name + '/'), name, date)
+    # for name in dataset_names:
+    #     print("\n\n\n# # # # # # # # # # # #")
+    #     print("#  ", name, "experiment  #")
+    #     print("# # # # # # # # # # # #")
+    #     run_experiments(read_text_data('../datasets/' + name + '/'), name, date)
 
     # Image Expiriments
     print("\n\n\n# # # # # # # # # # # #")

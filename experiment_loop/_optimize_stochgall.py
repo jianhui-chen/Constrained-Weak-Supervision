@@ -145,11 +145,17 @@ def y_gradient(learnable_probabilities, constraint_set, rho, y, quadratic=False)
     loss = constraint_set['loss']
     #active_mask = constraint_set['active_mask']
 
-    obj_grad = 1 - learnable_probabilities \
-                    if loss == 'multiclass' else 1 - 2*learnable_probabilities
+    # obj_grad = 1 - learnable_probabilities \
+    #                 if loss == 'multiclass' else 1 - 2*learnable_probabilities
 
-    obj_grad = obj_grad / n if loss == 'multiclass' else obj_grad / (n*k)
+    # obj_grad = obj_grad / n if loss == 'multiclass' else obj_grad / (n*k)
 
+    if loss == 'multiclass':
+        obj_grad = 1 - learnable_probabilities
+        obj_grad = obj_grad / n
+    else:
+        obj_grad = 1 - 2 * learnable_probabilities
+        obj_grad = obj_grad / (n * k)
 
     for key in constraint_keys:
         current_constraint = constraint_set[key]
@@ -242,7 +248,22 @@ def optimize(label, predicted_probs, rho, constraint_set, iters=300, enable_prin
         
         y = np.clip(y, a_min=min_vector, a_max=max_vector)  if not true_bounds \
                                 else (y if loss == 'multiclass' else np.clip(y, a_min=0, a_max=1))
+
+        # if not true_bounds:
+        #     y = np.clip(y, a_min=min_vector, a_max=max_vector)
+        # else:
+        #     if loss == 'multiclass':    
+        #         y = y
+        #     else:
+        #         y = np.clip(y, a_min=0, a_max=1)        # not multiclass
+
+
         y = projection_simplex(y, axis=1) if loss == 'multiclass' else y
+
+        # if loss == 'multiclass':
+        #     y = projection_simplex(y, axis=1)
+        # else:       #not multiclass
+        #     y = y
 
      
         constraint_set['violation'] = [viol_text, constraint_viol]
