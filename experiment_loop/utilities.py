@@ -18,12 +18,31 @@ decide a name for it... bound_loss or gamma_gradient
 #def bound_loss(y, a_matrix, active_mask, constant, bounds):
 def gamma_gradient(y, a_matrix, constant, bounds):
     """
+
+    Parameters
+    ----------
+    y: ndarray of size (n_data_points, num_class)
+        estimated labels for the data
+
+    a_matrix: ndarray of  size (num_weak, n, num_class)
+        constraint matrix
+
+    constant: ndarray of size (num_weak, n, num_class)
+        constant
+
+    bounds: ndarray of size (num_weak, num_class)
+         bounds for the constraint
+
+    Returns
+    -------
+
+
     Computes the gradient of lagrangian inequality penalty parameters
 
-    :param y: size (n_data_points, num_class) of estimated labels for the data
-    :type y: ndarray
+
     :param a_matrix: size (num_weak, n, num_class) of a constraint matrix
     :type a_matrix: ndarray
+
     :param constant: size (num_weak, n, num_class) of the constant
     :type constant: ndarray
     :param bounds: size (num_weak, num_class) of the bounds for the constraint

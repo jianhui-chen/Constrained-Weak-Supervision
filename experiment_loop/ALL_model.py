@@ -66,9 +66,7 @@ class ALL(BaseClassifier):
 
         to_return = self.model.predict(X)
         
-        return to_return.flatten()
-        # return to_return
-    
+        return to_return.flatten()    
 
     def fit(self, X, weak_signals_probas, weak_signals_error_bounds):
         """
@@ -112,10 +110,6 @@ class ALL(BaseClassifier):
 
         " to make up for weak_signals_precision, need to make optional or fix later "
         weak_signals_precision = np.zeros(weak_signals_probas.shape)
-
-        # constraint_set = set_up_constraint(weak_signals_probas[:num_weak_signals, :, :],
-        #                                    weak_signals_precision[:num_weak_signals, :],
-        #                                    weak_signals_error_bounds[:num_weak_signals, :])
         
         constraint_set = {}
         constraint_set['error'] = weak_signals_error_bounds

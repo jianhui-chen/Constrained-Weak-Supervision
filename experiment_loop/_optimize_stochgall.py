@@ -56,16 +56,24 @@ def objective_function(y, learnable_probabilities, constraint_set, rho):
     Computes the value of the objective function
     One weak signal contains k num of weak signals, one for each class k=num_class
 
-    :param y: size (n_data_points, num_class) adversarial labels for the data
-    :type y: ndarray
-    :param learnable_probabilities: size (n_data_points, num_class) of estimated probabilities for the learnable classifier
-    :type learnable_probabilities: ndarray
-    :param constraint_set: dictionary containing constraints specified in the constraint_keys
-    :type constraint_set: dict
-    :param rho: penalty parameter for the augmented lagrangian
-    :type rho: float
-    :return: scalar value of objective function
-    :rtype: float
+    Parameters
+    ----------
+    y : ndarray o fsize (n_data_points, num_class) 
+        adversarial labels for the data
+
+    learnable_probabilities : ndarray size (n_data_points, num_class)
+        stimated probabilities for the learnable classifier
+
+    constraint_set : dict
+        dictionary containing constraints specified in the constraint_keys
+
+    rho : float
+         scalar value of objective function
+        
+    Returns
+    -------
+    return : float
+        scalar value of objective function
     """
 
     gamma_constraint = 0
@@ -105,6 +113,28 @@ def gamma_gradient(y, a_matrix, constant, bounds):
     """
     Computes the gradient of lagrangian inequality penalty parameters
 
+    Parameters
+    ----------
+    y : 
+        estimated labels for the data
+
+    a_matrix : ndarray of size (num_weak, n, num_class) 
+        constraint matrix
+    
+    constant : ndarray of size size (num_weak, n, num_class) 
+        the constant
+
+    bounds : 
+
+
+        
+    Returns
+    -------
+
+    return: ndarray
+        loss of the constraint set wrt adversarial ys
+
+
     :param y: size (n_data_points, num_class) of estimated labels for the data
     :type y: ndarray
     :param a_matrix: size (num_weak, n, num_class) of a constraint matrix
@@ -113,8 +143,7 @@ def gamma_gradient(y, a_matrix, constant, bounds):
     :type constant: ndarray
     :param bounds: size (num_weak, num_class) of the bounds for the constraint
     :type bounds: ndarray
-    :return: loss of the constraint set wrt adversarial ys
-    :rtype: ndarray
+]
     """
     constraint = np.zeros(bounds.shape)
     # n, k = y.shape
@@ -129,16 +158,24 @@ def y_gradient(learnable_probabilities, constraint_set, rho, y, quadratic=False)
     """
     Computes the gradient y
 
-    :param learnable_probabilities: size (n_data_points, num_class) of probabilities for the learnable classifier
-    :type learnable_probabilities: ndarray
-    :param a_matrix: size (num_weak, n, num_class) of a constraint matrix
-    :type a_matrix: ndarray
-    :param gamma: vector of lagrangian inequality(upper bound) penalty parameters corresponding to the number of weak signals
-    :type gamma: array
-    :param rho: penalty parameter for the augmented lagrangian
-    :type rho: float
-    :return: ndarray of size (n_data_points, num_class) for y gradient
-    :rtype: ndarray
+    Parameters
+    ----------
+    learnable_probabilities : of size (n_data_points, num_class)
+        probabilities for the learnable classifier
+
+    a_matrix : ndarray of size (num_weak, n, num_class) 
+        constraint matrix
+
+    gamma : array of size number of weak signala
+        penalty parameters corresponding to the number of weak signala
+
+    rho : float
+        penalty parameter for the augmented lagrangian
+        
+    Returns
+    -------
+    return : ndarray of size (n_data_points, num_class) 
+        y gradient
     """
 
     n, k = learnable_probabilities.shape
