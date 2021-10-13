@@ -20,11 +20,9 @@ def get_weak_signal_data(data_obj):
     """
     Isolates dev and train data for fitting model for weak signals and 
     calculating probability and error bounds.
-
     """
     data = data_obj.data
 
-    # code to get weak signals –– create_weak_signals_view
     dev_data, dev_labels = data['dev_data']
     train_data, train_labels = data['train_data']
 
@@ -40,8 +38,6 @@ def get_weak_signal_data(data_obj):
     weak_signal_data = [weak_signal_dev_data, weak_signal_train_data]
 
     return weak_signal_data
-
-
 
 
 def train_weak_signals(data_obj, num_weak_signals):
@@ -92,8 +88,6 @@ def train_weak_signals(data_obj, num_weak_signals):
     return weak_signals
 
 
-
-
 def get_weak_signals(data_obj, num_weak_signals, weak_signal_path=None):
     """
     Generates weak_signal probabilities and error bounds or gets them from the data path
@@ -121,8 +115,10 @@ def get_weak_signals(data_obj, num_weak_signals, weak_signal_path=None):
         # Have console command stating this is in progress
 
         weak_signals = {}
-        weak_signals['probabilities'] = np.load(weak_signal_path + str(num_weak_signals) + '_weak_signals/weak_signals_probabilities.npy', allow_pickle=True)[()]
-        weak_signals['error_bounds'] = np.load(weak_signal_path + str(num_weak_signals) + '_weak_signals/weak_signals_error_bounds.npy', allow_pickle=True)[()]
+        weak_signals['probabilities'] = np.load(weak_signal_path + str(num_weak_signals) +
+                                                '_weak_signals/weak_signals_probabilities.npy', allow_pickle=True)[()]
+        weak_signals['error_bounds'] = np.load(weak_signal_path + str(num_weak_signals) +
+                                               '_weak_signals/weak_signals_error_bounds.npy', allow_pickle=True)[()]
         
     else:
         # Console command
@@ -131,11 +127,9 @@ def get_weak_signals(data_obj, num_weak_signals, weak_signal_path=None):
     return weak_signals
 
 
-
-
 def file_generator(datapath, savepath, views, load_and_process_data) :
     """
-    breaks down data from provided dataset and seperates it into files
+    Breaks down data from provided dataset and seperates it into files
     
     
     Parameters
@@ -167,7 +161,6 @@ def file_generator(datapath, savepath, views, load_and_process_data) :
     for num_weak_signals in range(1, 3 + 1):
         weak_signals = get_weak_signals(obs_data, num_weak_signals)
         multiple_weak_signals.append(weak_signals)
-    
 
     # Get data to store
     data = obs_data.data
@@ -181,7 +174,6 @@ def file_generator(datapath, savepath, views, load_and_process_data) :
     np.save(savepath+'data_labels.npy', train_labels)
     np.save(savepath+'test_labels.npy', test_labels)
     np.save(savepath+'weak_signals.npy', multiple_weak_signals[2]['probabilities'])
-
 
 
 print("\n\n working on OBS \n\n" )
