@@ -94,7 +94,7 @@ class BaseClassifier(ABC):
         return probas.ravel()
 
     @abstractmethod 
-    def fit(self, X):
+    def fit(self, X, weak_signals_probas, weak_signals_error_bounds):
         """
         Abstract method to fit models
 

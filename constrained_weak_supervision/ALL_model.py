@@ -1,22 +1,12 @@
-import sys # base class
 import random
-import numpy as np # baseclass
+import sys  # base class
+
+import numpy as np  # baseclass
 
 from BaseClassifier import BaseClassifier
-
-from sklearn.linear_model import LogisticRegression
-from sklearn.metrics import accuracy_score # base class
-from abc import ABC, abstractmethod
-from tensorflow.python.keras.models import Sequential
-from tensorflow.python.keras.layers import Dropout, Dense
-from scipy.optimize import minimize
-
-from log import Logger
-from setup_model import mlp_model
-from constraints import set_up_constraint
 # from setup_model import set_up_constraint, mlp_model
 from _optimize_stochgall import optimize
-from text_utilities import get_text_supervision_data
+from setup_model import mlp_model
 
 
 class ALL(BaseClassifier):
@@ -29,8 +19,6 @@ class ALL(BaseClassifier):
     ----------
     max_iter : int, default=300
         For optimize
-
-    log_name : Can be added, need to deal with some issues with imports
 
     """
 
@@ -57,21 +45,18 @@ class ALL(BaseClassifier):
 
         Parameters
         ----------
-        X : ndarray of shape (n_examples, n_features)      
+        X: ndarray of shape (n_examples, n_features)
             Training matrix, where n_examples is the number of examples and 
             n_features is the number of features for each example
 
-
-        weak_signals_proba : ndarray of shape (n_weak_signals, n_examples, n_classes)
+        weak_signals_probas: ndarray of shape (n_weak_signals, n_examples, n_classes)
             A set of soft or hard weak estimates for data examples.
             This may later be changed to accept just the weak signals, and these 
             probabilities will be calculated within the ALL class. 
 
-        weak_signals_error_bounds : dictionary
+        weak_signals_error_bounds: dictionary
             error constraints (a_matrix and bounds) of the weak signals. Contains both 
             left (a_matrix) and right (bounds) hand matrix of the inequality 
-
-        weak_signals_precision : ndarray of shape (n_weak_signals, n_class)
 
         Returns
         -------
@@ -105,8 +90,8 @@ class ALL(BaseClassifier):
         m = 2 if k == 1 else k
 
         # initialize final values
-        learnable_probabilities = np.ones((n,k)) * 1/m
-        y = np.ones((n,k)) * 0.1
+        learnable_probabilities = np.ones((n, k)) * 1/m
+        y = np.ones((n, k)) * 0.1
         assert y.shape[0] == X.shape[0]
 
         # initialize hyperparams todo: can this be in init?

@@ -11,7 +11,7 @@ from load_image_data import load_image_data
 from log import Logger, log_results
 
 # Import models
-from old_ALL import old_ALL
+from OldAll import OldAll
 from ALL_model import ALL
 from cll_model import CLL
 from data_consistency_model import DataConsistency
@@ -35,7 +35,7 @@ from PIL import Image
         1. Old ALL (Binary labels only)
         2. ALL (Multi label and Abstaining signals supported)
         3. CLL     
-        4. Data Consitency
+        4. Data Consistency
 """
 
 
@@ -70,12 +70,11 @@ def run_experiments(dataset, set_name, date):
     test_accuracy = []
     log_name = date + "/" + set_name
 
-
-    # set up error bounds.... different for every algorithm
+    # set up error bounds
     weak_errors = np.ones((m, k)) * 0.01
     try:
         matrix_weak_errors = dataset['weak_errors']
-    except:
+    except KeyError:
         matrix_weak_errors = weak_errors
 
     # cll_setup_weak_errors = multi_all_weak_errors
@@ -85,26 +84,26 @@ def run_experiments(dataset, set_name, date):
     error_set = [weak_errors, matrix_weak_errors, matrix_weak_errors, matrix_weak_errors]
 
     # set up algorithms
-    experiment_names = ["Binary-Label ALL", "Multi-Label ALL", "CLL", "Data Consistancy"]
-    binary_all = old_ALL(max_iter=10000, log_name=log_name+"/BinaryALL")
+    experiment_names = ["Binary-Label ALL", "Multi-Label ALL", "CLL", "Data Consistency"]
+    binary_all = OldAll(max_iter=10000, log_name=log_name + "/BinaryALL")
 
     if set_name == 'fashion':
         multi_all = ALL(loss='multiclass')
     else:
         multi_all = ALL()
-    Constrained_Labeling = CLL(log_name=log_name+"/CLL")
-    Data_Consitancy = DataConsistency(log_name=log_name+"/Const")
+    constrained_labeling = CLL(log_name=log_name+"/CLL")
+    data_consistency = DataConsistency(log_name=log_name+"/Const")
 
-    models = [binary_all, multi_all, Constrained_Labeling, Data_Consitancy]
+    models = [binary_all, multi_all, constrained_labeling, data_consistency]
 
     all_data = True
     # Loop through each algorithm
     for model_np, model in enumerate(models):
-        print("\n\nWORKING WITH:", experiment_names[model_np])
+        print("\n\nRunning experiment using", experiment_names[model_np])
 
         # skip binary all on multi label or abstaining signal set
         # if model_np == 0 or model_np==1:
-        if model_np == 0 :
+        if model_np == 0:
             if set_name == 'sst-2' or set_name == 'imdb' or set_name == 'fashion':
                 print("    Skipping binary ALL with multiclass data ")
                 all_data = False
@@ -129,14 +128,11 @@ def run_experiments(dataset, set_name, date):
 
         train_accuracy.append(train_acc)
         test_accuracy.append(test_acc)
-        if train_acc < 0.5 or test_acc < 0.5:
-            print("uhoh")
-            exit()
 
     if all_data:
         print('\n\nLogging results\n\n')
         acc_logger = Logger("logs/" + log_name + "/accuracies")
-        plot_path =  "./logs/" + log_name
+        plot_path = "./logs/" + log_name
         log_results(train_accuracy, acc_logger, plot_path, 'Accuracy on training data')
         log_results(test_accuracy, acc_logger, plot_path, 'Accuracy on testing data')
 

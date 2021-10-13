@@ -1,14 +1,11 @@
-
-
-
 import random
+import sys
 import numpy as np # baseclass
 
 from BaseClassifier import BaseClassifier
 
-
 from sklearn.linear_model import LogisticRegression
-from sklearn.metrics import accuracy_score # base class
+from sklearn.metrics import accuracy_score  # base class
 from abc import ABC, abstractmethod
 from tensorflow.python.keras.models import Sequential
 from tensorflow.python.keras.layers import Dropout, Dense
@@ -17,7 +14,7 @@ from scipy.optimize import minimize
 from log import Logger
 
 
-class old_ALL(BaseClassifier):
+class OldAll(BaseClassifier):
     """
     Adversarial Label Learning Classifier
 
