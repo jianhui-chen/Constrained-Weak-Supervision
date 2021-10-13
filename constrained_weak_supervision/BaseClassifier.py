@@ -62,7 +62,6 @@ class BaseClassifier(ABC):
         score = accuracy_score(true_labels.flatten(), self.predict(predicted_probas))
         return score
 
- 
     def predict_proba(self, X):   
         """
         Computes probability estimates for given class

@@ -71,20 +71,23 @@ def run_experiments(dataset, set_name, date):
     log_name = date + "/" + set_name
 
     # set up error bounds
-    weak_errors = np.ones((m, k)) * 0.01
+    weak_errors = np.ones((m, k)) * 0.01  # default value
     try:
-        matrix_weak_errors = dataset['weak_errors']
+        constraint_set = dataset['weak_errors']
     except KeyError:
-        matrix_weak_errors = weak_errors
+        constraint_set = weak_errors
 
     # cll_setup_weak_errors = multi_all_weak_errors
-    matrix_weak_errors = set_up_constraint(weak_signals, np.zeros(weak_errors.shape), matrix_weak_errors)['error']
-    # matrix_weak_errors = cll_setup(weak_signals, cll_setup_weak_errors)
+    constraint_set = set_up_constraint(weak_signals, np.zeros(weak_errors.shape), constraint_set)['error']
+    # constraint_set = cll_setup(weak_signals, cll_setup_weak_errors)
 
-    error_set = [weak_errors, matrix_weak_errors, matrix_weak_errors, matrix_weak_errors]
+    # workaround for an incompatiblity with Binary-Label ALL
+    experiment_constraints = [weak_errors, constraint_set, constraint_set, constraint_set]
 
     # set up algorithms
     experiment_names = ["Binary-Label ALL", "Multi-Label ALL", "CLL", "Data Consistency"]
+    
+    # instantiate learner objects for all methods
     binary_all = OldAll(max_iter=10000, log_name=log_name + "/BinaryALL")
 
     if set_name == 'fashion':
@@ -94,47 +97,41 @@ def run_experiments(dataset, set_name, date):
     constrained_labeling = CLL(log_name=log_name+"/CLL")
     data_consistency = DataConsistency(log_name=log_name+"/Const")
 
-    models = [binary_all, multi_all, constrained_labeling, data_consistency]
+    experiment_models = [binary_all, multi_all, constrained_labeling, data_consistency]
 
-    all_data = True
     # Loop through each algorithm
-    for model_np, model in enumerate(models):
-        print("\n\nRunning experiment using", experiment_names[model_np])
+    for model_index, model in enumerate(experiment_models):
+        print("\n\nRunning experiment using", experiment_names[model_index])
 
         # skip binary all on multi label or abstaining signal set
-        # if model_np == 0 or model_np==1:
-        if model_np == 0:
+        if model_index == 0:
             if set_name == 'sst-2' or set_name == 'imdb' or set_name == 'fashion':
-                print("    Skipping binary ALL with multiclass data ")
-                all_data = False
-                continue 
-        # if model_np == 2 or model_np == 0:
-        # if model_np != 1:
-        #     continue
+                print("    Skipping binary ALL because data is multi-class or has abstaining signals ")
+                train_accuracy.append(0)
+                test_accuracy.append(0)
+                continue
 
-        model.fit(train_data, weak_signals, error_set[model_np])
+        model.fit(train_data, weak_signals, experiment_constraints[model_index])
 
         """Predict_proba"""
         train_probas = model.predict_proba(train_data)
-  
         train_acc = model.get_accuracy(train_labels, train_probas)
 
         test_probas = model.predict_proba(test_data)
         test_acc = model.get_accuracy(test_labels, test_probas)
 
-        print("\nresults using predict_proba:")
+        print("\nUsing {}:".format(experiment_names[model_index]))
         print("    Train Accuracy is: ", train_acc)
         print("    Test Accuracy is: ", test_acc)
 
         train_accuracy.append(train_acc)
         test_accuracy.append(test_acc)
 
-    if all_data:
-        print('\n\nLogging results\n\n')
-        acc_logger = Logger("logs/" + log_name + "/accuracies")
-        plot_path = "./logs/" + log_name
-        log_results(train_accuracy, acc_logger, plot_path, 'Accuracy on training data')
-        log_results(test_accuracy, acc_logger, plot_path, 'Accuracy on testing data')
+    print('\n\nLogging results\n\n')
+    acc_logger = Logger("logs/" + log_name + "/accuracies")
+    plot_path = "./logs/" + log_name
+    log_results(train_accuracy, acc_logger, plot_path, 'Accuracy on training data')
+    log_results(test_accuracy, acc_logger, plot_path, 'Accuracy on testing data')
 
 
 if __name__ == '__main__':

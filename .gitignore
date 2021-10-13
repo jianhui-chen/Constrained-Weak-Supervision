@@ -1,0 +1,6 @@
+constrained_weak_supervision/logs/*
+*.pyc
+*.DS_store
+venv/*
+.idea
+.idea/*
