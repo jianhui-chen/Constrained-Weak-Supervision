@@ -1,131 +1,102 @@
+import os, json
 import numpy as np 
 import tensorflow as tf
 
-from tensorflow.keras import layers
 from tensorflow.python.keras.models import Sequential
 from tensorflow.python.keras.layers import Dropout, Dense
 
 
+def read_text_data(datapath):
+    """ Read text datasets """
 
-"""
-in...
-    - _optimize_stochgall.py
-    - ALL_modle.py
-    - maybe old_ALL????
-    
-decide a name for it... bound_loss or gamma_gradient
-"""
-#def bound_loss(y, a_matrix, active_mask, constant, bounds):
-def gamma_gradient(y, a_matrix, constant, bounds):
+    train_data = np.load(datapath + 'data_features.npy', allow_pickle=True)[()]
+    weak_signals = np.load(datapath + 'weak_signals.npy', allow_pickle=True)[()]
+    train_labels = np.load(datapath + 'data_labels.npy', allow_pickle=True)[()]
+    test_data = np.load(datapath +'test_features.npy', allow_pickle=True)[()]
+    test_labels = np.load(datapath + 'test_labels.npy', allow_pickle=True)[()]
+
+    if len(weak_signals.shape) == 2:
+        weak_signals = np.expand_dims(weak_signals.T, axis=-1)
+
+    # if weak_signals.shape[2] == 1:
+    #     train_labels = np.squeeze(train_labels)
+    #     test_labels = np.squeeze(test_labels)
+
+    data = {}
+    data['train'] = train_data, train_labels
+    data['test'] = test_data, test_labels
+    data['weak_signals'] = weak_signals
+    return data
+
+
+def writeToFile(data, filename):
+    """ Save data in json format """
+
+    json.dump(data,
+              codecs.open(filename, 'w', encoding='utf-8'),
+              separators=(',', ':'),
+              sort_keys=True,
+              indent=4)
+
+
+def majority_vote_signal(weak_signals):
     """
+    Calculate majority vote labels for the weak_signals
 
     Parameters
     ----------
-    y: ndarray of size (n_data_points, num_class)
-        estimated labels for the data
-
-    a_matrix: ndarray of  size (num_weak, n, num_class)
-        constraint matrix
-
-    constant: ndarray of size (num_weak, n, num_class)
-        constant
-
-    bounds: ndarray of size (num_weak, num_class)
-         bounds for the constraint
+    weak_signals: ndarray of shape (num_weak, num_examples, num _class)
+        weak signal probabilites containing -1 for abstaining signals, and between
+        0 to 1 for non-abstaining
 
     Returns
     -------
-
-
-    Computes the gradient of lagrangian inequality penalty parameters
-
-
-    :param a_matrix: size (num_weak, n, num_class) of a constraint matrix
-    :type a_matrix: ndarray
-
-    :param constant: size (num_weak, n, num_class) of the constant
-    :type constant: ndarray
-    :param bounds: size (num_weak, num_class) of the bounds for the constraint
-    :type bounds: ndarray
-    :return: loss of the constraint set wrt adversarial ys
-    :rtype: ndarray
+    mv_weak_labels: ndarray of shape (num_examples, num_class)
+        fitted  Data consistancy algorithm
     """
-    constraint = np.zeros(bounds.shape)
-    # n, k = y.shape
 
-    for i, current_a in enumerate(a_matrix):
-        #constraint[i] = np.sum((active_mask[i]*current_a) * y + (constant[i]*active_mask[i]), axis=0)
-        constraint[i] = np.sum(current_a * y + constant[i], axis=0)
-    return constraint - bounds
+    baseline_weak_labels = np.rint(weak_signals)
+    mv_weak_labels = np.ones(baseline_weak_labels.shape)
 
+    mv_weak_labels[baseline_weak_labels == -1] = 0
+    mv_weak_labels[baseline_weak_labels == 0] = -1
 
-
-
-
-
-###########################################################################
-######################### OTHER MODELS ####################################
-###########################################################################
-
-"""
-    Maybe move this here from label estimators
-"""
-def _mlp_model(self, dimension, output):
-        """ 
-            Builds Simple MLP model
-
-            Parameters
-            ----------
-            :param dimension: amount of input
-            :type  dimension: int
-            :param output: amount of final states
-            :type  output: int
-
-            Returns
-            -------
-            :returns: Simple MLP 
-            :return type: Sequential tensor model
-        """
-
-        model = Sequential()
-        model.add(Dense(512, activation='relu', input_shape=(dimension,)))
-        model.add(Dense(256, activation='relu'))
-        model.add(Dropout(0.2))
-        model.add(Dense(64, activation='relu'))
-        model.add(Dense(output, activation='sigmoid'))
-
-        model.compile(loss='binary_crossentropy',
-                    optimizer='adagrad', metrics=['accuracy'])
-
-        return model
+    mv_weak_labels = np.sign(np.sum(mv_weak_labels, axis=0))
+    break_ties = np.random.randint(2, size=int(np.sum(mv_weak_labels == 0)))
+    mv_weak_labels[mv_weak_labels == 0] = break_ties
+    mv_weak_labels[mv_weak_labels == -1] = 0
+    return mv_weak_labels
 
 
-"""
-    Maybe move this here from data_consistency
-"""
-def _simple_nn(self, dimension, output):
-        """ 
-        Data consistent model
+def convert_to_ovr_signals(weak_signals):
+    return weak_signals
+
+
+def mlp_model(dimension, output):
+    """
+        Builds Simple MLP model
 
         Parameters
         ----------
-        dimension: list with two valuse [num_examples, num_features]
-            first value is number of training examples, second is 
-            number of features for each example
-
-
-        output: int
-            number of classes
+        :param dimension: amount of input
+        :type  dimension: int
+        :param output: amount of final states
+        :type  output: int
 
         Returns
         -------
-        mv_weak_labels: ndarray of shape (num_examples, num_class)
-            fitted  Data consistancy algorithm
-        """
+        :returns: Simple MLP
+        :return type: Sequential tensor model
+    """
+    actv = 'sigmoid' if output == 1 else 'softmax'
+    loss = 'binary_crossentropy' if output == 1 else 'categorical_crossentropy'
+    model = Sequential()
+    model.add(Dense(512, activation='relu', input_shape=(dimension,)))
+    model.add(Dense(512, activation='relu'))
+    model.add(Dropout(0.2))
+    model.add(Dense(output, activation='sigmoid'))
 
-        actv = 'softmax' if output > 1 else 'sigmoid'
-        model = tf.keras.Sequential()
-        model.add(layers.Dense(512, activation='relu', input_shape=(dimension,)))
-        model.add(layers.Dropout(0.2))
-        model.add(layers.Dense(output, activation=actv))
-        return model
+    model.compile(loss='binary_crossentropy',
+                optimizer='adagrad', metrics=['accuracy'])
+
+    return model

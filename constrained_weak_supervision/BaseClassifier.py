@@ -3,6 +3,7 @@ import numpy as np
 
 from abc import ABC, abstractmethod
 from sklearn.metrics import accuracy_score
+from sklearn.metrics import f1_score
 
 
 class BaseClassifier(ABC):
@@ -11,94 +12,80 @@ class BaseClassifier(ABC):
 
     Constructors are all defined in subclasses
 
-    Current purely abstract methods are:
-    - fit
     """
 
-    def predict(self, predicted_probas):
+    @abstractmethod
+    def predict(self, X):
         """
-        Computes predicted labels based on probability predictions.
-        
-        NOTE: It may be good to have a version that takes in data X, instead
-        of precomputed probabilities. 
+        Computes predicted classes for the weak signals.
 
         Parameters
         ----------
-        predicted_probas : ndarray of shape (n_examples,)
-            Precomputed probabilities
+        weak_signals : ndarray of either weak signals or data depending on the algorithm
 
         Returns
         -------
-        predicted_labels : ndarray of shape (n_examples,)
-            Binary labels
+        predicted classes : ndarray array of predicted classes
         """
-  
-        predicted_labels = np.zeros(predicted_probas.size)
+        pass
 
-        # could also implement by rounding
-        predicted_labels[predicted_probas > 0.5] =1  
-          
-        return predicted_labels
-    
-    def get_accuracy(self, true_labels, predicted_probas):
+
+    @abstractmethod
+    def get_score(self, true_labels, predicted_labels, metric):
         """
-        Computes accuracy of predicted labels based on the true labels.
-        This may be good to move out of the class, also make it take in 
-        predicted labels, not probas.
+        Computes metrics of predicted labels based on the true labels.
 
         Parameters
         ----------
-        true_labels : ndarray of shape (n_examples,)
+        true_labels : ndarray
 
-        predicted_probas : ndarray of shape (n_examples,)
-            I don't know why I pass in probas instead of labels
+        predicted_labels : ndarray
+
+        metric : supports accuracy and F1 score
 
         Returns
         -------
         score : float
-            Value between 0 to 1.00
+            Value between 0 to 1.0
 
         """
-        score = accuracy_score(true_labels.flatten(), self.predict(predicted_probas))
-        return score
+        assert true_labels.shape == predicted_labels.shape, "True labels and predicted labels shape do not match"
+        if len(predicted_labels.shape) == 2:
+            true_labels = np.argmax(true_labels, axis=-1)
+            predicted_labels = np.argmax(predicted_labels, axis=-1)
 
-    def predict_proba(self, X):   
+        if metric == 'f1':
+            return f1_score(true_labels, np.round(predicted_labels), average='micro')
+        return accuracy_score(true_labels, np.round(predicted_labels))
+
+
+    @abstractmethod
+    def predict_proba(self, X):
         """
         Computes probability estimates for given class
         Should be able to be extendable for multi-class implementation
 
         Parameters
         ----------
-        X : ndarray of shape (n_features, n_examples)
-            Examples to be assigned a probability (binary)
-
+        X : ndarray of either weak signals or data depending on the algorithm
 
         Returns
         -------
-        probas : ndarray of shape (n_examples,)
+        probas : ndarray of label probabilities
 
         """
-        
-        if self.weights is None:
-            sys.exit("No Data fit")
-        
-        try: 
-            y = self.weights.dot(X)
-        except:
-            y = X.dot(self.weights)
+        pass
 
-        # first line of logistic from orig code, squishes y values
-        probas = 1 / (1 + np.exp(-y))    
-        
-        return probas.ravel()
 
     @abstractmethod 
-    def fit(self, X, weak_signals_probas, weak_signals_error_bounds):
+    def fit(self, weak_signals, weak_signal_error_bounds):
         """
         Abstract method to fit models
 
         Parameters
         ----------
-        X : ndarry 
+        weak_signals : ndarray of weak signals
+
+        weak_signal_error_bounds : ndarray of weak signals error bounds
         """
         pass

@@ -1,23 +1,14 @@
 import numpy as np
-import matplotlib.pyplot as plt
 import tensorflow as tf
 
 from datetime import datetime
-
-from data_readers import read_text_data
-from constraints import set_up_constraint
-from image_utilities import get_image_supervision_data
-from load_image_data import load_image_data
-from log import Logger, log_results
+from utilities import *
 
 # Import models
-from OldAll import OldAll
-from ALL_model import ALL
-from cll_model import CLL
-from data_consistency_model import DataConsistency
-
-from GEModel import GECriterion 
-from PIL import Image
+from ALL import ALL
+# from MultiALL import MultiALL
+from CLL import CLL
+from DCWS import DataConsistency
 
 
 """
@@ -25,21 +16,40 @@ from PIL import Image
         1. SST-2
         2. IMDB
         3. Cardio
-        4. OBS
+        4. Phishing
         5. Breast Cancer
+        6. Yelp
     
     Multi-Class Datasets:
-        1. Fashion
+        1. Fashion Mnist
+        2. SVHN
 
     Algorithms:
-        1. Old ALL (Binary labels only)
-        2. ALL (Multi label and Abstaining signals supported)
+        1. ALL (Binary datasets only)
+        2. Multi-ALL
         3. CLL     
-        4. Data Consistency
+        4. DCWS
+
+    Weak Signals:
+        -1 for abstain, 1 for positive labels and 0 for negative labels
+        Supports 2D weak signals for both binary and multi-class data: num_examples vs num_signals
+            For multi-class the signals are given as class labels [0, 1, 2, 3]
+            -1 is abstain
+            See synthetic experiment
+
+        Supports One-vs-rest weak signals: num_signals vs num_examples vs num_classes
+            Weak signals are 3D array
+            See run experiments
+
 """
 
+def synthetic_experiment():
+    # Test with default 2D weak signals for all methods
+    # Test with ovr signals
+    pass
 
-def run_experiments(dataset, set_name, date):
+
+def run_experiments(dataset):
     """ 
         sets up and runs experiments on various algorithms
 
@@ -49,12 +59,6 @@ def run_experiments(dataset, set_name, date):
             contains training set, testing set, and weak signals 
             of read in data
         
-        set_name : str
-            current name of dataset for logging purposes 
-
-        date : str
-            current date and time in format Y_m_d-I:M:S_p
-
         Returns
         -------
         nothing
@@ -63,92 +67,84 @@ def run_experiments(dataset, set_name, date):
     train_data, train_labels = dataset['train']
     test_data, test_labels = dataset['test']
     weak_signals = dataset['weak_signals']
-    m, n, k = weak_signals.shape
+    m, n, num_classes = weak_signals.shape
 
-    # set up variables
-    train_accuracy = []
-    test_accuracy = []
-    log_name = date + "/" + set_name
+    #####################################################################
+    #### ALL
+    if num_classes <= 2:
+        all_model = ALL()
+        all_model.fit(train_data, weak_signals)
+        predicted_labels = all_model.predict_proba(train_data)
+        predicted_classes = all_model.predict(train_data)
 
-    # set up error bounds
-    weak_errors = np.ones((m, k)) * 0.01  # default value
-    try:
-        constraint_set = dataset['weak_errors']
-    except KeyError:
-        constraint_set = weak_errors
+        assert all_model.get_score(np.round(predicted_labels), predicted_classes) == 1.0
 
-    # cll_setup_weak_errors = multi_all_weak_errors
-    constraint_set = set_up_constraint(weak_signals, np.zeros(weak_errors.shape), constraint_set)['error']
-    # constraint_set = cll_setup(weak_signals, cll_setup_weak_errors)
+        print(f"The train accuracy of ALL is: {all_model.get_score(train_labels, predicted_labels)}")
+        test_pred = all_model.predict_proba(test_data)
+        print(f"The test F-score of ALL is: {all_model.get_score(test_labels, test_pred, metric='accuracy')}")
+        print()
+    ###################################################################
+    #### MultiALL
 
-    # workaround for an incompatiblity with Binary-Label ALL
-    experiment_constraints = [weak_errors, constraint_set, constraint_set, constraint_set]
+    # multiall = MultiALL()
+    # multiall.fit(train_data, weak_signals)
+    # predicted_labels = multiall.predict_proba(train_data)
+    # predicted_classes = multiall.predict(train_data)
 
-    # set up algorithms
-    experiment_names = ["Binary-Label ALL", "Multi-Label ALL", "CLL", "Data Consistency"]
-    
-    # instantiate learner objects for all methods
-    binary_all = OldAll(max_iter=10000, log_name=log_name + "/BinaryALL")
+    # assert all_model.get_score(predicted_labels, predicted_classes) == 1.0
 
-    if set_name == 'fashion':
-        multi_all = ALL(loss='multiclass')
-    else:
-        multi_all = ALL()
-    constrained_labeling = CLL(log_name=log_name+"/CLL")
-    data_consistency = DataConsistency(log_name=log_name+"/Const")
+    # print(f"The train accuracy of MultiALL is: {multi_all.get_score(self, train_labels, predicted_labels)}")
+    # test_pred = multiall.predict_proba(test_data)
+    # print(f"The test F-score of MultiALL is: {multi_all.get_score(self, test_labels, test_pred, metric="f1")}")
+    # print()
+    ###################################################################
+    ### CLL
 
-    experiment_models = [binary_all, multi_all, constrained_labeling, data_consistency]
+    cll = CLL()
+    cll.fit(weak_signals)
+    predicted_labels = cll.predict_proba(weak_signals)
+    predicted_classes = cll.predict(predicted_labels)
 
-    # Loop through each algorithm
-    for model_index, model in enumerate(experiment_models):
-        print("\n\nRunning experiment using", experiment_names[model_index])
+    print(f"The train accuracy of CLL is: {cll.get_score(train_labels, predicted_labels)}")
+    print()
+    ###################################################################
+    ### DCWS
 
-        # skip binary all on multi label or abstaining signal set
-        if model_index == 0:
-            if set_name == 'sst-2' or set_name == 'imdb' or set_name == 'fashion':
-                print("    Skipping binary ALL because data is multi-class or has abstaining signals ")
-                train_accuracy.append(0)
-                test_accuracy.append(0)
-                continue
+    dcws = DataConsistency()
+    dcws.fit(train_data, weak_signals)
+    predicted_labels = np.squeeze(dcws.predict_proba(train_data))
+    predicted_classes = dcws.predict(train_data)
 
-        model.fit(train_data, weak_signals, experiment_constraints[model_index])
+    print(f"The train accuracy of DCWS is: {dcws.get_score(train_labels, predicted_labels)}")
+    test_pred = np.squeeze(dcws.predict_proba(test_data))
+    print(f"The test F-score of DCWS is: {dcws.get_score(test_labels, test_pred, metric='f1')}")
+    print()
+    # ###################################################################
+    #### Train an end model
 
-        """Predict_proba"""
-        train_probas = model.predict_proba(train_data)
-        train_acc = model.get_accuracy(train_labels, train_probas)
+    model = mlp_model(train_data.shape[1], num_classes)
+    model.fit(train_data, train_labels, batch_size=32, epochs=20, verbose=1)
+    test_predictions = np.squeeze(model.predict(test_data))
+    print(f"The test accuracy is: {dcws.get_score(test_labels, test_predictions)}")
 
-        test_probas = model.predict_proba(test_data)
-        test_acc = model.get_accuracy(test_labels, test_probas)
-
-        print("\nUsing {}:".format(experiment_names[model_index]))
-        print("    Train Accuracy is: ", train_acc)
-        print("    Test Accuracy is: ", test_acc)
-
-        train_accuracy.append(train_acc)
-        test_accuracy.append(test_acc)
-
-    print('\n\nLogging results\n\n')
-    acc_logger = Logger("logs/" + log_name + "/accuracies")
-    plot_path = "./logs/" + log_name
-    log_results(train_accuracy, acc_logger, plot_path, 'Accuracy on training data')
-    log_results(test_accuracy, acc_logger, plot_path, 'Accuracy on testing data')
 
 
 if __name__ == '__main__':
+    # print("Running synthetic experiments...")
 
+    print("Running real experiments...")
     # text and tabular experiments:
-    dataset_names = ['sst-2', 'imdb', 'obs', 'cardio', 'breast-cancer']
-    # dataset_names = ['obs', 'cardio', 'breast-cancer']
+    # run_experiments(read_text_data('../datasets/imbd/'))
+    # run_experiments(read_text_data('../datasets/yelp/'))
+    run_experiments(read_text_data('../datasets/sst-2/'))
+    # run_experiments(load_image_signals('../datasets/svhn'), 'svhn')
+    # run_experiments(load_image_signals('../datasets/fashion-mnist'))
+    # run_experiments(load_svhn(),'svhn')
+    # run_experiments(load_fashion_mnist(),'fmnist')
 
-    date = datetime.now().strftime("%Y_%m_%d-%I:%M:%S_%p")
-    for name in dataset_names:
-        print("\n\n\n# # # # # # # # # # # #")
-        print("#  ", name, "experiment  #")
-        print("# # # # # # # # # # # #")
-        run_experiments(read_text_data('../datasets/' + name + '/'), name, date)
 
-    # Image experiments
-    print("\n\n\n# # # # # # # # # # # #")
-    print("#  fashion experiment #")
-    print("# # # # # # # # # # # #")
-    run_experiments(load_image_data(), 'fashion', date)
+    # experiments for datasets used in ALL
+    # run_experiments(read_text_data('../datasets/breast-cancer/'))
+    # run_experiments(read_text_data('../datasets/obs-network/'))
+    # run_experiments(read_text_data('../datasets/cardiotocography/'))
+    # run_experiments(read_text_data('../datasets/phishing/'))
