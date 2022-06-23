@@ -5,10 +5,10 @@ from datetime import datetime
 from utilities import *
 
 # Import models
-from ALL import ALL
+#from ALL import ALL
 # from MultiALL import MultiALL
 from CLL import CLL
-from DCWS import DataConsistency
+#from DCWS import DataConsistency
 
 
 """
@@ -71,6 +71,7 @@ def run_experiments(dataset):
 
     #####################################################################
     #### ALL
+    """
     if num_classes <= 2:
         all_model = ALL()
         all_model.fit(train_data, weak_signals)
@@ -83,6 +84,7 @@ def run_experiments(dataset):
         test_pred = all_model.predict_proba(test_data)
         print(f"The test F-score of ALL is: {all_model.get_score(test_labels, test_pred, metric='accuracy')}")
         print()
+    """
     ###################################################################
     #### MultiALL
 
@@ -109,7 +111,7 @@ def run_experiments(dataset):
     print()
     ###################################################################
     ### DCWS
-
+    """
     dcws = DataConsistency()
     dcws.fit(train_data, weak_signals)
     predicted_labels = np.squeeze(dcws.predict_proba(train_data))
@@ -119,14 +121,15 @@ def run_experiments(dataset):
     test_pred = np.squeeze(dcws.predict_proba(test_data))
     print(f"The test F-score of DCWS is: {dcws.get_score(test_labels, test_pred, metric='f1')}")
     print()
+    """
     # ###################################################################
     #### Train an end model
-
+    """
     model = mlp_model(train_data.shape[1], num_classes)
     model.fit(train_data, train_labels, batch_size=32, epochs=20, verbose=1)
     test_predictions = np.squeeze(model.predict(test_data))
     print(f"The test accuracy is: {dcws.get_score(test_labels, test_predictions)}")
-
+    """
 
 
 if __name__ == '__main__':
