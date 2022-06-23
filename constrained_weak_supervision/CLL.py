@@ -4,8 +4,7 @@ import numpy as np
 from BaseClassifier import BaseClassifier
 from ConstraintEstimator import ConstraintEstimator
 from utilities import convert_to_ovr_signals
-#from log import Logger
-import logging
+from log import Logger
 
 class CLL(BaseClassifier):
     """
@@ -29,9 +28,6 @@ class CLL(BaseClassifier):
 
         self.max_iter = max_iter
         self.num_trials = num_trials
-
-        Logger = logging.getLogger("example_logger")
-
 
         if log_name is None:
             self.logger = None

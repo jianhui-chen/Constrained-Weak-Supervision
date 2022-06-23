@@ -38,7 +38,7 @@ ALL (aka MultiAlL):
 Is built off of the BaseClassifier abstract class in Baseclassifier.py. The most important script is the old_ALL.py script that contains implementation of the algorithm inside of the ALL class.
 
 CLL:
-Is built off of the Label Estimator abstract class in LabelEstimators.py. The most important script is the LabelEstimators.py script that contains implementation of the algorithm inside of the CLL class.
+Is built off of the Constraint Estimator abstract class in ConstraintEstimators.py. The most important script is the ConstraintEstimators.py script that contains implementation of the algorithm inside of the CLL class.
 
 Data Consistancy:
 Is built off of the Label Estimator abstract class in LabelEstimators.py. The most important script is the LabelEstimators.py script that contains implementation of the algorithm inside of the DataConsistency class.
@@ -50,7 +50,7 @@ We have provided a run_experiment that runs experiments on the real datasets pro
 
 # Logging
 
-Logging id done via TensorBoard and each run is stored by the date/time the expirment was started, and then by dataset, and then by algorithm. Use:
+Logging is done via TensorBoard and each run is stored by the date/time the expirment was started, and then by dataset, and then by algorithm. Use:
 
 tensorboard --logdir=logs/data_and_time/data_set/algorithm
 
