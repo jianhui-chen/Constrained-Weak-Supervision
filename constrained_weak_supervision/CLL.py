@@ -26,6 +26,12 @@ class CLL(BaseClassifier):
 
     def __init__(self, max_iter=300, num_trials=3, log_name=None,):
 
+        """
+        Logging is done via TensorBoard 
+        Each run is stored by the date/time the expirment was started, and then by dataset, and then by algorithm. 
+        Use: tensorboard --logdir=logs/data_and_time/data_set/algorithm
+        """
+
         self.max_iter = max_iter
         self.num_trials = num_trials
 
