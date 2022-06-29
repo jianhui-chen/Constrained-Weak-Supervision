@@ -27,9 +27,9 @@ class CLL(BaseClassifier):
     def __init__(self, max_iter=300, num_trials=3, log_name=None,):
 
         """
-        Logging is done via TensorBoard 
-        Each run is stored by the date/time the expirment was started, and then by dataset, and then by algorithm. 
-        Use: tensorboard --logdir=logs/data_and_time/data_set/algorithm
+        Logging is done via TensorBoard. 
+        The suggested storage format for each run is by the date/time the expirment was started, 
+        and then by dataset, and then by algorithm.
         """
 
         self.max_iter = max_iter
@@ -151,26 +151,6 @@ class CLL(BaseClassifier):
         """
         cons = ConstraintEstimator(error_threshold=0)
         self.constraints = cons.error_constraint(weak_signals, weak_signals_error_bounds)
-
-
-    def get_score(self, true_labels, predicted_probas, metric='accuracy'):
-        """
-        Calculate accuracy of the model
-
-        Parameters
-        ----------
-        :param true_labels: true labels of data set
-        :type  true_labels: ndarray
-        :param predicted_probas: Estimated labels that where trained on
-        :type  predicted_probas: ndarray
-
-        Returns
-        -------
-        :return: percent accuary of Estimated labels given the true labels
-        :rtype: float
-        """
-        score = super().get_score(true_labels, predicted_probas, metric)
-        return score
 
 
     def predict_proba(self, weak_signals):

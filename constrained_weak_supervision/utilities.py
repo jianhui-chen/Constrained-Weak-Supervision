@@ -12,7 +12,7 @@ def read_text_data(datapath):
     train_data = np.load(datapath + 'data_features.npy', allow_pickle=True)[()]
     weak_signals = np.load(datapath + 'weak_signals.npy', allow_pickle=True)[()]
     train_labels = np.load(datapath + 'data_labels.npy', allow_pickle=True)[()]
-    test_data = np.load(datapath +'test_features.npy', allow_pickle=True)[()]
+    test_data = np.load(datapath + 'test_features.npy', allow_pickle=True)[()]
     test_labels = np.load(datapath + 'test_labels.npy', allow_pickle=True)[()]
 
     if len(weak_signals.shape) == 2:
