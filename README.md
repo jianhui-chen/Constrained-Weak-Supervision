@@ -6,7 +6,6 @@ This repository contains code for the following papers
     * Data Consistency for Weakly Supervised Learning
 
 
-NOTE: DO WE NEED THIS????
 If you use this work in an academic study, please cite our paper
 
 ```
@@ -23,19 +22,17 @@ If you use this work in an academic study, please cite our paper
 # Requirements
 
 The library is tested in Python 3.6 and 3.7. Its main requirements are
-scipy and numpy. Scikit-learn is also required to run the experiments
-
-NOTE: Maybe add:
-    *tensorflow?
+scipy and numpy. Scikit-learn is also required to run the experiments.
+Tensorflow is required to for logging purpose.
 
 
 # Algorithms
 
-old_ALL:
-Is built off of the BaseClassifier abstract class in Baseclassifier.py. The most important script is the old_ALL.py script that contains implementation of the algorithm inside of the old_ALL class.
+ALL:
+Is built off of the BaseClassifier abstract class in Baseclassifier.py. The most important script is the ALL.py script that contains implementation of the algorithm inside of the ALL class.
 
-ALL (aka MultiAlL):
-Is built off of the BaseClassifier abstract class in Baseclassifier.py. The most important script is the old_ALL.py script that contains implementation of the algorithm inside of the ALL class.
+MultiALL:
+Is built off of the BaseClassifier abstract class in Baseclassifier.py. The most important script is the ALL.py script that contains implementation of the algorithm inside of the MultiALL class.
 
 CLL:
 Is built off of the Constraint Estimator abstract class in ConstraintEstimators.py. The most important script is the ConstraintEstimators.py script that contains implementation of the algorithm inside of the CLL class.
@@ -50,7 +47,7 @@ We have provided a run_experiment that runs experiments on the real datasets pro
 
 # Logging
 
-Logging is done via TensorBoard and each run is stored by the date/time the expirment was started, and then by dataset, and then by algorithm. Use:
+Logging is done via TensorBoard. The suggested storage format for each run is by the date/time the expirment was started, and then by dataset, and then by algorithm. Use:
 
 tensorboard --logdir=logs/data_and_time/data_set/algorithm
 
@@ -63,10 +60,10 @@ tensorboard --logdir=logs/2021_07_28-05:50:52_PM/breast-cancer/CLL
 # Models
 
 NOTE: FIX THIS
-old_ALL:
+ALL:
 The model trained is a logistic regression classifier as reported in the paper. The train_classifier code can be modified to use more advanced classifier
 
-ALL (aka MultiAlL):
+MultiALL:
 
 CLL:
 
@@ -75,10 +72,10 @@ Data Consistancy:
 # Bounds
 
 NOTE: FIX THIS
-old_ALL:
+ALL:
 The model is set to use the True bounds of the data. When this bounds is unknown, the user can provide an upper bounds for the weak signals or use constant bounds in the experiments scripts
 
-ALL (aka MultiAlL):
+MultiALL:
 
 CLL:
 
@@ -87,4 +84,4 @@ Data Consistancy:
 
 # Limitations
 
-The old_ALL algorithm only supports binary classification and weak signals that do not abstain, code for ALL (aka Multi ALL)  fixes these limitations and returns similar results to that of old_ALL. For now, we skip over running these data sets on 
+The ALL algorithm only supports binary classification and weak signals that do not abstain, code for MultiALL fixes these limitations and returns similar results to that of ALL. For now, we skip over running these data sets on 
