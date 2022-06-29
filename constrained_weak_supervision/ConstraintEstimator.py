@@ -229,23 +229,4 @@ class ConstraintEstimator():
             precisions.append(precision)
 
         return error_rates, precisions
-        
-
-    def get_score(self, true_labels, predicted_probas, metric='accuracy'):
-        """
-        Calculate accuracy of the model
-
-        Parameters
-        ----------
-        :param true_labels: true labels of data set
-        :type  true_labels: ndarray
-        :param predicted_probas: Estimated labels that where trained on
-        :type  predicted_probas: ndarray
-
-        Returns
-        -------
-        :return: percent accuary of Estimated labels given the true labels
-        :rtype: float
-        """
-        score = super().get_score(true_labels, predicted_probas, metric)
-        return score
+    

@@ -33,11 +33,13 @@ class ALL(BaseClassifier):
         if log_name is None:
             self.logger = None
         elif type(log_name) is str:
+            
             """
             Logging is done via TensorBoard. 
             The suggested storage format for each run is by the date/time the expirment was started, 
             and then by dataset, and then by algorithm.
             """
+
             self.logger = Logger("logs/" + log_name)      # this can be modified to include date and time in file name
         else:
             sys.exit("Not of string type")
@@ -224,6 +226,24 @@ class ALL(BaseClassifier):
 
             self.weights = weights
 
+    def get_score(self, true_labels, predicted_probas, metric='accuracy'):
+        """
+        Calculate accuracy of the model
+
+        Parameters
+        ----------
+        :param true_labels: true labels of data set
+        :type  true_labels: ndarray
+        :param predicted_probas: Estimated labels that where trained on
+        :type  predicted_probas: ndarray
+
+        Returns
+        -------
+        :return: percent accuary of Estimated labels given the true labels
+        :rtype: float
+        """
+        score = super().get_score(true_labels, predicted_probas, metric)
+        return score
 
     def predict_proba(self, X):
         """

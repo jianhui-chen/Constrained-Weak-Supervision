@@ -3,7 +3,6 @@ import tensorflow as tf
 
 from datetime import datetime
 from utilities import *
-from ConstraintEstimator import ConstraintEstimator
 
 # Import models
 #from ALL import ALL
@@ -108,7 +107,7 @@ def run_experiments(dataset):
     predicted_labels = cll.predict_proba(weak_signals)
     predicted_classes = cll.predict(predicted_labels)
 
-    print(f"The train accuracy of CLL is: {ConstraintEstimator.get_score(train_labels, predicted_labels)}")
+    print(f"The train accuracy of CLL is: {cll.get_score(train_labels, predicted_labels)}")
     print()
     ###################################################################
     ### DCWS
@@ -140,7 +139,7 @@ if __name__ == '__main__':
     # text and tabular experiments:
     # run_experiments(read_text_data('../datasets/imbd/'))
     # run_experiments(read_text_data('../datasets/yelp/'))
-    run_experiments(read_text_data('/Users/jianhuichen/Diamonds/here.git/datasets/sst-2/'))
+    # run_experiments(read_text_data('../datasets/sst-2/'))
     # run_experiments(load_svhn(),'svhn')
     # run_experiments(load_fashion_mnist(),'fmnist')
 
