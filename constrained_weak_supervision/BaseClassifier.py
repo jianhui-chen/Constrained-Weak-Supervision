@@ -30,7 +30,6 @@ class BaseClassifier(ABC):
         pass
 
 
-    @abstractmethod
     def get_score(self, true_labels, predicted_labels, metric):
         """
         Computes metrics of predicted labels based on the true labels.

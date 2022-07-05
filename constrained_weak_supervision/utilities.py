@@ -82,14 +82,14 @@ def convert_to_ovr_signals(weak_signals):
         -------
         weak_signals
     """
-
+    """
     max_weak_signals = max([len(i) for i in weak_signals])
     max_class = []
     for j in range(max_weak_signals - 1):
         max_class.append(max([len(k) for k in weak_signals[j]]))
     abstain = np.full(max_class, -1)
     weak_signals = np.array([j + [abstain] * (max_weak_signals - len(j)) for j in weak_signals], dtype=object)
-    
+    """
     return weak_signals
 
 
