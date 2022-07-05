@@ -151,7 +151,19 @@ class CLL(BaseClassifier):
         """
         cons = ConstraintEstimator(error_threshold=0)
         self.constraints = cons.error_constraint(weak_signals, weak_signals_error_bounds)
-        
+
+        weak_signals = convert_to_ovr_signals(weak_signals)
+        m, n, num_classes = weak_signals.shape
+
+        # initialize y and lists
+        y = np.random.rand(n, num_classes)
+        ys = []
+
+        for i in range(self.num_trials):
+            ys.append(self._run_constraints(y, self.constraints))
+        return ys
+
+
     def predict_proba(self, weak_signals):
         """
         Computes probability estimates for given class
@@ -167,16 +179,7 @@ class CLL(BaseClassifier):
         probas : ndarray of label probabilities
 
         """
-
-        weak_signals = convert_to_ovr_signals(weak_signals)
-        m, n, num_classes = weak_signals.shape
-
-        # initialize y and lists
-        y = np.random.rand(n, num_classes)
-        ys = []
-
-        for i in range(self.num_trials):
-            ys.append(self._run_constraints(y, self.constraints))
+        ys = self.fit(weak_signals)
         return np.squeeze(np.mean(ys, axis=0))
 
 

@@ -173,7 +173,7 @@ class ALL(BaseClassifier):
         lr = 0.0001
         converged = False
 
-        cons = ConstraintEstimator(error_threshold=0.3) ##delet this part and come back
+        cons = ConstraintEstimator()
         self.constraints = cons.error_constraint(weak_signals, weak_signals_error_bounds)
 
         a_matrix = np.squeeze(self.constraints['A'], axis=-1)

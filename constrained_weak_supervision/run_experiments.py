@@ -7,7 +7,7 @@ from utilities import *
 # Import models
 from ALL import ALL
 # from MultiALL import MultiALL
-#from CLL import CLL
+from CLL import CLL
 #from DCWS import DataConsistency
 
 
@@ -71,7 +71,7 @@ def run_experiments(dataset):
 
     #####################################################################
     #### ALL
-    
+    """
     if num_classes <= 2:
         all_model = ALL()
         all_model.fit(train_data, weak_signals)
@@ -84,6 +84,7 @@ def run_experiments(dataset):
         test_pred = all_model.predict_proba(test_data)
         print(f"The test F-score of ALL is: {all_model.get_score(test_labels, test_pred, metric='accuracy')}")
         print()
+    """
     
     ###################################################################
     #### MultiALL
@@ -101,7 +102,7 @@ def run_experiments(dataset):
     # print()
     ###################################################################
     ### CLL
-    """
+    
     cll = CLL()
     cll.fit(weak_signals)
     predicted_labels = cll.predict_proba(weak_signals)
@@ -109,7 +110,7 @@ def run_experiments(dataset):
 
     print(f"The train accuracy of CLL is: {cll.get_score(train_labels, predicted_labels, metric='accuracy')}")
     print()
-    """
+    
     ###################################################################
     ### DCWS
     """
