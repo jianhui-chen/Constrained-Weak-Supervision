@@ -82,14 +82,21 @@ def convert_to_ovr_signals(weak_signals):
         -------
         weak_signals
     """
-    """
-    max_weak_signals = max([len(i) for i in weak_signals])
-    max_class = []
-    for j in range(max_weak_signals - 1):
-        max_class.append(max([len(k) for k in weak_signals[j]]))
-    abstain = np.full(max_class, -1)
-    weak_signals = np.array([j + [abstain] * (max_weak_signals - len(j)) for j in weak_signals], dtype=object)
-    """
+    m, n  = weak_signals.shape #find the number of examples and weak signa;s
+    flatten = np.ndarray.flatten(weak_signals) #flatten out the array
+    k = np.max(flatten) #find the number of classes
+    final = [] #making an empty list
+
+    for i in range(1, k+1): #the number of classes
+        for j in range(m*n):  #the flatten array
+            if flatten[j] == i: 
+                final.append(1)
+            elif flatten[j] == -1: 
+                final.append(-1)
+            else:
+                final.append(0)
+
+    weak_signals = np.reshape(final, (k , m , n))
     return weak_signals
 
 
