@@ -147,7 +147,7 @@ class DataConsistency(BaseClassifier):
         weak_signals = convert_to_ovr_signals(weak_signals)
         m, n, k = weak_signals.shape
 
-        cons = ConstraintEstimator(error_threshold=0)
+        cons = ConstraintEstimator()
         self.constraints = cons.error_constraint(weak_signals, weak_signals_error_bounds)
 
         if reg_labels is None:
@@ -211,26 +211,6 @@ class DataConsistency(BaseClassifier):
                 best_viol, best_iter = constraint_viol, iters
 
         self.model = model
-
-
-    def get_score(self, true_labels, predicted_probas, metric='accuracy'):
-        """
-        Calculate accuracy of the model
-
-        Parameters
-        ----------
-        :param true_labels: true labels of data set
-        :type  true_labels: ndarray
-        :param predicted_probas: Estimated labels that where trained on
-        :type  predicted_probas: ndarray
-
-        Returns
-        -------
-        :return: percent accuary of Estimated labels given the true labels
-        :rtype: float
-        """
-        score = super().get_score(true_labels, predicted_probas, metric)
-        return score
 
 
     def predict_proba(self, X):

@@ -82,22 +82,33 @@ def convert_to_ovr_signals(weak_signals):
         -------
         weak_signals
     """
-    m, n  = weak_signals.shape #find the number of examples and weak signa;s
-    flatten = np.ndarray.flatten(weak_signals) #flatten out the array
-    k = np.max(flatten) #find the number of classes
-    final = [] #making an empty list
+    if weak_signals.ndim == 2: #check if the input array is 2D
+        m, n  = weak_signals.shape #find the number of examples and weak signa;s
+        flatten = np.ndarray.flatten(weak_signals) #flatten out the array
+        k = np.max(flatten) + 1 #find the number of classes
+        final = [] #making an empty list
 
-    for i in range(1, k+1): #the number of classes
-        for j in range(m*n):  #the flatten array
-            if flatten[j] == i: 
-                final.append(1)
-            elif flatten[j] == -1: 
-                final.append(-1)
-            else:
-                final.append(0)
+        for i in range(0, k): #the number of classes
+            for j in range(m*n):  #the flatten array
+                if flatten[j] == i: 
+                    final.append(1)
+                elif flatten[j] == -1: 
+                    final.append(-1)
+                else: 
+                    final.append(0)
 
-    weak_signals = np.reshape(final, (k , m , n))
-    return weak_signals
+        weak_signals = np.reshape(final, (k , m , n))
+        return weak_signals
+
+    elif weak_signals.ndim == 3: #check if the input array is 3D
+        flatten = np.ndarray.flatten(weak_signals) #flatten out the array
+        if all(p == -1 or 0 <= p <= 1 for p in np.ndarray.flatten(flatten)): #check if the format is correct, i.e. -1 or between 0 and 1
+            return weak_signals
+        else:
+            return print("incorrect formatting for weak signal inputs")
+
+    else: #if the input array is not 2D or 3D
+        return print("incorrect dimension for weak signal inputs")
 
 
 def mlp_model(dimension, output):
