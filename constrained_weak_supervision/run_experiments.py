@@ -8,7 +8,7 @@ from utilities import *
 from ALL import ALL
 # from MultiALL import MultiALL
 from CLL import CLL
-#from DCWS import DataConsistency
+from DCWS import DataConsistency
 
 
 """
@@ -105,11 +105,12 @@ def run_experiments(dataset):
     
     cll = CLL()
     cll.fit(weak_signals)
-    predicted_labels = cll.predict_proba(weak_signals)
-    predicted_classes = cll.predict(predicted_labels)
-
+    predicted_labels = cll.predict_proba()
+    predicted_classes = cll.predict()
+ 
     print(f"The train accuracy of CLL is: {cll.get_score(train_labels, predicted_labels, metric='accuracy')}")
     print()
+    
     
     ###################################################################
     ### DCWS
@@ -119,7 +120,7 @@ def run_experiments(dataset):
     predicted_labels = np.squeeze(dcws.predict_proba(train_data))
     predicted_classes = dcws.predict(train_data)
 
-    print(f"The train accuracy of DCWS is: {dcws.get_score(train_labels, predicted_labels)}")
+    print(f"The train accuracy of DCWS is: {dcws.get_score(train_labels, predicted_labels, metric='accuracy')}")
     test_pred = np.squeeze(dcws.predict_proba(test_data))
     print(f"The test F-score of DCWS is: {dcws.get_score(test_labels, test_pred, metric='f1')}")
     print()
@@ -141,7 +142,7 @@ if __name__ == '__main__':
     # text and tabular experiments:
     # run_experiments(read_text_data('../datasets/imbd/'))
     # run_experiments(read_text_data('../datasets/yelp/'))
-    run_experiments(read_text_data('/Users/jianhuichen/Diamonds/here.git/datasets/sst-2/'))
+    # run_experiments(read_text_data('../datasets/sst-2/'))
     # run_experiments(load_svhn(),'svhn')
     # run_experiments(load_fashion_mnist(),'fmnist')
 

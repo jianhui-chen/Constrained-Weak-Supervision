@@ -1,5 +1,6 @@
 import sys
 import numpy as np
+import tensorflow as tf
 
 from BaseClassifier import BaseClassifier
 from ConstraintEstimator import ConstraintEstimator
@@ -43,7 +44,7 @@ class CLL(BaseClassifier):
             sys.exit("Not of string type")
         self.constraints = None
 
-
+    
     def _bound_loss(self, y, a_matrix, bounds):
         """
         Computes the gradient of lagrangian inequality penalty parameters
@@ -68,7 +69,8 @@ class CLL(BaseClassifier):
             constraint[i] = np.sum(current_a * y, axis=0)
         return constraint - bounds
 
-
+    ##||Ay - c||^2, then gradient - tape
+    
     def _y_gradient(self, y, error_constraints):
         """
         Computes y gradient
@@ -94,7 +96,6 @@ class CLL(BaseClassifier):
             gradient += 2*constraint * bound_loss[i]
 
         return gradient
-
 
     def _run_constraints(self, y, error_constraints):
         """
@@ -127,6 +128,8 @@ class CLL(BaseClassifier):
             y = y - y_grad / np.sqrt(grad_sum + 1e-8)
             y = np.clip(y, a_min=0, a_max=1)
 
+            ##take gradient wrt y
+
             # log current data 
             if self.logger is not None and iter % 10 == 0:
                 with self.logger.writer.as_default():
@@ -157,21 +160,22 @@ class CLL(BaseClassifier):
 
         # initialize y and lists
         y = np.random.rand(n, num_classes)
-        ys = []
+        self.ys = []
 
         for i in range(self.num_trials):
-            ys.append(self._run_constraints(y, self.constraints))
-        return ys
+            self.ys.append(self._run_constraints(y, self.constraints))
+            
+        self.ys = np.array(self.ys)
+            
 
-
-    def predict_proba(self, weak_signals):
+    def predict_proba(self, indices=None):
         """
         Computes probability estimates for given class
         Should be able to be extendable for multi-class implementation
 
         Parameters
         ----------
-        weak_signals : ndarray of weak signals
+        indices : the indices of desired label
 
 
         Returns
@@ -179,24 +183,27 @@ class CLL(BaseClassifier):
         probas : ndarray of label probabilities
 
         """
-        ys = self.fit(weak_signals)
-        return np.squeeze(np.mean(ys, axis=0))
+        if indices == None:
+            return np.squeeze(np.mean(self.ys))
+        
+        else:
+            return np.squeeze(np.mean(self.ys[indices, :]))
 
 
-    def predict(self, predicted_labels):
+    def predict(self, indices=None):
         """
         Computes predicted classes for the weak signals.
 
         Parameters
         ----------
-        predicted_labels : predicted_labels
+        indices : the indices of desired label
 
         Returns
         -------
         predicted classes : ndarray array of predicted classes
         """
-        predicted_labels = np.squeeze(predicted_labels)
-        if len(predicted_labels.shape)==1:
-            return np.round(predicted_labels)
-        return np.argmax(predicted_labels, axis=-1)
-
+        if indices == None:
+            return np.argmax(self.ys)
+        
+        else:
+            return np.argmax(self.ys[indices, :], axis=-1)

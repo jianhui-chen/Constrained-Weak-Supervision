@@ -29,6 +29,12 @@ class DataConsistency(BaseClassifier):
 
     def __init__(self, max_iter=1000, max_stagnation=100, log_name=None,):
 
+        """
+        Logging is done via TensorBoard. 
+        The suggested storage format for each run is by the date/time the expirment was started, 
+        and then by dataset, and then by algorithm.
+        """
+        
         self.max_iter = max_iter 
         self.max_stagnation = max_stagnation
 
