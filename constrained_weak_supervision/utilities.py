@@ -105,10 +105,10 @@ def convert_to_ovr_signals(weak_signals):
         if all(p == -1 or 0 <= p <= 1 for p in np.ndarray.flatten(flatten)): #check if the format is correct, i.e. -1 or between 0 and 1
             return weak_signals
         else:
-            return print("incorrect formatting for weak signal inputs")
+            raise ValueError("incorrect format for weak signal inputs, the value should be -1 or between 0 and 1 ")
 
     else: #if the input array is not 2D or 3D
-        return print("incorrect dimension for weak signal inputs")
+        raise ValueError("incorrect dimension for weak signal inputs")
 
 
 def mlp_model(dimension, output):
