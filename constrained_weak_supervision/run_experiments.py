@@ -75,12 +75,12 @@ def run_experiments(dataset):
     if num_classes <= 2:
         all_model = ALL()
         all_model.fit(train_data, weak_signals)
-        predicted_labels = all_model.predict_proba(train_data)
-        predicted_classes = all_model.predict(train_data)
+        predicted_proba = all_model.predict_proba(train_data)
+        predicted_labels = all_model.predict(train_data)
 
-        assert all_model.get_score(np.round(predicted_labels), predicted_classes, metric='accuracy') == 1.0
+        assert all_model.get_score(np.round(predicted_proba), predicted_labels, metric='accuracy') == 1.0
 
-        print(f"The train accuracy of ALL is: {all_model.get_score(train_labels, predicted_labels, metric='accuracy')}")
+        print(f"The train accuracy of ALL is: {all_model.get_score(train_labels, predicted_proba, metric='accuracy')}")
         test_pred = all_model.predict_proba(test_data)
         print(f"The test F-score of ALL is: {all_model.get_score(test_labels, test_pred, metric='accuracy')}")
         print()
@@ -91,12 +91,12 @@ def run_experiments(dataset):
 
     # multiall = MultiALL()
     # multiall.fit(train_data, weak_signals)
-    # predicted_labels = multiall.predict_proba(train_data)
-    # predicted_classes = multiall.predict(train_data)
+    # predicted_proba = multiall.predict_proba(train_data)
+    # predicted_labels = multiall.predict(train_data)
 
-    # assert all_model.get_score(predicted_labels, predicted_classes) == 1.0
+    # assert all_model.get_score(predicted_proba, predicted_labels) == 1.0
 
-    # print(f"The train accuracy of MultiALL is: {multi_all.get_score(self, train_labels, predicted_labels, metric='accuracy')}")
+    # print(f"The train accuracy of MultiALL is: {multi_all.get_score(self, train_labels, predicted_proba, metric='accuracy')}")
     # test_pred = multiall.predict_proba(test_data)
     # print(f"The test F-score of MultiALL is: {multi_all.get_score(self, test_labels, test_pred, metric="f1")}")
     # print()
@@ -105,10 +105,10 @@ def run_experiments(dataset):
     
     cll = CLL()
     cll.fit(weak_signals)
-    predicted_labels = cll.predict_proba() #predicted probab/labels
-    predicted_classes = cll.predict()
+    predicted_proba = cll.predict_proba() #predicted probab/labels
+    predicted_labels = cll.predict()
      
-    print(f"The train accuracy of CLL is: {cll.get_score(train_labels, predicted_labels, metric='accuracy')}")
+    print(f"The train accuracy of CLL is: {cll.get_score(train_labels, predicted_proba, metric='accuracy')}")
     print()
     
     
@@ -117,10 +117,10 @@ def run_experiments(dataset):
     """
     dcws = DataConsistency()
     dcws.fit(train_data, weak_signals)
-    predicted_labels = np.squeeze(dcws.predict_proba(train_data))
-    predicted_classes = dcws.predict(train_data)
+    predicted_proba = np.squeeze(dcws.predict_proba(train_data))
+    predicted_labels = dcws.predict(train_data)
 
-    print(f"The train accuracy of DCWS is: {dcws.get_score(train_labels, predicted_labels, metric='accuracy')}")
+    print(f"The train accuracy of DCWS is: {dcws.get_score(train_labels, predicted_proba, metric='accuracy')}")
     test_pred = np.squeeze(dcws.predict_proba(test_data))
     print(f"The test F-score of DCWS is: {dcws.get_score(test_labels, test_pred, metric='f1')}")
     print()
