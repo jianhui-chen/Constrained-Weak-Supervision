@@ -105,9 +105,9 @@ def run_experiments(dataset):
     
     cll = CLL()
     cll.fit(weak_signals)
-    predicted_labels = cll.predict_proba()
+    predicted_labels = cll.predict_proba() #predicted probab/labels
     predicted_classes = cll.predict()
- 
+     
     print(f"The train accuracy of CLL is: {cll.get_score(train_labels, predicted_labels, metric='accuracy')}")
     print()
     

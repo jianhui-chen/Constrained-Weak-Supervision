@@ -166,7 +166,7 @@ class CLL(BaseClassifier):
             self.ys.append(self._run_constraints(y, self.constraints))
             
         self.ys = np.array(self.ys)
-            
+                    
 
     def predict_proba(self, indices=None):
         """
@@ -182,12 +182,11 @@ class CLL(BaseClassifier):
         -------
         probas : ndarray of label probabilities
 
-        """
+        """        
         if indices == None:
-            return np.squeeze(np.mean(self.ys))
-        
+            return np.squeeze(np.mean(self.ys, axis = 0))
         else:
-            return np.squeeze(np.mean(self.ys[indices, :]))
+            return np.squeeze(np.mean(self.ys[indices, :], axis = 0))
 
 
     def predict(self, indices=None):
@@ -202,8 +201,4 @@ class CLL(BaseClassifier):
         -------
         predicted classes : ndarray array of predicted classes
         """
-        if indices == None:
-            return np.argmax(self.ys)
-        
-        else:
-            return np.argmax(self.ys[indices, :], axis=-1)
+        return np.argmax(self.predict_proba(indices), axis=-1)
