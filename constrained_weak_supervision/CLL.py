@@ -43,60 +43,8 @@ class CLL(BaseClassifier):
         else:
             sys.exit("Not of string type")
         self.constraints = None
-
-    
-    def _bound_loss(self, y, a_matrix, bounds):
-        """
-        Computes the gradient of lagrangian inequality penalty parameters
-
-        Parameters
-        ----------
-        :param y: size (num_data, num_class) of estimated labels for the data
-        :type y: ndarray
-        :param a_matrix: size (num_weak, num_data, num_class) of a constraint matrix
-        :type a_matrix: ndarray
-        :param bounds: size (num_weak, num_class) of the bounds for the constraint
-        :type bounds: ndarray
-
-        Returns
-        -------
-        :return: loss of the constraint (num_weak, num_class)
-        :rtype: ndarray
-        """
-        constraint = np.zeros(bounds.shape)
-
-        for i, current_a in enumerate(a_matrix):
-            constraint[i] = np.sum(current_a * y, axis=0)
-        return constraint - bounds
-
-    ##||Ay - c||^2, then gradient - tape
-    
-    def _y_gradient(self, y, error_constraints):
-        """
-        Computes y gradient
-
-        Parameters
-        ----------
-        :param y: estimated Labels
-        :type  y: ndarray
-        :param error_constraints: error constraints of the weak signals
-        :type  error_constraints: dictionary containing both a_matrix and bounds
-
-        Returns
-        -------
-        :return: computed gradient
-        :rtype: float
-        """
-        gradient = 0
-        a_matrix = error_constraints['A']
-        bound_loss = error_constraints['bound_loss']
-
-        for i, current_a in enumerate(a_matrix):
-            constraint = a_matrix[i]
-            gradient += 2*constraint * bound_loss[i]
-
-        return gradient
-
+        
+        
     def _run_constraints(self, y, error_constraints):
         """
         Run constraints from CLL
@@ -109,34 +57,29 @@ class CLL(BaseClassifier):
         :return: estimated learned labels
         :rtype: ndarray
         """
-        grad_sum = 0
         a_matrix = error_constraints['A']
         bounds = error_constraints['b']
-
+        
+        adam_optimizer = tf.keras.optimizers.Adam()
+        
         for iter in range(self.max_iter):
-
-            # get bound loss for constraint
-            loss = self._bound_loss(y, a_matrix, bounds)
-
-            # update constraint values
-            error_constraints['bound_loss'] = loss
-            violation = np.linalg.norm(loss.clip(min=0))
-
-            # Update y˜ with its gradient
-            y_grad = self._y_gradient(y, error_constraints)
-            grad_sum += y_grad**2
-            y = y - y_grad / np.sqrt(grad_sum + 1e-8)
-            y = np.clip(y, a_min=0, a_max=1)
-
-            ##take gradient wrt y
+            
+            with tf.GradientTape() as tape:
+                
+                constraint = tf.Variable(tf.zeros(bounds.shape), tf.int32)
+                for i, current_a in enumerate(a_matrix):
+                    constraint = tf.add(constraint, tf.reduce_sum(tf.multiply(current_a, y), axis=0))
+                    loss = tf.subtract(constraint, bounds)
+                    
+                grads = tape.gradient(loss, y)
+        
+            adam_optimizer.apply_gradients(zip([grads], [y]))
 
             # log current data 
             if self.logger is not None and iter % 10 == 0:
                 with self.logger.writer.as_default():
                     self.logger.log_scalar("y", np.average(y), iter)
-                    self.logger.log_scalar("y_grad", np.average(y_grad), iter)
                     self.logger.log_scalar("loss", np.average(loss), iter)
-                    self.logger.log_scalar("violation", np.average(violation), iter)
         return y
     
 
@@ -160,6 +103,7 @@ class CLL(BaseClassifier):
 
         # initialize y and lists
         y = np.random.rand(n, num_classes)
+        y = tf.Variable(y.astype(np.float32), trainable=True, constraint=lambda x: tf.clip_by_value(x, 0, 1))        
         self.ys = []
 
         for i in range(self.num_trials):
@@ -176,7 +120,6 @@ class CLL(BaseClassifier):
         Parameters
         ----------
         indices : the indices of desired label
-
 
         Returns
         -------
